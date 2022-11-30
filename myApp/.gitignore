@@ -1,0 +1,14 @@
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Ignore the executable
+/vcpkg
+/vcpkg.exe
+
+# Visual Studio 2015 cache/options directory
+.vs/
+
