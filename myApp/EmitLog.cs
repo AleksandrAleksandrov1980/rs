@@ -10,7 +10,7 @@ namespace Rabbit
         const string USER = "rastr"; 
         const string USER_PASS = "rastr";
         const int PORT = 5672; // default 5672
-        
+        //https://swimburger.net/blog/dotnet/how-to-run-a-dotnet-core-console-app-as-a-service-using-systemd-on-linux
         public void test()
         {
             try
