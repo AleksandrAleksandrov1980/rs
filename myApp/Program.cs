@@ -19,5 +19,5 @@ for(i=0;i<2;i++)
 Console.WriteLine($"VSSS!{i}");
 
 Rabbit.CEmitLog emitLog = new Rabbit.CEmitLog();
-emitLog.test();
+emitLog.test();//
 

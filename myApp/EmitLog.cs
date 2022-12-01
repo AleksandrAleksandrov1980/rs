@@ -36,7 +36,7 @@ namespace Rabbit
                                             basicProperties: null,
                                             body: body);
                         Console.WriteLine(" [x] Sent {0}", message);
-                        System.Threading.Thread.Sleep(1000);
+                        System.Threading.Thread.Sleep(1000);//
                     }
                 }
                 Console.WriteLine(" Press [enter] to exit.");
