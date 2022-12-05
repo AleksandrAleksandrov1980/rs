@@ -7,27 +7,11 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/myApp/myApp.csproj",
+                "${workspaceFolder}/listener.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "build_release",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/myApp/myApp.csproj",
-                "-c",
-                "Release"
-            ],
-            "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            }
         },
         {
             "label": "publish",
@@ -35,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/myApp/myApp.csproj",
+                "${workspaceFolder}/listener.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -49,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/myApp/myApp.csproj"
+                "${workspaceFolder}/listener.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
