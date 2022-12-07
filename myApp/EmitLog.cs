@@ -26,17 +26,23 @@ namespace Rabbit
                 using (var channel = connection.CreateModel())
                 {
                     channel.ExchangeDeclare(exchange: "logs", type: ExchangeType.Fanout);
-                    int i = 0;
-                    for(i = 0 ; i < 10000 ; i++)
+                    uint k = 0;
+                    uint i = 0;
+                    for(i = 0 ;  ; i++)
                     {
-                        var message = $"TEST_MSG_{i}";
+                        var message = $"TEST_MSG_{k}_{i}";
                         var body = System.Text.Encoding.UTF8.GetBytes(message);
                         channel.BasicPublish(exchange: "logs",
                                             routingKey: "",
                                             basicProperties: null,
                                             body: body);
                         Console.WriteLine(" [x] Sent {0}", message);
-                        System.Threading.Thread.Sleep(1000);//
+                        //System.Threading.Thread.Sleep(100);//
+                        System.Threading.Thread.Sleep(0);//
+                        if(i>uint.MaxValue-1)
+                        {
+                            k++;
+                        }
                     }
                 }
                 Console.WriteLine(" Press [enter] to exit.");
