@@ -1,0 +1,72 @@
+<html>
+
+   <head>
+      <title>JavaScript MQTT WebSocket Example</title>
+          <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"> -->
+            <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js" integrity="sha512-tL4PIUsPy+Rks1go4kQG8M8/ItpRMvKnbBjQm4d2DQnFwgcBYRRN00QdyQnWSCwNMsoY/MfJY8nHp2CzlNdtZA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+      <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js" type="text/javascript"> </script>
+         
+     <script type = "text/javascript" language = "javascript">
+        
+        var subscription;
+        var nCounter = 0;
+        var nCounterMsgs = 0;
+        
+        const client = new StompJs.Client({
+           brokerURL: 'ws://192.168.1.59:15674/ws',
+           connectHeaders: {
+             login: 'rastr',
+             passcode: 'rastr',
+           },
+           reconnectDelay:    5000,
+           heartbeatIncoming: 4000,
+           heartbeatOutgoing: 4000,
+           debug: function (str) {
+             //console.log(str);
+           },
+         });
+
+        client.onConnect = function (frame) {
+           // Do something, all subscribes must be done is this callback
+           // This is needed because this will be executed after a (re)connect
+           console.log('connected');
+           subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
+         };
+         
+         client.onStompError = function (frame) {
+           // Will be invoked in case of error encountered at Broker
+           // Bad login/passcode typically will cause an error
+           // Complaint brokers will set `message` header with a brief message. Body may contain details.
+           // Compliant brokers will terminate the connection after any error
+           console.log('Broker reported error: ' + frame.headers['message']);
+           console.log('Additional details: ' + frame.body);
+         };
+
+        callback_subscribe_logs = function (message) {
+           // called when the client receives a STOMP message from the server
+           if (message.body) {
+             //alert('got message with body ' + message.body);
+              console.log('got message with body ' + message.body);
+              nCounterMsgs++;
+              let header = document.querySelector("h1");
+              if( nCounter++ > 30 )
+              {
+                 header.innerText = "";
+                 nCounter = 0;
+              }
+              //header.innerText += "Receive-> " + message.body + "<BR>";
+              header.innerHTML += "Receive-> " +nCounterMsgs.toString()+ " : " + message.body + "<BR/>";
+           } else {
+             //alert('got empty message');
+              console.log('got empty message');
+           }
+         };
+        
+         client.activate();
+        
+      </script>
+   </head>
+     <body>
+         <h1> JavaScript Display Text</h1>
+   </body>  
+</html>
