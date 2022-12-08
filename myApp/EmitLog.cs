@@ -38,7 +38,7 @@ namespace Rabbit
                                             body: body);
                         Console.WriteLine(" [x] Sent {0}", message);
                         //System.Threading.Thread.Sleep(100);//
-                        System.Threading.Thread.Sleep(0);//
+                        System.Threading.Thread.Sleep(100);//
                         if(i>uint.MaxValue-1)
                         {
                             k++;
