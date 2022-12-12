@@ -1,0 +1,8 @@
+#place to /etc/systemd/system/ !!
+[Unit]
+Description=codemaze-worker
+[Service]
+Type=notify
+ExecStart=dotnet /home/ustas/projects/git_main/rs/srv_lin/publish/srv_lin.dll
+[Install]
+WantedBy=multi-user.target
