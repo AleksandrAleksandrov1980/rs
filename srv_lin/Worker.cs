@@ -3,10 +3,16 @@ namespace srv_lin;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
+    private readonly string m_strHostName;
 
     public Worker(ILogger<Worker> logger)
     {
         _logger = logger;
+
+        IConfigurationRoot MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+        var IntExample = MyConfig.GetValue<int>("AppSettings:SampleIntValue");
+        var AppName = MyConfig.GetValue<string>("AppSettings:APP_Name");
+        m_strHostName = MyConfig.GetValue<string>("RPARAMS:HOST_NAME");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -15,9 +21,9 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation($"Information-> running at: {DateTimeOffset.Now}" );
-                _logger.LogWarning($"Warning-> running at: {DateTimeOffset.Now}" );
-                _logger.LogError($"Error-> running at: {DateTimeOffset.Now}" );
+                _logger.LogInformation($"{m_strHostName} : Information-> running at: {DateTimeOffset.Now}" );
+                _logger.LogWarning($"{m_strHostName} : Warning-> running at: {DateTimeOffset.Now}" );
+                _logger.LogError($"{m_strHostName} : Error-> running at: {DateTimeOffset.Now}" );
                 await Task.Delay(1000, stoppingToken);
             }
         }

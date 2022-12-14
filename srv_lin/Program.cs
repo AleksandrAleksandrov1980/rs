@@ -10,6 +10,9 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<Worker>();
     })
+    
     .Build();
+
+
 
 await host.RunAsync();
