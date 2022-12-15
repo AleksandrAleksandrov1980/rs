@@ -6,9 +6,7 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
-
-     private readonly IConfiguration Configuration;
-
+    public Task<int>? m_tskWrkThreadGram = null;
 
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
@@ -27,17 +25,19 @@ public class Worker : BackgroundService
     {
         try
         {
-            string? str_name = _configuration.GetValue<string>("r_params:name");
-            string? str_q_host_name = _configuration.GetValue<string>("r_params:q_host_name");
-            int? n_q_port = _configuration.GetValue<int>("r_params:q_port"); // default 5672
-            string? str_q_log_user =_configuration.GetValue<string>("r_params:q_log_user"); 
-            string? str_q_log_pass =_configuration.GetValue<string>("r_params:q_log_pass");
+            string? str_name   = _configuration.GetValue<string>("r_params:name");
+            string? str_q_host = _configuration.GetValue<string>("r_params:q_host");
+            int?    n_q_port   = _configuration.GetValue<int>   ("r_params:q_port"); // default 5672
+            string? str_q_exch = _configuration.GetValue<string>("r_params:q_exch"); 
+            string? str_q_user = _configuration.GetValue<string>("r_params:q_user"); 
+            string? str_q_pass = _configuration.GetValue<string>("r_params:q_pass");
             
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
             _logger.LogWarning($"name        : {str_name}");
-            _logger.LogWarning($"q_host_name : {str_q_host_name}");
+            _logger.LogWarning($"q_host      : {str_q_host}");
             _logger.LogWarning($"q_port      : {n_q_port}"); 
-            _logger.LogWarning($"q_log_user  : {str_q_log_user}"); 
+            _logger.LogWarning($"q_exch      : {str_q_exch}"); 
+            _logger.LogWarning($"q_user      : {str_q_user}"); 
             //_logger.LogWarning($" : {str_q_log_pass}");
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
 
@@ -48,6 +48,7 @@ public class Worker : BackgroundService
                 _logger.LogWarning($"{m_strHostName} : Warning-> running at: {DateTimeOffset.Now}" );
                 _logger.LogError($"{m_strHostName} : Error-> running at: {DateTimeOffset.Now}" );
                 await Task.Delay(1000, stoppingToken);
+                //Task.WaitAny()
             }
         }
         catch( Exception ex)
