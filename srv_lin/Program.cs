@@ -12,9 +12,14 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureLogging((context, logging) =>
     {
+        /*
         // See: https://github.com/dotnet/runtime/issues/47303
-        logging.AddConfiguration(
-            context.Configuration.GetSection("Logging"));
+        IConfigurationSection ii= context.Configuration.GetSection("Logging");
+        IConfigurationSection i2= context.Configuration.GetSection("Loggingeewdfe");
+        logging.AddConfiguration( context.Configuration.GetSection("Logging"));
+        logging.AddConfiguration( context.Configuration.GetSection("EventSourceg"));
+        logging.AddConfiguration( context.Configuration.GetSection("EventLog"));
+       */ 
     })
     .ConfigureAppConfiguration(ddd=>{
         Console.Write("sdf");
