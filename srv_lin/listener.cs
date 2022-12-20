@@ -13,6 +13,7 @@ public class CListener
         public string m_str_exch = ""; 
         public string m_str_user = ""; 
         public string m_str_pass = "";
+        public CancellationToken m_cncl_tkn;
     }
 
     public CListener()
@@ -56,8 +57,10 @@ public class CListener
                                 autoAck: true,
                                 consumer: consumer);
 
-            //Console.WriteLine(" Press [enter] to exit.");
-            Console.ReadLine();
+            //Console.WriteLine(" Press [enter] to exit.");(
+            par.m_cncl_tkn.WaitHandle.WaitOne();
+            _logger.LogWarning("CANCELLED!!");
+            //Console.ReadLine();
         }
 
         return 1;

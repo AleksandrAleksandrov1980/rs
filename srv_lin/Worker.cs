@@ -51,6 +51,7 @@ public class Worker : BackgroundService
             par.m_str_exch = _configuration.GetValue<string>("r_params:q_exch"); 
             par.m_str_user = _configuration.GetValue<string>("r_params:q_user"); 
             par.m_str_pass = _configuration.GetValue<string>("r_params:q_pass");
+            par.m_cncl_tkn = stoppingToken;
             
             CListener listener = new CListener();
             
@@ -65,9 +66,11 @@ public class Worker : BackgroundService
                                                         ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
 
 */
-            var t = Task.Run(() => {  CListener.ThreadListen(par, _logger) ; } );
-
-            Task.WaitAll(t);
+            Task ttt =  Task.Run(() => {  CListener.ThreadListen(par, _logger) ; } );
+            // ttt.Wait(500,stoppingToken);
+            await ttt;
+            //Task.WaitAll(ttt,5000,stoppingToken);
+            
             //Console.ReadLine();
             return ;
 
