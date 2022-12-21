@@ -25,5 +25,5 @@ IHost host = Host.CreateDefaultBuilder(args)
         Console.Write("sdf");
     })
     .Build();
-
+CInstance c=CInstance.GetCurrent();
 await host.RunAsync();

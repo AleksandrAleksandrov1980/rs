@@ -16,8 +16,13 @@ public class CListener
         public CancellationToken m_cncl_tkn;
     }
 
+   // public delegate int OnLog( shared.CHlpLog.CLogEntry log_entry );
+    public delegate int OnCom();
+
     public CListener()
     {
+        //Microsoft.Extensions.Logging.LoggerMessage();
+        //
 
     }
 
