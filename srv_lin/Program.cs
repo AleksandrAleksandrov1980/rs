@@ -1,5 +1,8 @@
 using srv_lin;
 
+//serilog
+//https://onloupe.com/blog/can-i-log-to-file-mel/
+
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {

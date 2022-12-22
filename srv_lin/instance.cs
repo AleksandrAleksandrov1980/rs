@@ -33,6 +33,7 @@ class CInstance
             int n_mt_id = Thread.CurrentThread.ManagedThreadId;
             //logEntry.strTime = DateTime.Now.ToString("yyyy:MM:dd-HH:mm:ss");
             string str_time = DateTime.Now.ToString( shared.CHlpLog.str_log_time_fmt );
+            //_logger.Log(LogLevel.Information
         }
 
     }
