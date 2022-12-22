@@ -1,6 +1,8 @@
 namespace shared;
 public class CHlpLog
 {
+    public static readonly string str_log_time_fmt = "yyyy:MM:dd-HH:mm:ss";
+    
     //Microsoft.Extensions.Logging.LogLevel d;
     public enum enErr
     {

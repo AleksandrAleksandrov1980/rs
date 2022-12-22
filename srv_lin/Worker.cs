@@ -28,6 +28,8 @@ public class Worker : BackgroundService
         try
         {
             CInstance c=CInstance.GetCurrent();
+            c.SetMsLogger(_logger);
+            c.Log(shared.CHlpLog.enErr.INF , "");
             string? str_name   = _configuration.GetValue<string>("r_params:name");
             string? str_q_host = _configuration.GetValue<string>("r_params:q_host");
             int?    n_q_port   = _configuration.GetValue<int>   ("r_params:q_port"); // default 5672

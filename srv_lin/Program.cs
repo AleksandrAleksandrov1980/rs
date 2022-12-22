@@ -12,18 +12,13 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureLogging((context, logging) =>
     {
-        /*
-        // See: https://github.com/dotnet/runtime/issues/47303
-        IConfigurationSection ii= context.Configuration.GetSection("Logging");
-        IConfigurationSection i2= context.Configuration.GetSection("Loggingeewdfe");
-        logging.AddConfiguration( context.Configuration.GetSection("Logging"));
-        logging.AddConfiguration( context.Configuration.GetSection("EventSourceg"));
-        logging.AddConfiguration( context.Configuration.GetSection("EventLog"));
-       */ 
+        //for EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
+       logging.AddEventLog(configuration => configuration.SourceName = "srv_lin");
     })
     .ConfigureAppConfiguration(ddd=>{
         Console.Write("sdf");
     })
     .Build();
+ 
 CInstance c=CInstance.GetCurrent();
 await host.RunAsync();
