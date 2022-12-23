@@ -3,6 +3,7 @@ using Serilog;
 using System.Runtime.InteropServices;
 
 //serilog
+//https://stackoverflow.com/questions/48251515/serilog-not-creating-log-file-when-running-on-linux
 //https://onloupe.com/blog/can-i-log-to-file-mel/
 
 IHost host = Host.CreateDefaultBuilder(args)
@@ -17,8 +18,12 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureLogging((context, logging) =>
     {
-        //for EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
-       logging.AddEventLog(configuration => configuration.SourceName = "srv_lin");
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            //for EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
+            logging.AddEventLog(configuration => configuration.SourceName = "srv_lin");
+        }
     })
     .ConfigureAppConfiguration(ddd=>{
         Console.Write("sdf");
