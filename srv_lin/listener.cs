@@ -1,9 +1,9 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using Serilog;
 
 namespace srv_lin;
-
 public class CListener
 {
     public class CParams
@@ -26,9 +26,11 @@ public class CListener
 
     }
 
-    public static int ThreadListen( CParams par, ILogger _logger)
+    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger)
     {
+        
         Console.WriteLine($"hello world\n");
+        Log.Information("Hccccccccccccccccccceldddlo, Serilog!");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName = par.m_str_host;

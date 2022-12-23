@@ -2,6 +2,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using shared;
+using Serilog;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -27,6 +28,8 @@ public class Worker : BackgroundService
     {
         try
         {
+            Log.Information("Heldddlo, Serilog!");
+
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");

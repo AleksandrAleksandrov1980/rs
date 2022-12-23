@@ -1,4 +1,6 @@
 using srv_lin;
+using Serilog;
+using System.Runtime.InteropServices;
 
 //serilog
 //https://onloupe.com/blog/can-i-log-to-file-mel/
@@ -24,4 +26,33 @@ IHost host = Host.CreateDefaultBuilder(args)
     .Build();
  
 CInstance c=CInstance.GetCurrent();
+
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+{
+  // Do something
+  Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    //.WriteTo.Console()
+    .WriteTo.File(@"/var/rs_wrk/log.txt",
+        rollingInterval: RollingInterval.Day,
+        rollOnFileSizeLimit: true)
+    .CreateLogger();
+}
+else
+{
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Information()
+        //.WriteTo.Console()
+        .WriteTo.File(@"C:\rs_wrk\log.txt",
+            rollingInterval: RollingInterval.Day,
+            rollOnFileSizeLimit: true)
+        .CreateLogger();
+}
+
+
+    
+Log.Information("Hello, Serilog!");
+
 await host.RunAsync();
+
+Log.CloseAndFlush();
