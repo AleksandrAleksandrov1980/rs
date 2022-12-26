@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 //https://onloupe.com/blog/can-i-log-to-file-mel/
 
 //t grafana loki https://github.com/josephwoodward/Serilog-Sinks-Loki
+// elastic https://www.humankode.com/asp-net-core/logging-with-elasticsearch-kibana-asp-net-core-and-docker/
 
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
