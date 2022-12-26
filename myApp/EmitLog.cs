@@ -6,7 +6,8 @@ namespace Rabbit
     {
         //public const string HOST_NAME = "localhost" ; 
         //public const string HOST_NAME = "192.168.1.59" ; 
-        public const string HOST_NAME = "192.168.1.59"; 
+        //public const string HOST_NAME = "192.168.1.59"; 
+        public const string HOST_NAME = "10.31.232.14"; 
         const string USER = "rastr"; 
         const string USER_PASS = "rastr";
         const int PORT = 5672; // default 5672
