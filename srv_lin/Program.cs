@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 //https://stackoverflow.com/questions/48251515/serilog-not-creating-log-file-when-running-on-linux
 //https://onloupe.com/blog/can-i-log-to-file-mel/
 
+//t grafana loki https://github.com/josephwoodward/Serilog-Sinks-Loki
+
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {
