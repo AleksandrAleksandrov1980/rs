@@ -30,16 +30,16 @@
       //brokerURL: 'ws://192.168.1.59:15674/ws',
       const client = new StompJs.Client({
         brokerURL: 'ws://alexandrov-7k:15674/ws',
-         connectHeaders: {
-           login: 'rastr',
-           passcode: 'rastr',
-         },
-         reconnectDelay:    5000,
-         heartbeatIncoming: 4000,
-         heartbeatOutgoing: 4000,
-         debug: function (str) {
-           //console.log(str);
-         },
+        connectHeaders: {
+          login: 'rastr',
+          passcode: 'rastr',
+        },
+        reconnectDelay:    5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+        debug: function (str){
+          //console.log(str);
+        },
        });
 
       client.onConnect = function (frame) {
@@ -47,35 +47,33 @@
          // This is needed because this will be executed after a (re)connect
          console.log('connected');
          subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
-       };
+      };
        
-       client.onStompError = function (frame) {
-         // Will be invoked in case of error encountered at Broker
-         // Bad login/passcode typically will cause an error
-         // Complaint brokers will set `message` header with a brief message. Body may contain details.
-         // Compliant brokers will terminate the connection after any error
-         console.log('Broker reported error: ' + frame.headers['message']);
-         console.log('Additional details: ' + frame.body);
-       };
+      client.onStompError = function (frame) {
+        // Will be invoked in case of error encountered at Broker
+        // Bad login/passcode typically will cause an error
+        // Complaint brokers will set `message` header with a brief message. Body may contain details.
+        // Compliant brokers will terminate the connection after any error
+        console.log('Broker reported error: ' + frame.headers['message']);
+        console.log('Additional details: ' + frame.body);
+      };
 
-      callback_subscribe_logs = function (message) {
+      callback_subscribe_logs = function(message){
         // called when the client receives a STOMP message from the server
-      if (message.body) {
-        //alert('got message with body ' + message.body);
-        console.log('got message with body ' + message.body);
-        nCounterMsgs++;
-        //let header = document.querySelector("h1");
-        let header = document.querySelector("#collapseCard");
-        
-        if( nCounter++ > 30 )
-        { 
-          header.innerText = "";
-          nCounter = 0;
-        }
-        header.innerHTML += "Receive-> " +nCounterMsgs.toString()+ " : " + message.body + "<BR/>";
+        if (message.body){
+          //alert('got message with body ' + message.body);
+          console.log('got message with body ' + message.body);
+          nCounterMsgs++;
+          //let header = document.querySelector("h1");
+          let collapseCard = document.querySelector("#collapseCard");
+          if( nCounter++ > 30 ){ 
+            collapseCard.innerText = "";
+            nCounter = 0;
+          }
+          collapseCard.innerHTML += "Receive-> " +nCounterMsgs.toString()+ " : " + message.body + "<BR/>";
         } else {
-        //alert('got empty message');
-        console.log('got empty message');
+          //alert('got empty message');
+          console.log('got empty message');
         }
       };
       client.activate();
@@ -193,23 +191,29 @@
          </div>
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
-          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
-          <div class="card shadow mb-4">
-          <!-- Card Header - Accordion -->
-          <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
-              role="button" aria-expanded="true" aria-controls="collapseCard">
-              <h6 class="m-0 font-weight-bold text-primary"> Сообщения брокера. </h6>
-          </a>
-          <!-- Card Content - Collapse -->
-          <div class="collapse show" id="collapseCard">
-              <div class="card-body">
-                  This is a collapsable card example using Bootstrap's built in collapse
-                  functionality. <strong>Click on the card header</strong> to see the card body
-                  collapse and expand!
-              </div>
-          </div>
-          </div>
-          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
+         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-Buttons.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+         <div class="container">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#loginModal">
+          
+          </button>  
+        </div>
+        <!--  XXXXXXXXXXXXXXXXXXXXXXXX-Buttons.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+
+         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
+         <div class="card shadow mb-4">
+         <!-- Card Header - Accordion -->
+         <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
+             role="button" aria-expanded="true" aria-controls="collapseCard">
+             <h6 class="m-0 font-weight-bold text-primary"> Сообщения брокера. </h6>
+         </a>
+         <!-- Card Content - Collapse -->
+         <div class="collapse show" id="collapseCard">
+           <div class="card-body">
+             <!--  здесь будут выводится сообщения брокера. -->
+           </div>
+         </div>
+         </div>
+         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
 
           </div>
           <!-- /.container-fluid --> </div>
@@ -286,134 +290,111 @@
 	<script >
 	  var g_str_jwt_tkn = 'no';
 		
-      function httpGet(theUrl)
-      {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-        xmlHttp.send( null );
-        return xmlHttp.responseText;
-      }
+    function httpGet(theUrl){
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+    }
 		
-      function httpGetAsync(theUrl, callback, use_tkn)
-      {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() { 
+    function httpGetAsync(theUrl, callback, use_tkn){
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function(){ 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-           callback(xmlHttp.responseText);
+        callback(xmlHttp.responseText);
+      }
+      xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+      if(use_tkn === true){
+        let str_jwt_tkn = localStorage.getItem('jwt_token');
+        if( isstring(str_jwt_tkn) === true){
+          //xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+          //xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+          //xmlHttp.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+          //headers = curl_slist_append( headers, "Content-Type: application/json;charset=UTF-8" );
+          //xmlHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');	
+          //xmlHttp.setRequestHeader('charset=UTF-8');	
+          xmlHttp.setRequestHeader('authorization', 'Bearer ' + str_jwt_tkn);	
         }
-        xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-		if(use_tkn === true)
-		{
-		  let str_jwt_tkn = localStorage.getItem('jwt_token');
-		  if( isstring(str_jwt_tkn) === true )
-		  {
-			//    xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
-  //xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-  //xmlHttp.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-			  // headers = curl_slist_append( headers, "Content-Type: application/json;charset=UTF-8" );
-			  //xmlHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');	
-			  //xmlHttp.setRequestHeader('charset=UTF-8');	
-	        xmlHttp.setRequestHeader('authorization', 'Bearer ' + str_jwt_tkn);	
-		  }
-		}
-        xmlHttp.send(null);
+      }
+      xmlHttp.send(null);
+    }
+		
+	  function cb_get_tkn(resTxt){
+      let obj = JSON.parse(resTxt);
+      console.log('get_tkn-> '+obj.token);
+      g_str_jwt_tkn = obj.token;
+      localStorage.setItem('jwt_token', g_str_jwt_tkn); // write
+      console.log(localStorage.getItem('jwt_token')); // read
 	  }
 		
-	  function cb_get_tkn(resTxt)
-      {
-		let obj = JSON.parse(resTxt);
-		console.log('get_tkn-> '+obj.token);
-		g_str_jwt_tkn = obj.token;
-
-		localStorage.setItem('jwt_token', g_str_jwt_tkn); // write
-        console.log(localStorage.getItem('jwt_token')); // read
-	  }
-		
-	  function GetTkn()
-	  {
+	  function GetTkn(){
         //curl "http://alexandrov-7k/be/i/user/create?name=hello&password=1fdsfsd45r&email=werwere@mil.ru" > tkh.txt
-		let name_el   = document.getElementById('name1');
-		let str_name  = name_el?.value;
-		let str_email = str_name;
-		let passw_el  = document.getElementById('password1');
-		let str_passw = passw_el.value;
-        //alert("Кролик номер 1["+ window.location.hostname+"/be/i"+"]-> "+ "name:["+str_name + "] passw:["+str_passw + "] email:"+str_email );
-		let str_req = 'http://alexandrov-7k/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
-		//let str_req = window.location.hostname  +'/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
+      let name_el   = document.getElementById('name1');
+      let str_name  = name_el?.value;
+      let str_email = str_name;
+      let passw_el  = document.getElementById('password1');
+      let str_passw = passw_el.value;
+      //alert("Кролик номер 1["+ window.location.hostname+"/be/i"+"]-> "+ "name:["+str_name + "] passw:["+str_passw + "] email:"+str_email );
+      let str_req = 'http://alexandrov-7k/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
+      //let str_req = window.location.hostname  +'/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
 	    console.log('str_req->'+str_req );
-		//httpGet( str_req);
-        httpGetAsync( str_req, cb_get_tkn, false);
+		  //httpGet( str_req);
+      httpGetAsync(str_req, cb_get_tkn, false);
 	  }
 
-	  function isobject(A)
-      {
-		if( (typeof A === "object" || typeof A === 'function') && (A !== null) )
+	  function isobject(A){
+      if( (typeof A === "object" || typeof A === 'function') && (A !== null) ) {
+        return true;
+      }
+      return false;
+	  }
+
+	  function isstring(S){
+      if( (typeof S === "string" ) && (S !== null) )
         {
           return true;
         }
-		return false;
+      return false;
 	  }
 
-	  function isstring(S)
-      {
-		if( (typeof S === "string" ) && (S !== null) )
-        {
-          return true;
-        }
-		return false;
-	  }
-
-	  function cb_data(resTxt)
-	  {
+	  function cb_data(resTxt){
 		  console.log('cb_data()-> '+resTxt);
 		  let arrObjs = JSON.parse(resTxt);
-		/*
-            var obj = JSON.parse(JS_Obj);
-            var res = [];
-              
-            for(var i in obj)
-                res.push(obj[i]);
-              
-*/
 		  r_table_populate_from_arr_objs(arrObjs);
 	  }
 
-	  function GetData(strParam)
-	  {
-	    console.log('click.GetData()' );
-		if( isstring(g_str_jwt_tkn) === false )
-		{
-	      return console.log('no.tkn!' );
-		}
+	  function GetData(strParam){
+      console.log('click.GetData()');
+		  if( isstring(g_str_jwt_tkn) === false )
+		  {
+	      return console.log('no.tkn!');
+		  }
   		//let str_req = 'http://alexandrov-7k/be/i/user/';
 		  let str_req = 'http://alexandrov-7k/be/i/'+strParam+'/';
-		console.log('str_req->'+str_req );
-		//httpGet( str_req);
-        httpGetAsync( str_req, cb_data, true);
-		//SET TKN="Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDg4ODM1NjksImV4cCI6MTY1MTQ3NTU2OX0.YnaretUtVV3OgYLs21lDIhwn8iq730X1aHsowcQcbVY"
+		  console.log('str_req->'+str_req );
+      httpGetAsync( str_req, cb_data, true);
+		  //SET TKN="Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDg4ODM1NjksImV4cCI6MTY1MTQ3NTU2OX0.YnaretUtVV3OgYLs21lDIhwn8iq730X1aHsowcQcbVY"
 	  }
 
- 	  function r_table_populate_from_arr_objs( arrObjs )
-      {
-	    if ( $.fn.dataTable.isDataTable( '#r_table' ) ) {
-          table = $('#r_table').DataTable();
-		  table.destroy();	
-        }
-		//console.log(Object.keys(arrObjs[0]));
-		let columns = [];
-		for (let key of Object.keys(arrObjs[0])) {
-			columns.push({ data: key,    title: key} );
-		}	
-		$(document).ready(function() {
-		  $('#r_table').DataTable( {
-		    data: arrObjs, 
-		    columns
-		  } );
-		});
-	  }
+    function r_table_populate_from_arr_objs( arrObjs ){
+      if ( $.fn.dataTable.isDataTable( '#r_table' ) ) {
+        table = $('#r_table').DataTable();
+        table.destroy();	
+      }
+      //console.log(Object.keys(arrObjs[0]));
+      let columns = [];
+      for (let key of Object.keys(arrObjs[0])) {
+      columns.push({ data: key, title: key} );
+      }	
+      $(document).ready(function() {
+        $('#r_table').DataTable( {
+          data: arrObjs, 
+          columns
+        } );
+      });
+    }
 
-	  function PopulateTable()
-      {
+	  function PopulateTable(){
 		  let dataSet = [
 		    [ "Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011/04/25", "$320,800" ],
 		    [ "Garrett Winters", "Accountant", "Tokyo", "8422", "2011/07/25", "$170,750" ],
@@ -426,72 +407,56 @@
 		    [ "Gavin Cortez", "Team Leader", "San Francisco", "2860", "2008/10/26", "$235,500" ],
 		    [ "Martena Mccray", "Post-Sales support", "Edinburgh", "8240", "2011/03/09", "$324,050" ],
 		    [ "Unity Butler", "Marketing Designer", "San Francisco", "5384", "2009/12/09", "$85,675" ]
-		];
-		let i = 0;
-		for (let i = 0; i < 3000; i++) {
-		  dataSet.push( [ i, "Martena Mccray "+i, "Post-Sales support", "Edinburgh", "8240", "2011/03/09", "$324,050"] );
-		}
-		if ( $.fn.dataTable.isDataTable( '#r_table' ) ) {
-          table = $('#r_table').DataTable();
-		  table.destroy();	
-        }
-/*
-		$(document).ready(function() {
-		  $('#r_table').DataTable( {
-		        data: dataSet, 
-		        columns: [
-		            { title: "Name" }, 
-		            { title: "Position" },
-		            { title: "Office" },
-		            { title: "Extn." },
-		            { title: "Start date" },
-		            { title: "Salary"  },
-					{ title: "Sala"  },
-		        ]  
-		  } );
-		});
-*/		  
-		let dataSetMy = [{
-"createdAt":1649166689390,
-"updatedAt":1649166689390,
-"id":27,
-"email":"werwere@mil.ru",
-"name":"11111hello",
-"description":"",
-"password":"1fdsfsd45r"
-},
-{
-"createdAt":1649166689390,
-"updatedAt":1649166689390,
-"id":27,
-"email":"werwere@mil.ru",
-"name":"11111hello",
-"description":"d2",
-"password":"1fdsfsd45r"
-},
-];
+		  ];
+      let i = 0;
+      for (let i = 0; i < 3000; i++) {
+        dataSet.push( [ i, "Martena Mccray "+i, "Post-Sales support", "Edinburgh", "8240", "2011/03/09", "$324,050"] );
+      }
+      if ( $.fn.dataTable.isDataTable( '#r_table' ) ) {
+        table = $('#r_table').DataTable();
+        table.destroy();	
+      }
+        
+      let dataSetMy = [
+        {
+        "createdAt":1649166689390,
+        "updatedAt":1649166689390,
+        "id":27,
+        "email":"werwere@mil.ru",
+        "name":"11111hello",
+        "description":"",
+        "password":"1fdsfsd45r"
+        },
+        {
+        "createdAt":1649166689390,
+        "updatedAt":1649166689390,
+        "id":27,
+        "email":"werwere@mil.ru",
+        "name":"11111hello",
+        "description":"d2",
+        "password":"1fdsfsd45r"
+        },
+      ];
 
-		console.log(Object.keys(dataSetMy[0]));
+      console.log(Object.keys(dataSetMy[0]));
 
-		r_table_populate_from_arr_objs(dataSetMy);
-		return ;
-		  
-		$(document).ready(function() {
-		  $('#r_table').DataTable( {
-				data: dataSetMy, 
-		        columns: [
-		            { data: "createdAt",    title: "createdAt",}, 
-					{ data: "updatedAt",    title: "updatedAt",}, 
-					{ data: "id",           title: "id", }, 
-					{ data: "email",        title: "email", }, 
-					{ data: "name",         title: "name",}, 
-					{ data: "description",  title: "description", }, 
-					{ data: "password",     title: "password", }, 
-		        ]  
-		  } );
-		});
-	  
-
+      r_table_populate_from_arr_objs(dataSetMy);
+      return ;
+        
+      $(document).ready(function() {
+        $('#r_table').DataTable( {
+          data: dataSetMy, 
+              columns: [
+                { data: "createdAt",    title: "createdAt",}, 
+                { data: "updatedAt",    title: "updatedAt",}, 
+                { data: "id",           title: "id", }, 
+                { data: "email",        title: "email", }, 
+                { data: "name",         title: "name",}, 
+                { data: "description",  title: "description", }, 
+                { data: "password",     title: "password", }, 
+              ]  
+        } );
+      });
 	  }
 	</script>
 	
