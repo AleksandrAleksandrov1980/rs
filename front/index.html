@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -29,10 +29,10 @@
       //alexandrov-7k
       //brokerURL: 'ws://192.168.1.59:15674/ws',
       const client = new StompJs.Client({
-        brokerURL: 'ws://alexandrov-7k:15674/ws',
+        brokerURL  : 'ws://alexandrov-7k:15674/ws',
         connectHeaders: {
-          login: 'rastr',
-          passcode: 'rastr',
+          login    : 'rastr',
+          passcode : 'rastr',
         },
         reconnectDelay:    5000,
         heartbeatIncoming: 4000,
@@ -77,6 +77,24 @@
         }
       };
       client.activate();
+
+      function SendCom(){
+        strData = '*********************************';
+        // trying to publish a message when the broker is not connected will throw an exception
+        if (!client.connected) {
+          alert("Broker disconnected, can't send message.");
+          return ;
+        }
+        if (strData.length > 0) {
+          //const payLoad = { user: user, message: message };
+          const payLoad = { user: "dfdfd", message: strData };
+          // You can additionally pass headers
+          //stompClient.publish({destination: '/topic/chat', body: JSON.stringify(payLoad)});
+          client.publish({destination: '/exchange/logs', body: JSON.stringify(payLoad)});
+        }
+      }
+
+
     </script>
     <!-- StompJs.end. -->
 
@@ -89,9 +107,9 @@
       <!-- Sidebar -->
       <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar"> 
         <!-- Sidebar - Brand -->
-		<a class="sidebar-brand d-flex align-items-center justify-content-center"  href="index.html">
-		  <img title="RastrW.3" src="./img/RastrWin3_32x32.ico" />
-          <div class="sidebar-brand-text mx-3"> Rastr.W <sup>3</sup></div>
+		    <a class="sidebar-brand d-flex align-items-center justify-content-center"  href="index.html">
+		    <img title="RastrW.3" src="./img/RastrWin3_32x32.ico" />
+        <div class="sidebar-brand-text mx-3"> Rastr.W <sup>3</sup></div>
         </a>
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
@@ -115,27 +133,25 @@
           <!-- Topbar -->
           <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
             <!-- Sidebar Toggle (Topbar) -->
-			<!-- <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"> WWWWW        </button> -->
-			
-            <!-- Topbar Search -->
+			      <!-- <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"> WWWWW        </button> -->
+			      <!-- Topbar Search -->
             <ul class="navbar-nav ml-auto">
               <li class="nav-item dropdown no-arrow mx-1"><a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false"> </a>
               <!-- Nav Item - User Information -->
               <li class="nav-item dropdown no-arrow"> 
-			     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
-				   <span class="mr-2 d-none d-lg-inline text-gray-600 small"> Douglas McGee </span> 
-				   <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> 
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small"> Douglas McGee </span> 
+                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
                 </a>
                 <!-- Dropdown - User Information -->
                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown"> 
-				  <a class="dropdown-item" href="#"> <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile </a> 
-				  <a class="dropdown-item" href="#"> <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Settings </a> 
-				 <!-- <a class="dropdown-item" href="#"> <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i> Activity Log </a> -->
-                  <!-- <div class="dropdown-divider"></div> -->
-				  <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal"> <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout </a> 
-				  <a class="dropdown-item" href="#" data-toggle="modal" data-target="#loginModal">  <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2 text-gray-400"></i> LogIn  </a> 
-			    </div> 
-                  
+				        <a class="dropdown-item" href="#"> <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile </a> 
+				        <a class="dropdown-item" href="#"> <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Settings </a> 
+				        <!-- <a class="dropdown-item" href="#"> <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i> Activity Log </a> -->
+                <!-- <div class="dropdown-divider"></div> -->
+				        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal"> <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout </a> 
+				        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#loginModal">  <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2 text-gray-400"></i> LogIn  </a> 
+			          </div> 
               </li>
             </ul>
           </nav>
@@ -191,13 +207,23 @@
          </div>
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
-         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-Buttons.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
          <div class="container">
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" data-target="#loginModal">
-          
+           <!--   
+            STATE
+            RUN_PROC
+            EXTERMINATE_PROC,
+            CREATE_DIR
+            CLEAR_DIR
+            GRAM_START
+            GRAM_STOP
+            GRAM_STATE
+          -->
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCom()">
+            STATE
           </button>  
         </div>
-        <!--  XXXXXXXXXXXXXXXXXXXXXXXX-Buttons.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+        <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
          <div class="card shadow mb-4">
@@ -287,7 +313,7 @@
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 	
-	<script >
+	<script>
 	  var g_str_jwt_tkn = 'no';
 		
     function httpGet(theUrl){
@@ -350,10 +376,9 @@
 	  }
 
 	  function isstring(S){
-      if( (typeof S === "string" ) && (S !== null) )
-        {
-          return true;
-        }
+      if( (typeof S === "string" ) && (S !== null) ) {
+        return true;
+      }
       return false;
 	  }
 
