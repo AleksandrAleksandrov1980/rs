@@ -15,7 +15,6 @@ public class Worker : BackgroundService
     {
         _logger = logger;
         _configuration =configuration;
-
         /*
         IConfigurationRoot MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         var IntExample = MyConfig.GetValue<int>("AppSettings:SampleIntValue");

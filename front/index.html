@@ -34,6 +34,7 @@ sokjs-->
         CLEAR_DIR        : "CLEAR_DIR",
         GRAM_START       : "GRAM_START",
         GRAM_STOP        : "GRAM_STOP",
+        GRAM_KIT         : "GRAM_KIT",
         GRAM_STATE       : "STATE",
       });
       
@@ -133,9 +134,32 @@ sokjs-->
 
       async function PlayScn1(){
         AddLog('<------------- Scn1.begin ------------------>');
+        let delay = 100;
         SendCommand(g_enCOMMDANDS.STATE,"");
-        await Sleep(3000);
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_STATE,"");
         SendCommand(g_enCOMMDANDS.GRAM_START,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_START,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_STOP,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_KIT,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_START,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_STATE,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_KIT,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_STATE,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_STOP,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.GRAM_KIT,"");
+        await Sleep(delay);
+        SendCommand(g_enCOMMDANDS.STATE,"");
+        //SendCommand(g_enCOMMDANDS.GRAM_START,"");
         AddLog('<------------- Scn1.end. ------------------>');
       }
 

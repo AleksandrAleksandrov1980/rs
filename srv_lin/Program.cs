@@ -21,7 +21,6 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureLogging((context, logging) =>
     {
-        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             //for EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
@@ -56,11 +55,7 @@ else
             rollOnFileSizeLimit: true)
         .CreateLogger();
 }
-
-
     
 Log.Information("Hello, Serilog!");
-
 await host.RunAsync();
-
 Log.CloseAndFlush();
