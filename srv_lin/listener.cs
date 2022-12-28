@@ -2,10 +2,53 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using Serilog;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Runtime.Serialization;
 
 namespace srv_lin;
 public class CListener
 {
+    /*
+    public static class enCommands 
+    {
+        public static readonly string STATE            = "STATE";
+        public static readonly string RUN_PROC         = "RUN_PROC";
+        public static readonly string EXTERMINATE_PROC = "EXTERMINATE_PROC";
+        public static readonly string CREATE_DIR       = "CREATE_DIR";
+        public static readonly string CLEAR_DIR        = "CLEAR_DIR";
+        public static readonly string GRAM_START       = "GRAM_START";
+        public static readonly string GRAM_STOP        = "GRAM_STOP";
+        public static readonly string GRAM_KIT         = "GRAM_KIT";
+        public static readonly string GRAM_STATE       = "STATE";
+    }
+*/
+    public  enum enCommands 
+    {
+        STATE            = 1,
+        RUN_PROC         = 2,
+        EXTERMINATE_PROC = 3,
+        CREATE_DIR       = 4,
+        CLEAR_DIR        = 5,
+        GRAM_START       = 6,
+        GRAM_STOP        = 7,
+        GRAM_KIT         = 8,
+        GRAM_STATE       = 9,
+    }
+
+    //[JsonConverter(typeof(EmptyArrayToObjectConverter<Command>))]
+    public class Command
+    {
+        public string? command{ get; set; }
+        public string? pars   { get; set; }
+    }
+
+    public enum xz
+    {
+     d,
+     sdf   
+    }
+
     public class CParams
     {
         public string m_str_host = "";
@@ -28,9 +71,12 @@ public class CListener
 
     public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger)
     {
-        
         Console.WriteLine($"hello world\n");
         Log.Information("Hccccccccccccccccccceldddlo, Serilog!");
+
+        
+        var x = Enum.GetValues(typeof(xz));
+        //var x1 = .GetValues(typeof(Commands));
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName = par.m_str_host;
@@ -58,6 +104,18 @@ public class CListener
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
+
+                Command? command;    
+                try
+                {
+                     command = JsonSerializer.Deserialize<Command>((string)message);
+                }
+                catch
+                {}
+
+                //WeatherForecast? weatherForecast = 
+                //JsonSerializer.Deserialize<WeatherForecast>(jsonString);
+
                 _logger.LogInformation($" [x] {message}");
             };
             channel.BasicConsume(queue: queueName,
