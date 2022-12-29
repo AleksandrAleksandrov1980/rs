@@ -112,13 +112,37 @@ sokjs-->
         client.publish({destination: '/exchange/logs', body: payLoad });
       }
 
-      function Sleep(ms) {
+      async function Sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
+      var g_prms_cycle_scn1 = undefined;
+      var g_bl_cycle_scn1_exit = false;
+      async function AsyncLunchCycleScn1(){
+        if(g_prms_cycle_scn1 !== undefined)
+          return ;
+        return  new Promise( async p1 => {
+          for(;;)
+          {
+            PlayScn1();
+            await Sleep(1000);
+            if(g_bl_cycle_scn1_exit == true){
+              g_bl_cycle_scn1_exit = false;
+              g_prms_cycle_scn1 = undefined;
+              break;
+            }
+          }
+        });
+      }
+
+      function AsyncStopCycleScn1(){
+        g_bl_cycle_scn1_exit = true;
+      }
+
       async function PlayScn1(){
-        AddLog('<------------- Scn1.begin ------------------>');
         let delay = 100;
+        AddLog('<------------- Scn1.begin ------------------>');
+        await Sleep(delay);
         SendCommand(g_enCOMMDANDS.STATE,"");
         await Sleep(delay);
         SendCommand(g_enCOMMDANDS.GRAM_STATE,"");
@@ -143,8 +167,10 @@ sokjs-->
         SendCommand(g_enCOMMDANDS.GRAM_KIT,"");
         await Sleep(delay);
         SendCommand(g_enCOMMDANDS.STATE,"");
+        await Sleep(1000);
         //SendCommand(g_enCOMMDANDS.GRAM_START,"");
         AddLog('<------------- Scn1.end. ------------------>');
+        await Sleep(delay);
       }
 
       function PlayScn2(){
@@ -336,7 +362,15 @@ sokjs-->
           </button> 
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="PlayScn3();">
             PlayScn3
-          </button>  
+          </button> 
+          
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_prms_cycle_scn1 = AsyncLunchCycleScn1();">
+            CyclePlayScn1.begin!
+          </button> 
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="AsyncStopCycleScn1();">
+            CyclePlayScn1.end.
+          </button> 
+
         </div>
         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 

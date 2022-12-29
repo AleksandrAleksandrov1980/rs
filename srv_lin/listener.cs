@@ -122,10 +122,12 @@ public class CListener
                 {
                     JsonSerializerOptions j = new JsonSerializerOptions();
                     
-                     command = JsonSerializer.Deserialize<Command>((string)message)!;
+                    command = JsonSerializer.Deserialize<Command>((string)message)!;
                 }
-                catch
-                {}
+                catch(Exception ex)
+                {
+                    Log.Error($"catch exeption -> {ex.Message}");
+                }   
 
                 //WeatherForecast? weatherForecast = 
                 //JsonSerializer.Deserialize<WeatherForecast>(jsonString);
