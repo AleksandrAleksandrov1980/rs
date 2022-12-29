@@ -51,7 +51,7 @@ sokjs-->
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         debug: function (str){
-          console.log(str);
+          //console.log(str);
         },
        });
 
@@ -109,7 +109,7 @@ sokjs-->
           alert("Broker disconnected, can't send message.");
           return ;
         }
-        const payLoad = JSON.stringify({ command: en_command, pars: str_params });
+        const payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params });
         client.publish({destination: '/exchange/logs', body: payLoad });
       }
 
@@ -146,7 +146,7 @@ sokjs-->
         await Sleep(delay);
         SendCommand(g_enCOMMDANDS.STATE,"");
         await Sleep(delay);
-        SendCommand(g_enCOMMDANDS.GRAM_STATE,"");
+        SendCommand(g_enCOMMDANDS.GRAM_STATE, "c:\\program files(x86)\\rastrwin3.exe -weer -erer" );
         SendCommand(g_enCOMMDANDS.GRAM_START,"");
         await Sleep(delay);
         SendCommand(g_enCOMMDANDS.GRAM_START,"");

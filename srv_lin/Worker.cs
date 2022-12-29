@@ -15,12 +15,17 @@ public class Worker : BackgroundService
     {
         _logger = logger;
         _configuration =configuration;
-        /*
-        IConfigurationRoot MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        var IntExample = MyConfig.GetValue<int>("AppSettings:SampleIntValue");
-        var AppName = MyConfig.GetValue<string>("AppSettings:APP_Name");
-        m_strHostName = MyConfig.GetValue<string>("RPARAMS:HOST_NAME");
-        */
+    }
+
+    private object _obj_sync_command = new Object();
+
+    public int OnCommand( CListener.Command command )
+    {
+        lock(_obj_sync_command)
+        {
+            Log.Information($"{command.ToString()}");
+        }
+        return 1;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -71,7 +76,8 @@ public class Worker : BackgroundService
                                                         ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
 
 */
-            Task ttt =  Task.Run(() => {  CListener.ThreadListen(par, _logger) ; } );
+            
+            Task ttt =  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
             // ttt.Wait(500,stoppingToken);
             await ttt;
             //Task.WaitAll(ttt,5000,stoppingToken);

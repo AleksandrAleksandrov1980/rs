@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 namespace srv_lin;
 public class CListener
 {
+    public delegate int OnCommand( Command command );
     /*
     public static class enCommands 
     {
@@ -23,8 +24,9 @@ public class CListener
         public static readonly string GRAM_STATE       = "STATE";
     }
 */
-    public  enum enCommands 
+    public enum enCommands 
     {
+        ERROR            = -1,
         STATE            = 1,
         RUN_PROC         = 2,
         EXTERMINATE_PROC = 3,
@@ -36,31 +38,50 @@ public class CListener
         GRAM_STATE       = 9,
     }
 
-    //[JsonConverter(typeof(EmptyArrayToObjectConverter<Command>))]
-    public class Command
+    public class CommandSerialized
     {
-        public string? command{ get; set; }
-        public string? pars   { get; set; }
+        public string? str_command{ get; set; }
+        public string? str_pars   { get; set; }
     }
 
-    public enum xz
+    public class Command
     {
-     d,
-     sdf   
-    }
-/*
-    public static bool TryParseJson<T>(this string @this, out T result)
-    {
-        bool success = true;
-        var settings = new JsonSerializerSettings
+        public enCommands command{ get; set; }
+        public string?    pars   { get; set; }
+
+        public static enCommands StrToCommand(string? str_command)
         {
-            Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; },
-            MissingMemberHandling = MissingMemberHandling.Error
-        };
-        result = JsonConvert.DeserializeObject<T>(@this, settings);
-        return success;
+            if(str_command!=null)
+            {
+                foreach( var x in Enum.GetValues(typeof(enCommands)))
+                {
+                    if(str_command == x.ToString())
+                    {
+                        return (enCommands)x;
+                    }
+                }
+            } 
+            return enCommands.ERROR;
+        }
+
+        public Command(CommandSerialized? command_serialized)
+        {
+            if(command_serialized != null)
+            {
+                command = StrToCommand(command_serialized.str_command);
+                if(command != enCommands.ERROR)
+                {
+                    pars = new string( command_serialized.str_pars);
+                }
+            }
+            else
+            {
+                command = enCommands.ERROR;
+                pars = null;
+            }
+        }
     }
-*/
+
     public class CParams
     {
         public string m_str_host = "";
@@ -71,24 +92,11 @@ public class CListener
         public CancellationToken m_cncl_tkn;
     }
 
-   // public delegate int OnLog( shared.CHlpLog.CLogEntry log_entry );
-    public delegate int OnCom();
-
-    public CListener()
+    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger,  OnCommand oc )
     {
-        //Microsoft.Extensions.Logging.LoggerMessage();
-        //
-
-    }
-
-    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger)
-    {
+        int nRes = 0;
         Console.WriteLine($"hello world\n");
         Log.Information("Hccccccccccccccccccceldddlo, Serilog!");
-
-        
-        var x = Enum.GetValues(typeof(xz));
-        //var x1 = .GetValues(typeof(Commands));
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName = par.m_str_host;
@@ -102,36 +110,29 @@ public class CListener
         using(var channel = connection.CreateModel())
         {
             channel.ExchangeDeclare(exchange: par.m_str_exch, type: ExchangeType.Fanout);
-
             var queueName = channel.QueueDeclare().QueueName;
             channel.QueueBind(queue: queueName,
                             exchange: par.m_str_exch,
                             routingKey: "");
-
             //Console.WriteLine(" [*] Waiting for logs.");
             _logger.LogInformation($" [*] Waiting for [{queueName}]");
-
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
-                Command? command;    
+                byte[] body = ea.Body.ToArray();
+                string message = Encoding.UTF8.GetString(body);
+                CommandSerialized? command_serialized = null;
                 try
                 {
-                    JsonSerializerOptions j = new JsonSerializerOptions();
-                    
-                    command = JsonSerializer.Deserialize<Command>((string)message)!;
+                    command_serialized = JsonSerializer.Deserialize<CommandSerialized>((string)message)!;
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"catch exeption -> {ex.Message}");
+                    Log.Error($"catch exeption -> {ex.Message} ehile try parse serialized command {message}");
+                    command_serialized = null;    
                 }   
-
-                //WeatherForecast? weatherForecast = 
-                //JsonSerializer.Deserialize<WeatherForecast>(jsonString);
-
+                Command command = new Command(command_serialized);
+                nRes = oc(command);
                 _logger.LogInformation($" [x] {message}");
             };
             channel.BasicConsume(queue: queueName,
