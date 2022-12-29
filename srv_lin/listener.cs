@@ -48,7 +48,19 @@ public class CListener
      d,
      sdf   
     }
-
+/*
+    public static bool TryParseJson<T>(this string @this, out T result)
+    {
+        bool success = true;
+        var settings = new JsonSerializerSettings
+        {
+            Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; },
+            MissingMemberHandling = MissingMemberHandling.Error
+        };
+        result = JsonConvert.DeserializeObject<T>(@this, settings);
+        return success;
+    }
+*/
     public class CParams
     {
         public string m_str_host = "";
@@ -108,7 +120,9 @@ public class CListener
                 Command? command;    
                 try
                 {
-                     command = JsonSerializer.Deserialize<Command>((string)message);
+                    JsonSerializerOptions j = new JsonSerializerOptions();
+                    
+                     command = JsonSerializer.Deserialize<Command>((string)message)!;
                 }
                 catch
                 {}
