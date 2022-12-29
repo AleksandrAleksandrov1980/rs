@@ -40,8 +40,9 @@ sokjs-->
       
       //alexandrov-7k
       //brokerURL: 'ws://192.168.1.59:15674/ws',
+      //brokerURL  : 'ws://alexandrov-7k:15674/ws',
       const client = new StompJs.Client({
-        brokerURL  : 'ws://alexandrov-7k:15674/ws',
+        brokerURL: 'ws://192.168.1.59:15674/ws',
         connectHeaders: {
           login    : 'rastr',
           passcode : 'rastr',
@@ -50,7 +51,7 @@ sokjs-->
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         debug: function (str){
-          //console.log(str);
+          console.log(str);
         },
        });
 
