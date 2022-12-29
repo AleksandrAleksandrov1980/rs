@@ -23,7 +23,7 @@ public class Worker : BackgroundService
     {
         lock(_obj_sync_command)
         {
-            Log.Information($"{command.ToString()}");
+            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
         }
         return 1;
     }
