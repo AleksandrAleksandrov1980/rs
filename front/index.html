@@ -91,6 +91,8 @@ sokjs-->
       };
       client.activate();
 
+      var g_n_counter_seneded_msgs = 0;
+
       function SendCommand(en_command, str_params){
         strData = `> ${en_command} : '${str_params}'`;
         let bl_error = true;
@@ -109,7 +111,18 @@ sokjs-->
           alert("Broker disconnected, can't send message.");
           return ;
         }
-        const payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params });
+        g_n_counter_seneded_msgs++;
+        var currentdate = new Date(); 
+        var datetime = " timestamp: " +  currentdate.getFullYear() +"/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getDate() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds() + ":"
+                +currentdate.getMilliseconds();
+                
+        str_params_to_serialize = str_params +" : " + g_n_counter_seneded_msgs.toString() + " : " + datetime;
+        const payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params_to_serialize });
         client.publish({destination: '/exchange/logs', body: payLoad });
       }
 
