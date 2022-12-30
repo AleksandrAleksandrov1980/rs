@@ -47,7 +47,7 @@ sokjs-->
           login    : 'rastr',
           passcode : 'rastr',
         },
-        reconnectDelay:    5000,
+        reconnectDelay:    1000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         debug: function (str){
@@ -108,7 +108,7 @@ sokjs-->
         }
         // trying to publish a message when the broker is not connected will throw an exception
         if(!client.connected){
-          alert("Broker disconnected, can't send message.");
+          //alert("Broker disconnected, can't send message.");
           return ;
         }
         g_n_counter_seneded_msgs++;
