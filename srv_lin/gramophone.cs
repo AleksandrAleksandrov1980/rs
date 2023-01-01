@@ -1,5 +1,6 @@
-using System.Text.Json;
 using Serilog;
+using System.Text.Json;
+using System.Diagnostics;
 
 public class Cgramophone
 {
@@ -67,4 +68,44 @@ public class Cgramophone
         }
         return 1;
     }
+
+            public int PlayTask(CRecord.CTask task)
+            {
+                try
+                {
+                    if (task.Act == false)
+                    {
+                        //LogAdd(dllcom.CHlpLog.enErr.INF, $"Task is off [{task.Name}]");
+                        return 1;
+                    }
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    //bool lblEx = System.IO.File.Exists("C:\\Program Files (x86)\\RastrWin3\\master.exe");
+                    //psi.FileName = System.IO.Path.GetFileName(fullPath);
+                    psi.FileName = task.FileName;
+                    psi.Arguments = task.Arguments;
+                    Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
+                    //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+
+                    Process process = Process.Start(psi);
+                    //LogSendStartedProcccessId(process.Id);
+                    //process.Id;
+                    bool blRes = process.WaitForExit(task.TimeOutSecs * 1000);
+                    //LogSendFinishedProcccessId(process.Id);
+                    if (blRes != true)
+                    {
+                        //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
+                        return -2;// timeout
+                    }
+                    int nExitCode = process.ExitCode;
+                    //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
+                    return nExitCode;
+                }
+                catch (Exception ex)
+                {
+                    Console.Write($"Error {ex.Message}\n");
+                    //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
+                    return -1;
+                }
+                return 1;
+            }
 }
