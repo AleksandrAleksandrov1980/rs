@@ -57,7 +57,7 @@ public class Worker : BackgroundService
 
     private int on_GRAM_START()
     {
-        //return 1;
+        return 1;
         int nRes = 0;
         m_gramaphone = new Cgramophone();
         nRes = m_gramaphone.DeSerializeRecordFromJsonFile(@"C:\projects\gitmain\rs\wrk\gram.json");
