@@ -63,8 +63,17 @@ public class Worker : BackgroundService
         nRes = m_gramaphone.DeSerializeRecordFromJsonFile(@"C:\projects\gitmain\rs\wrk\gram.json");
         Cgramophone.CRecord.CTask task = new Cgramophone.CRecord.CTask();
         task.Act = true;
-        task.FileName = @"C:\Program Files (x86)\RastrWin3\master.exe"; 
-        task.Arguments = "-register";
+        if(false)
+        {
+            task.FileName = @"C:\Program Files (x86)\RastrWin3\master.exe"; 
+            task.Arguments = "-register";
+        }
+        else
+        {
+            ///home/ustas/projects/git_main/rs/myApp/bin/Debug/net6.0
+            task.FileName = @"dotnet"; 
+            task.Arguments = @"/home/ustas/projects/git_main/rs/myApp/bin/Debug/net6.0/myApp.dll";
+        }
         task.lstOk = new List<int>(1000){1};
         m_gramaphone.PlayTask(task);
         return nRes;
