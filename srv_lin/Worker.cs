@@ -21,9 +21,22 @@ public class Worker : BackgroundService
 
     public int OnCommand( CListener.Command command )
     {
+        int nRes = 0;
         lock(_obj_sync_command)
         {
             Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
+
+            switch(command.command)
+            {
+                case CListener.enCommands.GRAM_START:
+                    nRes = on_GRAM_START();
+                break;
+                
+                default:
+                    nRes = -1;
+                    Log.Error($"unknown command!");
+                break;
+            }
         }
         return 1;
     }
@@ -40,9 +53,15 @@ public class Worker : BackgroundService
         GRAM_STATE       = 9,
     */
 
-    private int On_GRAM_START()
+    private Cgramophone? m_gramaphone = null;
+
+    private int on_GRAM_START()
     {
         return 1;
+        int nRes = 0;
+        m_gramaphone = new Cgramophone();
+        nRes = m_gramaphone.DeSerializeRecordFromJsonFile(@"C:\projects\gitmain\rs\wrk\gram.json");
+        return nRes;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
