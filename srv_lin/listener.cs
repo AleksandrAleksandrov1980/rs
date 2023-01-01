@@ -44,6 +44,11 @@ public class CListener
         public string? str_pars   { get; set; }
     }
 
+    public static class enCommands1 
+    {
+        public static readonly string STATE   = enCommands.STATE.ToString();
+    }
+
     public class Command
     {
         public enCommands command{ get; set; }

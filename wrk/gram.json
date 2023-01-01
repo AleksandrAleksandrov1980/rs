@@ -1,0 +1,44 @@
+{
+  "Act": true,
+  "Name": "No",
+  "strPub": "nio8.ems.int:5678",
+  "strSub": "nio8.ems.int:1234",
+  "lstJTasks": [
+    {
+      "Act": true,
+      "Name": "Tom",
+      "FileName": "C:\\projects\\main\\RastrWin\\Debug\\master.exe",
+      "Arguments": "-\u0022hell world\u0022 -bla bla bla",
+      "lstOk": [
+        1,
+        2,
+        -3
+      ],
+      "TimeOutSecs": 1000
+    },
+    {
+      "Act": true,
+      "Name": "Jery",
+      "FileName": "C:\\\u043C\u043E\u044F \u043F\u0430\u043F\u043A\u0430\\main\\RastrWin\\Debug\\master1.exe",
+      "Arguments": "-\u0022hell \u043C\u0438\u0440\u0022 -bla bla bla",
+      "lstOk": [
+        1,
+        2,
+        -3
+      ],
+      "TimeOutSecs": 1000
+    },
+    {
+      "Act": true,
+      "Name": "Tom",
+      "FileName": "C:\\projects\\main\\RastrWin\\Debug\\master1.exe",
+      "Arguments": "-\u0022hell world\u0022 -bla bla bla",
+      "lstOk": [
+        1,
+        2,
+        -3
+      ],
+      "TimeOutSecs": 1000
+    }
+  ]
+}

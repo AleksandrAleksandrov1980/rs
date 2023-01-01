@@ -27,6 +27,23 @@ public class Worker : BackgroundService
         }
         return 1;
     }
+    
+    /*
+        STATE            = 1,
+        RUN_PROC         = 2,
+        EXTERMINATE_PROC = 3,
+        CREATE_DIR       = 4,
+        CLEAR_DIR        = 5,
+        GRAM_START       = 6,
+        GRAM_STOP        = 7,
+        GRAM_KIT         = 8,
+        GRAM_STATE       = 9,
+    */
+
+    private int On_GRAM_START()
+    {
+        return 1;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
