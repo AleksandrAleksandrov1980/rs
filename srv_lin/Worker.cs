@@ -3,6 +3,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using shared;
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -60,19 +61,19 @@ public class Worker : BackgroundService
         return 1;
         int nRes = 0;
         m_gramaphone = new Cgramophone();
-        nRes = m_gramaphone.DeSerializeRecordFromJsonFile(@"C:\projects\gitmain\rs\wrk\gram.json");
         Cgramophone.CRecord.CTask task = new Cgramophone.CRecord.CTask();
         task.Act = true;
-        if(false)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            task.FileName = @"C:\Program Files (x86)\RastrWin3\master.exe"; 
-            task.Arguments = "-register";
-        }
-        else
-        {
+            nRes = m_gramaphone.DeSerializeRecordFromJsonFile(@"C:\projects\gitmain\rs\wrk\gram.json");                     
             ///home/ustas/projects/git_main/rs/myApp/bin/Debug/net6.0
             task.FileName = @"dotnet"; 
             task.Arguments = @"/home/ustas/projects/git_main/rs/myApp/bin/Debug/net6.0/myApp.dll";
+        }
+        else
+        {
+            task.FileName = @"C:\Program Files (x86)\RastrWin3\master.exe"; 
+            task.Arguments = "-register";        
         }
         task.lstOk = new List<int>(1000){1};
         m_gramaphone.PlayTask(task);
