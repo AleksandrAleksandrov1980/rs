@@ -2,7 +2,7 @@ using Serilog;
 using System.Text.Json;
 using System.Diagnostics;
 
-public class Cgramophone
+public class CGramophone
 {
     public class CRecord
     {
@@ -69,43 +69,76 @@ public class Cgramophone
         return 1;
     }
 
-            public int PlayTask(CRecord.CTask task)
+    public int PlayTask(CRecord.CTask task)
+    {
+        try
+        {
+            if (task.Act == false)
             {
-                try
-                {
-                    if (task.Act == false)
-                    {
-                        //LogAdd(dllcom.CHlpLog.enErr.INF, $"Task is off [{task.Name}]");
-                        return 1;
-                    }
-                    ProcessStartInfo psi = new ProcessStartInfo();
-                    //bool lblEx = System.IO.File.Exists("C:\\Program Files (x86)\\RastrWin3\\master.exe");
-                    //psi.FileName = System.IO.Path.GetFileName(fullPath);
-                    psi.FileName = task.FileName;
-                    psi.Arguments = task.Arguments;
-                    Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
-                    //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-
-                    Process process = Process.Start(psi);
-                    //LogSendStartedProcccessId(process.Id);
-                    //process.Id;
-                    bool blRes = process.WaitForExit(task.TimeOutSecs * 1000);
-                    //LogSendFinishedProcccessId(process.Id);
-                    if (blRes != true)
-                    {
-                        //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
-                        return -2;// timeout
-                    }
-                    int nExitCode = process.ExitCode;
-                    //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
-                    return nExitCode;
-                }
-                catch (Exception ex)
-                {
-                    Console.Write($"Error {ex.Message}\n");
-                    //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
-                    return -1;
-                }
+                //LogAdd(dllcom.CHlpLog.enErr.INF, $"Task is off [{task.Name}]");
                 return 1;
             }
+            ProcessStartInfo psi = new ProcessStartInfo();
+            //bool lblEx = System.IO.File.Exists("C:\\Program Files (x86)\\RastrWin3\\master.exe");
+            //psi.FileName = System.IO.Path.GetFileName(fullPath);
+            psi.FileName = task.FileName;
+            psi.Arguments = task.Arguments;
+            Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
+            //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+
+            Process? process = Process.Start(psi);
+            if(process == null)
+            {
+                return -2;
+            }
+            //LogSendStartedProcccessId(process.Id);
+            //process.Id;
+            bool blRes = process.WaitForExit(task.TimeOutSecs * 1000);
+            //LogSendFinishedProcccessId(process.Id);
+            if (blRes != true)
+            {
+                //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
+                return -3;// timeout
+            }
+            int nExitCode = process.ExitCode;
+            //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
+            return nExitCode;
+        }
+        catch (Exception ex)
+        {
+            Console.Write($"Error {ex.Message}\n");
+            //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
+            return -1;
+        }
+        return 1;
+    }
+
+    int Play(CancellationToken cncl_tkn, string str_path_record)
+    {
+         int nCounter = 0 ;
+        for(;;nCounter++)
+        {
+            string json = System.IO.File.ReadAllText(str_path_record);
+            CRecord? record = JsonSerializer.Deserialize<CRecord>(json);
+            if(record != null)
+            {
+                foreach( CRecord.CTask task in record.lstJTasks )
+                {
+                    int nRes =0 ;
+                    nRes = PlayTask(task);
+                }
+            }
+        }
+        return 1;
+    }
+
+    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record )
+    {
+        CGramophone gramophone = new CGramophone();
+        gramophone.Play( cncl_tkn,  str_path_record);
+        
+
+       
+        return 1;
+    }
 }

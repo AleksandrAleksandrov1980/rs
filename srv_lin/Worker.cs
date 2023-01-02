@@ -54,14 +54,14 @@ public class Worker : BackgroundService
         GRAM_STATE       = 9,
     */
 
-    private Cgramophone? m_gramaphone = null;
+    private CGramophone? m_gramaphone = null;
 
     private int on_GRAM_START()
     {
         return 1;
         int nRes = 0;
-        m_gramaphone = new Cgramophone();
-        Cgramophone.CRecord.CTask task = new Cgramophone.CRecord.CTask();
+        m_gramaphone = new CGramophone();
+        CGramophone.CRecord.CTask task = new CGramophone.CRecord.CTask();
         task.Act = true;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
