@@ -43,7 +43,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
   // Do something
   Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    //.WriteTo.Console()
+    .WriteTo.Console()
     .WriteTo.File(@"/var/rs_wrk/log.txt",
         rollingInterval: RollingInterval.Day,
         rollOnFileSizeLimit: true)
@@ -53,7 +53,7 @@ else
 {
     Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Information()
-        //.WriteTo.Console()
+        .WriteTo.Console()
         .WriteTo.File(@"C:\rs_wrk\log.txt",
             rollingInterval: RollingInterval.Day,
             rollOnFileSizeLimit: true)

@@ -10,7 +10,8 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly IConfiguration _configuration;
-    public Task<int>? m_tskWrkThreadGram = null;
+    public Task<int>? m_tskThreadGram = null;
+    private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
 
     public Worker(ILogger<Worker> logger, IConfiguration configuration)
     {
@@ -31,6 +32,14 @@ public class Worker : BackgroundService
             {
                 case CListener.enCommands.GRAM_START:
                     nRes = on_GRAM_START();
+                    nRes = on_GRAM_STATE();
+                    nRes = on_GRAM_STOP();
+                break;
+
+                case CListener.enCommands.GRAM_STATE:
+                break;
+
+                case CListener.enCommands.GRAM_STOP:
                 break;
                 
                 default:
@@ -53,12 +62,23 @@ public class Worker : BackgroundService
         GRAM_KIT         = 8,
         GRAM_STATE       = 9,
     */
-
-    private CGramophone? m_gramaphone = null;
-
     private int on_GRAM_START()
     {
+        //=  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
+        if(m_tskThreadGram!=null)
+        {
+            Log.Error("Gramaphone already runing");
+            m_tskThreadGram.Dispose();
+            m_tskThreadGram = null;
+            //return -100;
+        }
+        m_tskThreadGram = Task.Run(()=>
+        {
+            return CGramophone.ThreadPlay(m_cnc_tkn_src.Token,@"C:\rs_wrk\gram.json");
+        });
         return 1;
+
+        CGramophone? m_gramaphone = null;
         int nRes = 0;
         m_gramaphone = new CGramophone();
         CGramophone.CRecord.CTask task = new CGramophone.CRecord.CTask();
@@ -78,6 +98,62 @@ public class Worker : BackgroundService
         task.lstOk = new List<int>(1000){1};
         m_gramaphone.PlayTask(task);
         return nRes;
+    }
+
+    private int on_GRAM_STOP()
+    {
+        m_cnc_tkn_src.Cancel();
+        m_cnc_tkn_src.Dispose();
+        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
+
+        if(m_tskThreadGram!=null)
+        {
+            bool blRes = false;
+            blRes = m_tskThreadGram.Wait(3000);
+            if(blRes==true)
+            {
+                Log.Warning("Task finished!");
+            }
+            else
+            {
+                Log.Error("Task no finished!");
+            }
+            //m_tskThreadGram;
+        }
+        
+        return 1;
+    }
+
+    private int on_GRAM_STATE()
+    {
+       int nRes = 0;
+       if(m_tskThreadGram!=null)
+       {
+            string strState = ($"OnGramState() : Status-> {m_tskThreadGram.Status}  Excp->{m_tskThreadGram.Exception }");
+            switch (m_tskThreadGram.Status)
+            {
+                case TaskStatus.RanToCompletion:
+                    Log.Information($"OnGramState() : RanToCompletion.Result {m_tskThreadGram.Result}");
+                    strState += $": RanToCompletion.Result {m_tskThreadGram.Result}";
+                    nRes = 1;
+                break;
+
+                case TaskStatus.WaitingForActivation:
+                    Log.Information($"OnGramState() : WaitingForActivations -> busy ");           
+                    nRes = 2;
+                break;
+
+                case TaskStatus.Faulted:
+                    Log.Information($"OnGramState() : Faulted ");
+                    nRes = -13;
+                break;
+            }
+       }
+       else
+       {
+            Log.Warning("NO GRAMAPHONE");
+       }
+       return 1;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

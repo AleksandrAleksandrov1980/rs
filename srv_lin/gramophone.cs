@@ -76,6 +76,7 @@ public class CGramophone
             if (task.Act == false)
             {
                 //LogAdd(dllcom.CHlpLog.enErr.INF, $"Task is off [{task.Name}]");
+                Log.Information($"Task is off [{task.Name}]");
                 return 1;
             }
             ProcessStartInfo psi = new ProcessStartInfo();
@@ -85,10 +86,11 @@ public class CGramophone
             psi.Arguments = task.Arguments;
             Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-
+            Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Process? process = Process.Start(psi);
             if(process == null)
             {
+                Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}]");
                 return -2;
             }
             //LogSendStartedProcccessId(process.Id);
@@ -98,15 +100,18 @@ public class CGramophone
             if (blRes != true)
             {
                 //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
+                Log.Error($"TimeOut Pid {process.Id}");
                 return -3;// timeout
             }
             int nExitCode = process.ExitCode;
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
+            Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             return nExitCode;
         }
         catch (Exception ex)
         {
             Console.Write($"Error {ex.Message}\n");
+            Log.Error($"Exception {ex.Message}");
             //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
             return -1;
         }
@@ -115,18 +120,35 @@ public class CGramophone
 
     int Play(CancellationToken cncl_tkn, string str_path_record)
     {
-         int nCounter = 0 ;
+        int nCounter = 0 ;
         for(;;nCounter++)
         {
+            Log.Information($"[{nCounter}] read record -> {str_path_record}");
             string json = System.IO.File.ReadAllText(str_path_record);
             CRecord? record = JsonSerializer.Deserialize<CRecord>(json);
             if(record != null)
             {
                 foreach( CRecord.CTask task in record.lstJTasks )
                 {
-                    int nRes =0 ;
+                    int nRes = 0;
+                    if(cncl_tkn.IsCancellationRequested == true)
+                    {
+                        Log.Warning("Cancell requested!");
+                        break;
+                    }
+                    //https://stackoverflow.com/questions/17597642/how-to-cancel-task-quicker/17610886#17610886
+                    //if(cncl_tkn.WaitHandle.WaitOne(10000)==true)
+                    //{   Log.Warning("Cancell requested!");
+                    //    break;
+                    //}
                     nRes = PlayTask(task);
+                    Thread.Sleep(1000);
                 }
+            }
+            if(cncl_tkn.IsCancellationRequested == true)
+            {
+                Log.Warning("Exit-> Cancell requested!");
+                break;
             }
         }
         return 1;
@@ -136,8 +158,6 @@ public class CGramophone
     {
         CGramophone gramophone = new CGramophone();
         gramophone.Play( cncl_tkn,  str_path_record);
-        
-
        
         return 1;
     }
