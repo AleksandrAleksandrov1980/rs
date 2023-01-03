@@ -142,7 +142,8 @@ public class CGramophone
                     //    break;
                     //}
                     nRes = PlayTask(task);
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
+                    Task.Delay(1000, cncl_tkn).Wait();
                 }
             }
             if(cncl_tkn.IsCancellationRequested == true)
