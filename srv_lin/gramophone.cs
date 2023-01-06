@@ -125,7 +125,8 @@ public class CGramophone
         {
             for(;;nCounter++)
             {
-                Log.Information($"[{nCounter}] read record -> {str_path_record}");
+                Log.Information($"cycle [{nCounter}]----------------------------------------------");
+                Log.Information($"read record -> {str_path_record}");
                 CRecord? record = null;
                 try
                 {
