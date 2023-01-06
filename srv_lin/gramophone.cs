@@ -126,8 +126,16 @@ public class CGramophone
             for(;;nCounter++)
             {
                 Log.Information($"[{nCounter}] read record -> {str_path_record}");
-                string json = System.IO.File.ReadAllText(str_path_record);
-                CRecord? record = JsonSerializer.Deserialize<CRecord>(json);
+                CRecord? record = null;
+                try
+                {
+                    string json = System.IO.File.ReadAllText(str_path_record);
+                    record = JsonSerializer.Deserialize<CRecord>(json);
+                }
+                catch(Exception ex)
+                {
+                    Log.Error($"can't read, message-> {ex.Message}");
+                }               
                 if(record != null)
                 {
                     foreach( CRecord.CTask task in record.lstJTasks )
@@ -138,25 +146,15 @@ public class CGramophone
                             Log.Warning("Cancell requested!");
                             break;
                         }
-                        //https://stackoverflow.com/questions/17597642/how-to-cancel-task-quicker/17610886#17610886
-                        //if(cncl_tkn.WaitHandle.WaitOne(10000)==true)
-                        //{   Log.Warning("Cancell requested!");
-                        //    break;
-                        //}
                         nRes = PlayTask(task);
                         if(nRes < 0)
                         {
                             Log.Warning($"finished task [{task.Name}]  with error {nRes}");
                         }
-                        //Thread.Sleep(1000);
-                        Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
                     }
                 }
-                if(cncl_tkn.IsCancellationRequested == true)
-                {
-                    Log.Warning("Exit-> Cancell requested!");
-                    break;
-                }
+                //Thread.Sleep(1000);
+                Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
             }
         }
         catch(System.AggregateException sae)
