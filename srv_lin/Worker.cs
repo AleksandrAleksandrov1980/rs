@@ -31,15 +31,15 @@ public class Worker : BackgroundService
             switch(command.command)
             {
                 case CListener.enCommands.GRAM_START:
-                    nRes = on_GRAM_START();
-                    nRes = on_GRAM_STATE();
-                    nRes = on_GRAM_STOP();
+                    nRes = on_GRAM_START();                      
                 break;
 
                 case CListener.enCommands.GRAM_STATE:
+                    nRes = on_GRAM_STATE();
                 break;
 
                 case CListener.enCommands.GRAM_STOP:
+                    nRes = on_GRAM_STOP();
                 break;
                 
                 default:
@@ -65,6 +65,7 @@ public class Worker : BackgroundService
     private int on_GRAM_START()
     {
         //=  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
+
         if(m_tskThreadGram!=null)
         {
             Log.Error("Gramaphone already runing");
@@ -72,6 +73,8 @@ public class Worker : BackgroundService
             m_tskThreadGram = null;
             //return -100;
         }
+        m_cnc_tkn_src.Dispose();
+        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
         m_tskThreadGram = Task.Run(()=>
         {
             return CGramophone.ThreadPlay(m_cnc_tkn_src.Token,@"C:\rs_wrk\gram.json");
@@ -102,17 +105,17 @@ public class Worker : BackgroundService
 
     private int on_GRAM_STOP()
     {
-        m_cnc_tkn_src.Cancel();
-        m_cnc_tkn_src.Dispose();
-        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
-
-        if(m_tskThreadGram!=null)
+         if(m_tskThreadGram!=null)
         {
+            m_cnc_tkn_src.Cancel();
             bool blRes = false;
             blRes = m_tskThreadGram.Wait(3000);
             if(blRes==true)
             {
                 Log.Warning("Task finished!");
+                
+                m_cnc_tkn_src.Dispose();
+                m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
             }
             else
             {

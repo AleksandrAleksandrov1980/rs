@@ -121,36 +121,51 @@ public class CGramophone
     int Play(CancellationToken cncl_tkn, string str_path_record)
     {
         int nCounter = 0 ;
-        for(;;nCounter++)
+        try
         {
-            Log.Information($"[{nCounter}] read record -> {str_path_record}");
-            string json = System.IO.File.ReadAllText(str_path_record);
-            CRecord? record = JsonSerializer.Deserialize<CRecord>(json);
-            if(record != null)
+            for(;;nCounter++)
             {
-                foreach( CRecord.CTask task in record.lstJTasks )
+                Log.Information($"[{nCounter}] read record -> {str_path_record}");
+                string json = System.IO.File.ReadAllText(str_path_record);
+                CRecord? record = JsonSerializer.Deserialize<CRecord>(json);
+                if(record != null)
                 {
-                    int nRes = 0;
-                    if(cncl_tkn.IsCancellationRequested == true)
+                    foreach( CRecord.CTask task in record.lstJTasks )
                     {
-                        Log.Warning("Cancell requested!");
-                        break;
+                        int nRes = 0;
+                        if(cncl_tkn.IsCancellationRequested == true)
+                        {
+                            Log.Warning("Cancell requested!");
+                            break;
+                        }
+                        //https://stackoverflow.com/questions/17597642/how-to-cancel-task-quicker/17610886#17610886
+                        //if(cncl_tkn.WaitHandle.WaitOne(10000)==true)
+                        //{   Log.Warning("Cancell requested!");
+                        //    break;
+                        //}
+                        nRes = PlayTask(task);
+                        //Thread.Sleep(1000);
+                        Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
                     }
-                    //https://stackoverflow.com/questions/17597642/how-to-cancel-task-quicker/17610886#17610886
-                    //if(cncl_tkn.WaitHandle.WaitOne(10000)==true)
-                    //{   Log.Warning("Cancell requested!");
-                    //    break;
-                    //}
-                    nRes = PlayTask(task);
-                    //Thread.Sleep(1000);
-                    Task.Delay(1000, cncl_tkn).Wait();
+                }
+                if(cncl_tkn.IsCancellationRequested == true)
+                {
+                    Log.Warning("Exit-> Cancell requested!");
+                    break;
                 }
             }
-            if(cncl_tkn.IsCancellationRequested == true)
-            {
-                Log.Warning("Exit-> Cancell requested!");
-                break;
-            }
+        }
+        catch(System.AggregateException sae)
+        {
+            Log.Warning($"canceled in wait-> {sae.InnerException.Message}");
+        }
+        catch(System.OperationCanceledException oce)
+        {
+            Log.Warning($"canceled-> {oce.Message}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"Exception-> {ex.Message}");
         }
         return 1;
     }
