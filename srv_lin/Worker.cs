@@ -68,7 +68,7 @@ public class Worker : BackgroundService
 
         if(m_tskThreadGram!=null)
         {
-            Log.Error("Gramaphone already runing");
+            Log.Error("Gramaphone already runing, will be relaunched");
             m_tskThreadGram.Dispose();
             m_tskThreadGram = null;
             //return -100;
@@ -105,7 +105,7 @@ public class Worker : BackgroundService
 
     private int on_GRAM_STOP()
     {
-         if(m_tskThreadGram!=null)
+        if(m_tskThreadGram!=null)
         {
             m_cnc_tkn_src.Cancel();
             bool blRes = false;
@@ -113,15 +113,19 @@ public class Worker : BackgroundService
             if(blRes==true)
             {
                 Log.Warning("Task finished!");
-                
                 m_cnc_tkn_src.Dispose();
                 m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
+                m_tskThreadGram = null;
             }
             else
             {
-                Log.Error("Task no finished!");
+                Log.Error("Task not finished in time!");
             }
             //m_tskThreadGram;
+        }
+        else
+        {
+            Log.Warning("No gramaphone launched");
         }
         
         return 1;

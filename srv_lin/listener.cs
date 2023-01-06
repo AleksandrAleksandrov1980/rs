@@ -100,8 +100,8 @@ public class CListener
     public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger,  OnCommand oc )
     {
         int nRes = 0;
-        Console.WriteLine($"hello world\n");
-        Log.Information("Hccccccccccccccccccceldddlo, Serilog!");
+        //Console.WriteLine($"hello world\n");
+        Log.Information("start listen!");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName = par.m_str_host;

@@ -84,7 +84,7 @@ public class CGramophone
             //psi.FileName = System.IO.Path.GetFileName(fullPath);
             psi.FileName = task.FileName;
             psi.Arguments = task.Arguments;
-            Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
+            //Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Process? process = Process.Start(psi);
@@ -108,10 +108,10 @@ public class CGramophone
             Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             return nExitCode;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            Console.Write($"Error {ex.Message}\n");
-            Log.Error($"Exception {ex.Message}");
+            //Console.Write($"Error {ex.Message}\n");
+            Log.Error($"\tPlay.Exception {ex.Message}");
             //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
             return -1;
         }
@@ -144,6 +144,10 @@ public class CGramophone
                         //    break;
                         //}
                         nRes = PlayTask(task);
+                        if(nRes < 0)
+                        {
+                            Log.Warning($"finished task [{task.Name}]  with error {nRes}");
+                        }
                         //Thread.Sleep(1000);
                         Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
                     }
