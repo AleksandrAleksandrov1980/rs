@@ -163,11 +163,50 @@ public class Worker : BackgroundService
        return 1;
     }
 
+    private void Tst_DownloadFileFTP()
+    {
+        //https://stackoverflow.com/questions/860638/how-do-i-create-a-directory-on-ftp-server-using-c
+        System.Net.WebRequest frequest = System.Net.WebRequest.Create("ftp://192.168.1.59/");
+        //frequest.Method = System.Net.WebRequestMethods.Ftp.ListDirectory;
+        frequest.Method = System.Net.WebRequestMethods.Ftp.ListDirectoryDetails;
+        frequest.Credentials = new System.Net.NetworkCredential("anon", "");
+        using (var resp = (System.Net.FtpWebResponse) frequest.GetResponse())
+        {
+            Console.WriteLine(resp.StatusCode);
+            Stream responseStream = resp.GetResponseStream();
+            StreamReader reader = new StreamReader(responseStream);
+            string str = reader.ReadToEnd();
+            //Console.WriteLine(reader.ReadToEnd());
+            Log.Information(str);
+        }
+
+        //https://stackoverflow.com/questions/2781654/ftpwebrequest-download-file
+        //string inputfilepath = @"C:\Temp\FileName.exe";
+        string fileDownload = "compile.tar";
+        string inputfilepath = @"C:\rs_wrk\"+fileDownload;
+        string ftphost = "192.168.1.59";
+        string ftpfilepath = "/"+fileDownload;
+        string ftpfullpath = "ftp://" + ftphost + ftpfilepath;
+        using (System.Net.WebClient request = new System.Net.WebClient())
+        {
+            request.Credentials = new System.Net.NetworkCredential("anon", "");
+            //request.UploadFile(ftpfullpath+"_1",inputfilepath);
+            byte[] fileData = request.DownloadData(ftpfullpath);
+            using (FileStream file = File.Create(inputfilepath))
+            {
+                file.Write(fileData, 0, fileData.Length);
+                file.Close();
+            }
+            Log.Information("Download Complete");
+         }
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
             Log.Information("Heldddlo, Serilog!");
+            //Tst_DownloadFileFTP();
 
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(_logger);
