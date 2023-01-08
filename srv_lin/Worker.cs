@@ -207,6 +207,7 @@ public class Worker : BackgroundService
         {
             Log.Information("Heldddlo, Serilog!");
             //Tst_DownloadFileFTP();
+            string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
 
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(_logger);
