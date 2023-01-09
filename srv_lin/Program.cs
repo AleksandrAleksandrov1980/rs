@@ -2,6 +2,7 @@ using srv_lin;
 using Serilog;
 using System.Runtime.InteropServices;
 
+
 //serilog
 //https://stackoverflow.com/questions/48251515/serilog-not-creating-log-file-when-running-on-linux
 //https://onloupe.com/blog/can-i-log-to-file-mel/
@@ -31,34 +32,36 @@ IHost host = Host.CreateDefaultBuilder(args)
             logging.AddEventLog(configuration => configuration.SourceName = "srv_lin");
         }
     })
-    .ConfigureAppConfiguration(ddd=>{
-        Console.Write("sdf");
+    .ConfigureAppConfiguration(ConfigurationBuilder=>{
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            ConfigurationBuilder.AddJsonFile($"appsettings.lin.json", optional: true, reloadOnChange: true);
+            /*
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File(@"/var/rs_wrk/log.txt",
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true)
+                .CreateLogger();
+                */
+        }
+        else
+        {
+            ConfigurationBuilder.AddJsonFile($"appsettings.win.json", optional: true, reloadOnChange: true);
+            /*
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.File(@"C:\rs_wrk\log.txt",
+                rollingInterval: RollingInterval.Day,
+                rollOnFileSizeLimit: true)
+            .CreateLogger();*/
+        }
     })
     .Build();
  
 CInstance c=CInstance.GetCurrent();
-
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-{
-  // Do something
-  Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File(@"/var/rs_wrk/log.txt",
-        rollingInterval: RollingInterval.Day,
-        rollOnFileSizeLimit: true)
-    .CreateLogger();
-}
-else
-{
-    Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .WriteTo.Console()
-        .WriteTo.File(@"C:\rs_wrk\log.txt",
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true)
-        .CreateLogger();
-}
     
 Log.Information("Hello, Serilog!");
 await host.RunAsync();

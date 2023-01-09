@@ -114,7 +114,7 @@ public class CListener
         using(var connection = factory.CreateConnection())
         using(var channel = connection.CreateModel())
         {
-            channel.ExchangeDeclare(exchange: par.m_str_exch, type: ExchangeType.Fanout);
+            channel.ExchangeDeclare(exchange: par.m_str_exch, type: ExchangeType.Fanout, durable: false, autoDelete:true );
             var queueName = channel.QueueDeclare().QueueName;
             channel.QueueBind(queue: queueName,
                             exchange: par.m_str_exch,

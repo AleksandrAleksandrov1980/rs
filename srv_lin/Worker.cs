@@ -205,13 +205,38 @@ public class Worker : BackgroundService
     {
         try
         {
-            Log.Information("Heldddlo, Serilog!");
-            //Tst_DownloadFileFTP();
+            _logger.LogInformation("start main()");
+            string? str_dir_wrk = _configuration.GetValue<string>("platform:dir_wrk");
+            if(str_dir_wrk==null)
+            {
+                _logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
+               return;
+            }
+            _logger.LogInformation($"create dir:{str_dir_wrk} ");
+            System.IO.Directory.CreateDirectory(str_dir_wrk);
+            string str_dir_log = str_dir_wrk+"/logs/";
+            _logger.LogInformation($"create dir:{str_dir_log} ");
+            System.IO.Directory.CreateDirectory(str_dir_log);
+            string str_path_log = str_dir_log+"rs.log";
+            _logger.LogInformation($"path log:{str_path_log} ");
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File(str_path_log,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true)
+                .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
+            Log.Information($"-----------------------------------------------------------------------------------------");
+            Log.Information($"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}]---------------------------------------");
+            Log.Information($"-----------------------------------------------------------------------------------------");
+            //Tst_DownloadFileFTP();
+            
 
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");
+            
             string? str_name   = _configuration.GetValue<string>("r_params:name");
             string? str_q_host = _configuration.GetValue<string>("r_params:q_host");
             int?    n_q_port   = _configuration.GetValue<int>   ("r_params:q_port"); // default 5672
