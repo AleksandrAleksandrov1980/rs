@@ -89,58 +89,45 @@ public class CListener
     public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger, OnCommand on_command )
     {
         int nRes = 0;
-        //Console.WriteLine($"hello world\n");
         Log.Information("start listen!");
-
         ConnectionFactory factory = new ConnectionFactory();
-        factory.HostName = par.m_str_host;
-        factory.Port = par.m_n_port;
+        factory.HostName    = par.m_str_host;
+        factory.Port        = par.m_n_port;
         factory.VirtualHost = "/";
-        factory.UserName = par.m_str_user; // guest - resctricted to local only
-        factory.Password = par.m_str_pass;
-        
+        factory.UserName    = par.m_str_user; // guest - resctricted to local only
+        factory.Password    = par.m_str_pass;
         _logger.LogWarning( $"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
         using(var connection = factory.CreateConnection())
         using(var channel = connection.CreateModel())
         {
-            channel.ExchangeDeclare(exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:true );
-            var queueName = channel.QueueDeclare().QueueName;
-            channel.QueueBind(queue: queueName,
-                            exchange: par.m_str_exch_commands,
-                            routingKey: "");
-            Log.Information($"[*] Waiting for queue [{queueName}]");
+            channel.ExchangeDeclare( exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+            var queue_name = channel.QueueDeclare().QueueName;
+            channel.QueueBind( queue: queue_name, exchange: par.m_str_exch_commands, routingKey: "" );
+            Log.Information($"Waiting for commands queue [{queue_name}]");
             var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
+            consumer.Received += ( model, ea ) =>
             {
                 byte[] body = ea.Body.ToArray();
                 string message = Encoding.UTF8.GetString(body);
+                Log.Information($"get message: {message}");
                 CommandSerialized? command_serialized = null;
                 try
                 {
-                    command_serialized = JsonSerializer.Deserialize<CommandSerialized>((string)message)!;
+                    command_serialized = JsonSerializer.Deserialize<CommandSerialized>(message)!;
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"catch exeption -> {ex.Message} ehile try parse serialized command {message}");
+                    Log.Error($"exception -> [{ex.Message}] when trying deserialize command [{message}]");
                     command_serialized = null;    
                 }   
-                //_logger.LogInformation($" [x] {message}");
-                Log.Information($"get message: {message}");
                 Command command = new Command(command_serialized);
                 nRes = on_command(command);
                 Log.Information($"command ret: {nRes}");
             };
-            channel.BasicConsume(queue: queueName,
-                                autoAck: true,
-                                consumer: consumer);
-
-            //Console.WriteLine(" Press [enter] to exit.");(
+            channel.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
             par.m_cncl_tkn.WaitHandle.WaitOne();
-            //_logger.LogWarning("CANCELLED!!");
             Log.Warning($"listener get cancel signal.");
-            //Console.ReadLine();
         }
-
         return 1;
     }
 
