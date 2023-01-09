@@ -10,20 +10,7 @@ namespace srv_lin;
 public class CListener
 {
     public delegate int OnCommand( Command command );
-    /*
-    public static class enCommands 
-    {
-        public static readonly string STATE            = "STATE";
-        public static readonly string RUN_PROC         = "RUN_PROC";
-        public static readonly string EXTERMINATE_PROC = "EXTERMINATE_PROC";
-        public static readonly string CREATE_DIR       = "CREATE_DIR";
-        public static readonly string CLEAR_DIR        = "CLEAR_DIR";
-        public static readonly string GRAM_START       = "GRAM_START";
-        public static readonly string GRAM_STOP        = "GRAM_STOP";
-        public static readonly string GRAM_KIT         = "GRAM_KIT";
-        public static readonly string GRAM_STATE       = "STATE";
-    }
-*/
+
     public enum enCommands 
     {
         ERROR            = -1,
@@ -99,7 +86,7 @@ public class CListener
         public CancellationToken m_cncl_tkn;
     }
 
-    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger,  OnCommand oc )
+    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger, OnCommand on_command )
     {
         int nRes = 0;
         //Console.WriteLine($"hello world\n");
@@ -140,7 +127,8 @@ public class CListener
                 //_logger.LogInformation($" [x] {message}");
                 Log.Information($"get message: {message}");
                 Command command = new Command(command_serialized);
-                nRes = oc(command);
+                nRes = on_command(command);
+                Log.Information($"command ret: {nRes}");
             };
             channel.BasicConsume(queue: queueName,
                                 autoAck: true,
