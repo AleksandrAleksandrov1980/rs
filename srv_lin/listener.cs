@@ -89,11 +89,13 @@ public class CListener
 
     public class CParams
     {
-        public string m_str_host = "";
+        public string? m_str_name = "";
+        public string? m_str_host = "";
         public int    m_n_port   = 0 ; // default 5672
-        public string m_str_exch = ""; 
-        public string m_str_user = ""; 
-        public string m_str_pass = "";
+        public string? m_str_exch_commands = ""; 
+        public string? m_str_exch_events   = ""; 
+        public string? m_str_user = ""; 
+        public string? m_str_pass = "";
         public CancellationToken m_cncl_tkn;
     }
 
@@ -114,13 +116,12 @@ public class CListener
         using(var connection = factory.CreateConnection())
         using(var channel = connection.CreateModel())
         {
-            channel.ExchangeDeclare(exchange: par.m_str_exch, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+            channel.ExchangeDeclare(exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:true );
             var queueName = channel.QueueDeclare().QueueName;
             channel.QueueBind(queue: queueName,
-                            exchange: par.m_str_exch,
+                            exchange: par.m_str_exch_commands,
                             routingKey: "");
-            //Console.WriteLine(" [*] Waiting for logs.");
-            _logger.LogInformation($" [*] Waiting for [{queueName}]");
+            Log.Information($"[*] Waiting for queue [{queueName}]");
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
@@ -136,9 +137,10 @@ public class CListener
                     Log.Error($"catch exeption -> {ex.Message} ehile try parse serialized command {message}");
                     command_serialized = null;    
                 }   
+                //_logger.LogInformation($" [x] {message}");
+                Log.Information($"get message: {message}");
                 Command command = new Command(command_serialized);
                 nRes = oc(command);
-                _logger.LogInformation($" [x] {message}");
             };
             channel.BasicConsume(queue: queueName,
                                 autoAck: true,
@@ -146,7 +148,8 @@ public class CListener
 
             //Console.WriteLine(" Press [enter] to exit.");(
             par.m_cncl_tkn.WaitHandle.WaitOne();
-            _logger.LogWarning("CANCELLED!!");
+            //_logger.LogWarning("CANCELLED!!");
+            Log.Warning($"listener get cancel signal.");
             //Console.ReadLine();
         }
 

@@ -2,7 +2,6 @@ using srv_lin;
 using Serilog;
 using System.Runtime.InteropServices;
 
-
 //serilog
 //https://stackoverflow.com/questions/48251515/serilog-not-creating-log-file-when-running-on-linux
 //https://onloupe.com/blog/can-i-log-to-file-mel/
@@ -28,7 +27,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            //for EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
+            //for Win.EventLog! https://learn.microsoft.com/ru-ru/dotnet/core/extensions/logging-providers#windows-eventlog
             logging.AddEventLog(configuration => configuration.SourceName = "srv_lin");
         }
     })
@@ -36,27 +35,10 @@ IHost host = Host.CreateDefaultBuilder(args)
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             ConfigurationBuilder.AddJsonFile($"appsettings.lin.json", optional: true, reloadOnChange: true);
-            /*
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.Console()
-                .WriteTo.File(@"/var/rs_wrk/log.txt",
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true)
-                .CreateLogger();
-                */
         }
         else
         {
             ConfigurationBuilder.AddJsonFile($"appsettings.win.json", optional: true, reloadOnChange: true);
-            /*
-            Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .WriteTo.Console()
-            .WriteTo.File(@"C:\rs_wrk\log.txt",
-                rollingInterval: RollingInterval.Day,
-                rollOnFileSizeLimit: true)
-            .CreateLogger();*/
         }
     })
     .Build();

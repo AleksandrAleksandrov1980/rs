@@ -59,7 +59,8 @@ sokjs-->
          // Do something, all subscribes must be done is this callback
          // This is needed because this will be executed after a (re)connect
          console.log('connected');
-         subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
+         //subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
+         subscription = client.subscribe('/exchange/rs_commands', callback_subscribe_rs_commands);
       };
        
       client.onStompError = function (frame) {
@@ -80,7 +81,8 @@ sokjs-->
         collapseCard.innerHTML += str_log.toString()+ "<BR/>";
       }
 
-      callback_subscribe_logs = function(message){
+      //callback_subscribe_logs = function(message){
+        callback_subscribe_rs_commands = function(message){
         if (message.body){
           console.log('got message with body ' + message.body);
           nCounterMsgs++;
@@ -115,15 +117,16 @@ sokjs-->
         var currentdate = new Date(); 
         var datetime = " timestamp: " +  currentdate.getFullYear() +"/"
                 + (currentdate.getMonth()+1)  + "/" 
-                + currentdate.getDate() + " @ "  
-                + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
-                + currentdate.getSeconds() + ":"
-                +currentdate.getMilliseconds();
+                +  currentdate.getDate()      + " @ "  
+                +  currentdate.getHours()     + ":"  
+                +  currentdate.getMinutes()   + ":" 
+                +  currentdate.getSeconds()   + ":"
+                +  currentdate.getMilliseconds();
                 
         str_params_to_serialize = str_params +" : " + g_n_counter_seneded_msgs.toString() + " : " + datetime;
         const payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params_to_serialize });
-        client.publish({destination: '/exchange/logs', body: payLoad });
+        //client.publish({destination: '/exchange/logs', body: payLoad });
+        client.publish({destination: '/exchange/rs_commands', body: payLoad });
       }
 
       async function Sleep(ms) {
@@ -211,7 +214,8 @@ sokjs-->
           const payLoad = { user: "dfdfd", message: strData };
           // You can additionally pass headers
           //stompClient.publish({destination: '/topic/chat', body: JSON.stringify(payLoad)});
-          client.publish({destination: '/exchange/logs', body: JSON.stringify(payLoad)});
+          //client.publish({destination: '/exchange/logs', body: JSON.stringify(payLoad)});
+          client.publish({destination: '/exchange/rs_commands', body: JSON.stringify(payLoad)});
         }
       }
 

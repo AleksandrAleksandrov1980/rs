@@ -30,10 +30,10 @@ public class CGramophone
         public class CTask
         {
             public bool Act { get; set; } = true;
-            public string Name { get; set; }
-            public string FileName { get; set; }
-            public string Arguments { get; set; }
-            public List<int> lstOk { get; set; }
+            public string Name { get; set; } = "";
+            public string FileName { get; set; } = "";
+            public string Arguments { get; set; } = "";
+            public List<int> lstOk { get; set; } = new List<int>();
             public int TimeOutSecs { get; set; } = 1000;
 
             public CTask()
@@ -160,7 +160,7 @@ public class CGramophone
         }
         catch(System.AggregateException sae)
         {
-            Log.Warning($"canceled in wait-> {sae.InnerException.Message}");
+            Log.Warning($"canceled in wait-> {sae?.InnerException?.Message}");
         }
         catch(System.OperationCanceledException oce)
         {
