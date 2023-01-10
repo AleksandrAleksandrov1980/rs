@@ -26,6 +26,12 @@ sokjs-->
       var subscription;
       var nCounter = 0;
       var nCounterMsgs = 0;
+
+      var subscription_events;
+      var nCounter_events = 0;
+      var nCounterMsgs_events = 0;
+
+
       const g_enCOMMDANDS = Object.freeze({
         STATE            : "STATE",
         RUN_PROC         : "RUN_PROC",
@@ -60,7 +66,8 @@ sokjs-->
          // This is needed because this will be executed after a (re)connect
          console.log('connected');
          //subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
-         subscription = client.subscribe('/exchange/rs_commands', callback_subscribe_rs_commands);
+         subscription        = client.subscribe('/exchange/rs_commands', callback_subscribe_rs_commands);
+         subscription_events = client.subscribe('/exchange/rs_events',   callback_subscribe_rs_events);
       };
        
       client.onStompError = function (frame) {
@@ -72,6 +79,16 @@ sokjs-->
         console.log('Additional details: ' + frame.body);
       };
 
+      callback_subscribe_rs_commands = function(message){
+        if (message.body){
+          console.log('got command with body : ' + message.body);
+          nCounterMsgs++;
+          AddLog( "< " +nCounterMsgs.toString()+ " : " + message.body );
+        } else {
+          console.log('got empty message');
+        }
+      };
+
       function AddLog(str_log) {
         let collapseCard = document.querySelector("#collapseCard");
         if( nCounter++ > 30 ){ 
@@ -81,16 +98,25 @@ sokjs-->
         collapseCard.innerHTML += str_log.toString()+ "<BR/>";
       }
 
-      //callback_subscribe_logs = function(message){
-        callback_subscribe_rs_commands = function(message){
+      callback_subscribe_rs_events = function(message){
         if (message.body){
-          console.log('got message with body ' + message.body);
-          nCounterMsgs++;
-          AddLog( "< " +nCounterMsgs.toString()+ " : " + message.body );
+          console.log('got event with body : ' + message.body);
+          nCounterMsgs_events++;
+          AddLogEvents( "> " +nCounterMsgs_events.toString()+ " : " + message.body );
         } else {
           console.log('got empty message');
         }
       };
+
+      function AddLogEvents(str_log) {
+        let collapseCard = document.querySelector("#collapseCard_rs_events");
+        if( nCounter_events++ > 30 ){ 
+            collapseCard.innerText = "";
+            nCounter_events = 0;
+        }
+        collapseCard.innerHTML += str_log.toString()+ "<BR/>";
+      }
+
       client.activate();
 
       var g_n_counter_seneded_msgs = 0;
@@ -333,16 +359,7 @@ sokjs-->
 
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
          <div class="container">
-           <!--   
-            STATE
-            RUN_PROC
-            EXTERMINATE_PROC,
-            CREATE_DIR
-            CLEAR_DIR
-            GRAM_START
-            GRAM_STOP
-            GRAM_STATE
-          -->
+
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('STATE');">
             STATE
           </button>
@@ -392,21 +409,37 @@ sokjs-->
         </div>
         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
-         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
+         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
          <div class="card shadow mb-4">
-         <!-- Card Header - Accordion -->
-         <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
-             role="button" aria-expanded="true" aria-controls="collapseCard">
-             <h6 class="m-0 font-weight-bold text-primary"> Сообщения брокера. </h6>
-         </a>
-         <!-- Card Content - Collapse -->
-         <div class="collapse show" id="collapseCard">
-           <div class="card-body">
-             <!--  здесь будут выводится сообщения брокера. -->
-           </div>
-         </div>
-         </div>
-         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
+          <!-- Card Header - Accordion -->
+          <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
+              role="button" aria-expanded="true" aria-controls="collapseCard">
+              <h6 class="m-0 font-weight-bold text-primary"> Комманды брокера. </h6>
+          </a>
+          <!-- Card Content - Collapse -->
+          <div class="collapse show" id="collapseCard">
+            <div class="card-body">
+              <!--  здесь будут выводится сообщения брокера. -->
+            </div>
+          </div>
+          </div>
+          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
+
+         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
+         <div class="card shadow mb-4">
+          <!-- Card Header - Accordion -->
+          <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
+              role="button" aria-expanded="true" aria-controls="collapseCard">
+              <h6 class="m-0 font-weight-bold text-primary"> События брокера. </h6>
+          </a>
+          <!-- Card Content - Collapse -->
+          <div class="collapse show" id="collapseCard_rs_events">
+            <div class="card-body">
+              <!--  здесь будут выводится события брокера. -->
+            </div>
+          </div>
+          </div>
+          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
 
           </div>
           <!-- /.container-fluid --> </div>

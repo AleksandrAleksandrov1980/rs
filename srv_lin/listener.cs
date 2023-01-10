@@ -74,29 +74,18 @@ public class CListener
         }
     }
 
-    public class CParams
-    {
-        public string? m_str_name = "";
-        public string? m_str_host = "";
-        public int    m_n_port   = 0 ; // default 5672
-        public string? m_str_exch_commands = ""; 
-        public string? m_str_exch_events   = ""; 
-        public string? m_str_user = ""; 
-        public string? m_str_pass = "";
-        public CancellationToken m_cncl_tkn;
-    }
-
-    public static int ThreadListen( CParams par, Microsoft.Extensions.Logging.ILogger _logger, OnCommand on_command )
+    public static int ThreadListen( Worker.CParams par, Microsoft.Extensions.Logging.ILogger _logger, OnCommand on_command )
     {
         int nRes = 0;
-        Log.Information("start listen!");
+        Log.Information("start Listener!");
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName    = par.m_str_host;
         factory.Port        = par.m_n_port;
         factory.VirtualHost = "/";
         factory.UserName    = par.m_str_user; // guest - resctricted to local only
         factory.Password    = par.m_str_pass;
-        _logger.LogWarning( $"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
+        _logger.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
+        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
         using(var connection = factory.CreateConnection())
         using(var channel = connection.CreateModel())
         {

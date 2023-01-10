@@ -13,14 +13,26 @@ public class Worker : BackgroundService
     public Task<int>? m_tskThreadGram = null;
     private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
     public string? m_str_dir_wrk;
+    private object _obj_sync_command = new Object();
+    private CWriter m_writer = new CWriter();
 
-    public Worker(ILogger<Worker> logger, IConfiguration configuration)
+    public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
         _logger = logger;
         _configuration =configuration;
     }
-
-    private object _obj_sync_command = new Object();
+  
+    public class CParams
+    {
+        public string? m_str_name = "";
+        public string? m_str_host = "";
+        public int     m_n_port   = 0 ; // default 5672
+        public string? m_str_exch_commands = ""; 
+        public string? m_str_exch_events   = ""; 
+        public string? m_str_user = ""; 
+        public string? m_str_pass = "";
+        public CancellationToken m_cncl_tkn;
+    }
 
     public int OnCommand( CListener.Command command )
     {
@@ -28,7 +40,7 @@ public class Worker : BackgroundService
         lock(_obj_sync_command)
         {
             Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
-
+            m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
             switch(command.command)
             {
                 case CListener.enCommands.GRAM_START:
@@ -216,7 +228,7 @@ public class Worker : BackgroundService
             c.SetMsLogger(_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");
 
-            CListener.CParams par = new CListener.CParams();
+            CParams par = new CParams();
             par.m_str_name          = _configuration.GetValue<string>("r_params:name","");
             par.m_str_host          = _configuration.GetValue<string>("r_params:q_host","");
             par.m_n_port            = _configuration.GetValue<int>   ("r_params:q_port",0); // default 5672
@@ -235,21 +247,20 @@ public class Worker : BackgroundService
             _logger.LogWarning($"q_user      : {par.m_str_user}"); 
             //_logger.LogWarning($" : {str_q_log_pass}");
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
-           
-                /*
-            Task<int> t= Task.Factory.StartNew<int>(
-                                                         () => CListener.ThreadListen(par, _logger),
-                                                         TaskCreationOptions.LongRunning
-                                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
-*/
-            Task taskListener =  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
+            m_writer.Init( par, _logger );
+            m_writer.Publish("hello world!");
+            //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, _logger), TaskCreationOptions.LongRunning
+            //                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
+            Task taskListener = Task.Run(()=>{CListener.ThreadListen( par, _logger, OnCommand );});
             // ttt.Wait(500,stoppingToken);
             await taskListener;
             //Console.ReadLine();
+            if( m_writer != null)
+                m_writer.Dispose();
         }
         catch( Exception ex)
         {
-            _logger.LogError($"catched exeption: {ex.Message}");
+            _logger.LogError($"Program catch exeption: {ex.Message}");
 
             //https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service 
             // In order for the Windows Service Management system to leverage configured
