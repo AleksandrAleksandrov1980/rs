@@ -319,11 +319,12 @@ public class Worker : BackgroundService
                     }
                 }
                 catch(Exception ex){
-                    Log.Error($"Communicator exception : {ex.Message}. Will be relaunched.");
+                    Log.Error($"[{i}] Communicator exception : {ex.Message}. Will be relaunched.");
                 }
                 if(stoppingToken.IsCancellationRequested==true)
                 {
-                    Log.Warning($"Communicator canceled.");
+                    Log.Warning($"[{i}] Communicator canceled.");
+                    break;
                 }
             }
             /*
