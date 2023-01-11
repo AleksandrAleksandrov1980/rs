@@ -15,11 +15,12 @@ public class Worker : BackgroundService
     public string? m_str_dir_wrk;
     private object _obj_sync_command = new Object();
     private CWriter m_writer = new CWriter();
+    public Ccommunicator? m_communicator;
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
         _logger = logger;
-        _configuration =configuration;
+        _configuration = configuration;
     }
   
     public class CParams
@@ -41,9 +42,10 @@ public class Worker : BackgroundService
         if(m_tskThreadGram!=null)
         {
             Log.Error("Gramaphone already runing, will be relaunched");
-            m_tskThreadGram.Dispose();
-            m_tskThreadGram = null;
+            /*m_tskThreadGram.Dispose();
+            m_tskThreadGram = null;*/
             //return -100;
+            on_GRAM_STOP();
         }
         m_cnc_tkn_src.Dispose();
         m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
@@ -194,6 +196,38 @@ public class Worker : BackgroundService
         }
         return 1;
     }
+
+    public int OnCommand( Ccommunicator.Command command )
+    {
+        int nRes = 0;
+        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
+        lock(_obj_sync_command)
+        {
+            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
+            //m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
+            m_communicator.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
+            switch(command.command)
+            {
+                case Ccommunicator.enCommands.GRAM_START:
+                    nRes = on_GRAM_START();                      
+                break;
+
+                case Ccommunicator.enCommands.GRAM_STATE:
+                    nRes = on_GRAM_STATE();
+                break;
+
+                case Ccommunicator.enCommands.GRAM_STOP:
+                    nRes = on_GRAM_STOP();
+                break;
+                
+                default:
+                    nRes = -1;
+                    Log.Error($"unknown command!");
+                break;
+            }
+        }
+        return 1;
+    }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -249,6 +283,32 @@ public class Worker : BackgroundService
             _logger.LogWarning($"q_user      : {par.m_str_user}"); 
             //_logger.LogWarning($" : {str_q_log_pass}");
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
+
+            int i = 0 ;
+            for(i= 0; i < 10 ; i++){
+                try{
+                    if(m_communicator!=null){
+                        m_communicator.Dispose();
+                        m_communicator = null;
+                    }
+                    m_communicator = new Ccommunicator();
+                    m_communicator.Consume(par, _logger, OnCommand);
+                    if(m_communicator!=null){
+                        m_communicator.Dispose();
+                        m_communicator = null;
+                    }
+                }
+                catch(Exception ex){
+                    Log.Error($"Communicator exception : {ex.Message}. Will be relaunched.");
+                }
+                if(stoppingToken.IsCancellationRequested==true)
+                {
+                    Log.Warning($"Communicator canceled.");
+                }
+            }
+            /*
+            CListener.ThreadListen( par, _logger, OnCommand );
+
             m_writer.Init( par, _logger );
             int i = 0;
             for(i=0;i<10;i++){
@@ -261,6 +321,8 @@ public class Worker : BackgroundService
             //#pragma warning disable CS4014
             //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, _logger), TaskCreationOptions.LongRunning
             //                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
+            */
+
 /*
             Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
             Task taskListener = Task.Run(()=>{  
@@ -270,13 +332,15 @@ public class Worker : BackgroundService
                 });
             Console.WriteLine($"THREAD_4_: {Thread.CurrentThread.ManagedThreadId}");
            */ 
+           /*
            Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
-            CListener.ThreadListen( par, _logger, OnCommand );
+           CListener.ThreadListen( par, _logger, OnCommand );
             // ttt.Wait(500,stoppingToken);
             //await taskListener;
             //Console.ReadLine();
             if( m_writer != null)
                 m_writer.Dispose();
+                */
         }
         catch( Exception ex)
         {
