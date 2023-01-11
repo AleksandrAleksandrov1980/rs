@@ -82,7 +82,9 @@ public class CWriter : IDisposable
                 return -2;
             byte[] body = Encoding.UTF8.GetBytes(strMsg);
             Log.Information($"publish to [{m_str_exch}] : [{strMsg}]");
-            m_channel.BasicPublish( exchange: m_str_exch, routingKey: "", basicProperties: null, body: body );
+            Task ttt = Task.Run(()=>{m_channel.BasicPublish( exchange: m_str_exch, routingKey: "", basicProperties: null, body: body );});
+            //bool b = ttt.Wait(1000);
+            //m_channel.BasicPublish( exchange: m_str_exch, routingKey: "", basicProperties: null, body: body );
         }
         catch(Exception ex)
         {

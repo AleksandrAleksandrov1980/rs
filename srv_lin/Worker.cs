@@ -248,7 +248,15 @@ public class Worker : BackgroundService
             //_logger.LogWarning($" : {str_q_log_pass}");
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
             m_writer.Init( par, _logger );
-            m_writer.Publish("hello world!");
+            int i = 0;
+            for(i=0;i<10000000;i++){
+                m_writer.Publish($"{i} : hello world!");
+                //Task.Run(()=>{m_writer.Publish($"{i} : hello world!");});
+                //Thread.Sleep(10);
+            }
+            //https://github.com/MassTransit/MassTransit
+            //https://github.com/EasyNetQ/EasyNetQ
+            //#pragma warning disable CS4014
             //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, _logger), TaskCreationOptions.LongRunning
             //                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
             Task taskListener = Task.Run(()=>{CListener.ThreadListen( par, _logger, OnCommand );});

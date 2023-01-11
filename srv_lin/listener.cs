@@ -113,6 +113,7 @@ public class CListener
                 nRes = on_command(command);
                 Log.Information($"command ret: {nRes}");
             };
+            //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
             channel.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
             par.m_cncl_tkn.WaitHandle.WaitOne();
             Log.Warning($"listener get cancel signal.");
