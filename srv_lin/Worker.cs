@@ -272,9 +272,10 @@ public class Worker : BackgroundService
             
             string strTmp = "";
             strTmp += $"-----------------------------------------------------------------------------------------\n";
-            strTmp += $"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd___HH_mm")}]---------------------------------------\n";
             strTmp += $"-----------------------------------------------------------------------------------------\n";
-            strTmp += $"path to exe: {Process.GetCurrentProcess().MainModule.FileName}\n";
+            strTmp += $"[START][{DateTime.Now.ToString("yyyy_MM_dd___HH_mm")}] Rastr[X]\n";
+            strTmp += $"-----------------------------------------------------------------------------------------\n";
+            strTmp += $"path to exe: {Process.GetCurrentProcess()?.MainModule?.FileName}\n";
             strTmp += $"--------------------------------------------------------------------\n" ; 
             strTmp += $"name        : {par.m_str_name}\n";
             strTmp += $"q_host      : {par.m_str_host}\n";
