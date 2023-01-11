@@ -271,6 +271,7 @@ public class Worker : BackgroundService
             var  proc = Process.GetCurrentProcess();
             
             string strTmp = "";
+            strTmp += $"\n\n";
             strTmp += $"-----------------------------------------------------------------------------------------\n";
             strTmp += $"-----------------------------------------------------------------------------------------\n";
             strTmp += $"[START][{DateTime.Now.ToString("yyyy_MM_dd___HH_mm")}] Rastr[X]\n";
