@@ -34,47 +34,6 @@ public class Worker : BackgroundService
         public CancellationToken m_cncl_tkn;
     }
 
-    public int OnCommand( CListener.Command command )
-    {
-        int nRes = 0;
-        lock(_obj_sync_command)
-        {
-            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
-            m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
-            switch(command.command)
-            {
-                case CListener.enCommands.GRAM_START:
-                    nRes = on_GRAM_START();                      
-                break;
-
-                case CListener.enCommands.GRAM_STATE:
-                    nRes = on_GRAM_STATE();
-                break;
-
-                case CListener.enCommands.GRAM_STOP:
-                    nRes = on_GRAM_STOP();
-                break;
-                
-                default:
-                    nRes = -1;
-                    Log.Error($"unknown command!");
-                break;
-            }
-        }
-        return 1;
-    }
-    
-    /*
-        STATE            = 1,
-        RUN_PROC         = 2,
-        EXTERMINATE_PROC = 3,
-        CREATE_DIR       = 4,
-        CLEAR_DIR        = 5,
-        GRAM_START       = 6,
-        GRAM_STOP        = 7,
-        GRAM_KIT         = 8,
-        GRAM_STATE       = 9,
-    */
     private int on_GRAM_START()
     {
         //=  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
@@ -193,6 +152,49 @@ public class Worker : BackgroundService
          }
     }
 
+    /*
+        STATE            = 1,
+        RUN_PROC         = 2,
+        EXTERMINATE_PROC = 3,
+        CREATE_DIR       = 4,
+        CLEAR_DIR        = 5,
+        GRAM_START       = 6,
+        GRAM_STOP        = 7,
+        GRAM_KIT         = 8,
+        GRAM_STATE       = 9,
+    */
+
+    public int OnCommand( CListener.Command command )
+    {
+        int nRes = 0;
+        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
+        lock(_obj_sync_command)
+        {
+            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
+            m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
+            switch(command.command)
+            {
+                case CListener.enCommands.GRAM_START:
+                    nRes = on_GRAM_START();                      
+                break;
+
+                case CListener.enCommands.GRAM_STATE:
+                    nRes = on_GRAM_STATE();
+                break;
+
+                case CListener.enCommands.GRAM_STOP:
+                    nRes = on_GRAM_STOP();
+                break;
+                
+                default:
+                    nRes = -1;
+                    Log.Error($"unknown command!");
+                break;
+            }
+        }
+        return 1;
+    }
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -249,7 +251,7 @@ public class Worker : BackgroundService
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
             m_writer.Init( par, _logger );
             int i = 0;
-            for(i=0;i<10000000;i++){
+            for(i=0;i<10;i++){
                 m_writer.Publish($"{i} : hello world!");
                 //Task.Run(()=>{m_writer.Publish($"{i} : hello world!");});
                 //Thread.Sleep(10);
@@ -259,9 +261,19 @@ public class Worker : BackgroundService
             //#pragma warning disable CS4014
             //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, _logger), TaskCreationOptions.LongRunning
             //                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
-            Task taskListener = Task.Run(()=>{CListener.ThreadListen( par, _logger, OnCommand );});
+/*
+            Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
+            Task taskListener = Task.Run(()=>{  
+                Console.WriteLine($"THREAD_2_: {Thread.CurrentThread.ManagedThreadId}");
+                CListener.ThreadListen( par, _logger, OnCommand );
+                 Console.WriteLine($"THREAD_3_: {Thread.CurrentThread.ManagedThreadId}");
+                });
+            Console.WriteLine($"THREAD_4_: {Thread.CurrentThread.ManagedThreadId}");
+           */ 
+           Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
+            CListener.ThreadListen( par, _logger, OnCommand );
             // ttt.Wait(500,stoppingToken);
-            await taskListener;
+            //await taskListener;
             //Console.ReadLine();
             if( m_writer != null)
                 m_writer.Dispose();

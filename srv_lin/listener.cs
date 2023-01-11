@@ -78,9 +78,11 @@ public class CListener
     {
         int nRes = 0;
         Log.Information("start Listener!");
+        Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
         ConnectionFactory factory = new ConnectionFactory();
         factory.HostName    = par.m_str_host;
         factory.Port        = par.m_n_port;
+        
         factory.VirtualHost = "/";
         factory.UserName    = par.m_str_user; // guest - resctricted to local only
         factory.Password    = par.m_str_pass;
@@ -110,7 +112,9 @@ public class CListener
                     command_serialized = null;    
                 }   
                 Command command = new Command(command_serialized);
+                Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
                 nRes = on_command(command);
+                Console.WriteLine($"THREAD_Listener2_: {Thread.CurrentThread.ManagedThreadId}");
                 Log.Information($"command ret: {nRes}");
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
