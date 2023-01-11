@@ -1,0 +1,13 @@
+#https://swimburger.net/blog/dotnet/how-to-run-a-dotnet-core-console-app-as-a-service-using-systemd-on-linux
+cd  /home/ustas/projects/git_main/rs/srv_lin/publish
+dotnet publish "srv_lin.csproj" -c Release -o /home/ustas/projects/git_main/rs/srv_lin/publish -r linux-x64 --self-contained -p:PublishTrimmed=true
+#https://code-maze.com/aspnetcore-running-applications-as-linux-service/
+sudo -i
+systemctl stop srv_lin.service
+cp /home/ustas/projects/git_main/rs/srv_lin/srv_lin.service /etc/systemd/system/
+#cp /etc/systemd/system/srv_lin.service /home/ustas/projects/git_main/rs/srv_lin/ 
+cat  /etc/systemd/system/srv_lin.service
+systemctl start srv_lin.service
+ystemctl status srv_lin.service
+systemctl daemon-reload
+journalctl -xe

@@ -1,8 +1,10 @@
-#place to /etc/systemd/system/ !!
+#place to /etc/systemd/system/ !! get from https://code-maze.com/aspnetcore-running-applications-as-linux-service/
 [Unit]
-Description=codemaze-worker
+Description=rs-worker
 [Service]
 Type=notify
+WorkingDirectory=/home/ustas/projects/git_main/rs/srv_lin/publish
+#ExecStart=/home/ustas/projects/git_main/rs/srv_lin/publish/srv_lin
 ExecStart=dotnet /home/ustas/projects/git_main/rs/srv_lin/publish/srv_lin.dll
 [Install]
 WantedBy=multi-user.target
