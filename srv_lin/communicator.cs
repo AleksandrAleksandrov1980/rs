@@ -116,16 +116,17 @@ public class Ccommunicator: IDisposable
         factory.VirtualHost = "/";
         factory.UserName    = par.m_str_user; // guest - resctricted to local only
         factory.Password    = par.m_str_pass;
-        _logger.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
-        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} => {factory.VirtualHost}");
+        _logger.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} ");
+        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
         //using(var connection = factory.CreateConnection())
         m_connection = factory.CreateConnection();
         m_channel_events = m_connection.CreateModel();
         m_str_exch_events = par.m_str_exch_events;
-        Log.Warning($"EXCHANGE-> [{m_str_exch_events}]");
+        Log.Warning($"EXCHANGE_EVENTS-> [{m_str_exch_events}]");
         m_channel_events.ExchangeDeclare( exchange: m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:true );
         using(IModel channel_commands = m_connection.CreateModel())
         {
+            Log.Warning($"EXCHANGE_COMMANDS-> [{par.m_str_exch_commands}]");
             channel_commands.ExchangeDeclare( exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:true );
             var queue_name = channel_commands.QueueDeclare().QueueName;
             channel_commands.QueueBind( queue: queue_name, exchange: par.m_str_exch_commands, routingKey: "" );

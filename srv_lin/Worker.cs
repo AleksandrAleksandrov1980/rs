@@ -1,9 +1,6 @@
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-using shared;
 using Serilog;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -255,9 +252,6 @@ public class Worker : BackgroundService
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            Log.Information($"-----------------------------------------------------------------------------------------");
-            Log.Information($"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}]---------------------------------------");
-            Log.Information($"-----------------------------------------------------------------------------------------");
             //Tst_DownloadFileFTP();
             
             CInstance c=CInstance.GetCurrent();
@@ -274,6 +268,30 @@ public class Worker : BackgroundService
             par.m_str_pass          = _configuration.GetValue<string>("r_params:q_pass","");
             par.m_cncl_tkn          = stoppingToken;
 
+            var  proc = Process.GetCurrentProcess();
+            
+            string strTmp = "";
+            strTmp += $"-----------------------------------------------------------------------------------------\n";
+            strTmp += $"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd___HH_mm")}]---------------------------------------\n";
+            strTmp += $"-----------------------------------------------------------------------------------------\n";
+            strTmp += $"path to exe: {Process.GetCurrentProcess().MainModule.FileName}\n";
+            strTmp += $"--------------------------------------------------------------------\n" ; 
+            strTmp += $"name        : {par.m_str_name}\n";
+            strTmp += $"q_host      : {par.m_str_host}\n";
+            strTmp += $"q_port      : {par.m_n_port}\n"; 
+            strTmp += $"q_exch_cmds : {par.m_str_exch_commands}\n"; 
+            strTmp += $"q_exch_evts : {par.m_str_exch_events}\n"; 
+            strTmp += $"q_user      : {par.m_str_user}\n"; 
+            //_logger.LogWarning($" : {str_q_log_pass}");
+            strTmp += $"--------------------------------------------------------------------\n" ; 
+            _logger.LogWarning(strTmp);
+            Log.Warning(strTmp);
+
+/*
+            Log.Information($"-----------------------------------------------------------------------------------------");
+            Log.Information($"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}]---------------------------------------");
+            Log.Information($"-----------------------------------------------------------------------------------------");
+
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
             _logger.LogWarning($"name        : {par.m_str_name}");
             _logger.LogWarning($"q_host      : {par.m_str_host}");
@@ -283,7 +301,7 @@ public class Worker : BackgroundService
             _logger.LogWarning($"q_user      : {par.m_str_user}"); 
             //_logger.LogWarning($" : {str_q_log_pass}");
             _logger.LogWarning($"--------------------------------------------------------------------" ); 
-
+*/
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
                 try{
