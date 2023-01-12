@@ -312,7 +312,9 @@ public class Worker : BackgroundService
                         m_communicator = null;
                     }
                     m_communicator = new Ccommunicator();
-                    m_communicator.Consume(par, _logger, OnCommand);
+                    Task taskCommuicator = Task.Run( ()=>{ m_communicator.Consume(par, _logger, OnCommand); });
+                    await taskCommuicator;
+                    //m_communicator.Consume(par, _logger, OnCommand);
                     if(m_communicator!=null){
                         m_communicator.Dispose();
                         m_communicator = null;
