@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 namespace srv_lin;
 public class Ccommunicator: IDisposable
 {
+    private ConnectionFactory? m_factory;
     private IConnection? m_connection;
     private IModel? m_channel_events;
     private string? m_str_exch_events;
@@ -16,7 +17,7 @@ public class Ccommunicator: IDisposable
 
     public void Dispose() 
     {
-        Log.Information("Writer.Dispose22222!");
+        Log.Information("Writer.Dispose!");
         m_channel_events?.Abort();
         m_channel_events?.Dispose();
         m_channel_events = null;
@@ -88,10 +89,77 @@ public class Ccommunicator: IDisposable
         }
     }
 
+    private int m_n_connection_errors = 0;
+
+    private void MakeConnection( ref IConnection? connection )
+    {
+        try
+        {
+            if(m_factory==null)
+                throw new Exception("m_factory==null");
+            if(connection!=null)
+            {
+                if(connection.IsOpen)
+                {
+                    return;
+                }
+                else
+                {
+                    m_n_connection_errors++;
+                    Log.Error($"___CONNECTION___ already closed? try dispose and recreate");
+                    connection.Dispose();
+                }
+            }
+            connection = m_factory.CreateConnection();
+        }
+        catch(Exception ex)
+        {
+            m_n_connection_errors++;
+            Log.Error($"when CreateConnection() : {ex.Message}");
+        }
+    }
+
+    private int m_n_publish_errors = 0;
+
+    private void MakeExchange( ref IModel? exchange, string? str_exch_name )
+    {
+        try
+        {
+            if(str_exch_name==null)
+                throw new Exception("str_exch_name==null");
+            if(exchange!=null)
+            {
+                if(exchange.IsOpen)
+                {
+                    return;
+                }
+                else
+                {
+                    m_n_publish_errors++;
+                    Log.Warning($"EXCHANGE_ already closed? try dispose and recreate -> [{str_exch_name}]");
+                    exchange.Dispose();
+                }
+            }
+            //m_connection.IsOpen
+            exchange = m_connection.CreateModel();
+            Log.Warning($"EXCHANGE_ declare-> [{str_exch_name}]");
+            exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+            Log.Information($"EXCHANGE_ declared-> [{str_exch_name}]");
+        }
+        catch(Exception ex)
+        {
+            m_n_publish_errors++;   
+            Log.Error($" when declare exchange {str_exch_name} : {ex.Message}");
+        }
+    }
+
+
     public int Publish(string strMsg)
     {
         byte[] body = Encoding.UTF8.GetBytes(strMsg);
         Log.Information($"publish to [{m_str_exch_events}] : [{strMsg}]");
+        MakeExchange( ref m_channel_events, m_str_exch_events );
+        //DeclareExchange( m_channel_events, m_str_exch_events);
         //Task ttt = Task.Run(()=>{m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );});
         m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
         return 1;
@@ -110,20 +178,21 @@ public class Ccommunicator: IDisposable
         }
         m_n_consume_errors = 0;
         //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.HostName    = par.m_str_host;
-        factory.Port        = par.m_n_port;
-        factory.VirtualHost = "/";
-        factory.UserName    = par.m_str_user; // guest - resctricted to local only
-        factory.Password    = par.m_str_pass;
-        _logger.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} ");
-        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
-        //using(var connection = factory.CreateConnection())
-        m_connection = factory.CreateConnection();
-        m_channel_events = m_connection.CreateModel();
+        m_factory = new ConnectionFactory();
+        m_factory.HostName    = par.m_str_host;
+        m_factory.Port        = par.m_n_port;
+        m_factory.VirtualHost = "/";
+        m_factory.UserName    = par.m_str_user; // guest - resctricted to local only
+        m_factory.Password    = par.m_str_pass;
+        _logger.LogWarning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName} ");
+        Log.Warning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName}");
+        MakeConnection( ref m_connection );
+        //m_connection = m_factory.CreateConnection();
+        //m_channel_events = m_connection.CreateModel();
         m_str_exch_events = par.m_str_exch_events;
-        Log.Warning($"EXCHANGE_EVENTS-> [{m_str_exch_events}]");
-        m_channel_events.ExchangeDeclare( exchange: m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+        //Log.Warning($"EXCHANGE_EVENTS-> [{m_str_exch_events}]");
+        //m_channel_events.ExchangeDeclare( exchange: m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+        MakeExchange( ref m_channel_events, m_str_exch_events );
         using(IModel channel_commands = m_connection.CreateModel())
         {
             Log.Warning($"EXCHANGE_COMMANDS-> [{par.m_str_exch_commands}]");

@@ -20,7 +20,8 @@ sokjs-->
 
 
     <!-- StompJs.begin -->
-    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js" type="text/javascript"> </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js" type="text/javascript"> </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.js" type="text/javascript"> </script> 
     <script type = "text/javascript" language = "javascript">
         
       var subscription;
@@ -65,10 +66,14 @@ sokjs-->
          // Do something, all subscribes must be done is this callback
          // This is needed because this will be executed after a (re)connect
          console.log('connected');
-         //subscription = client.subscribe('/exchange/logs', callback_subscribe_logs);
+         //when subscription closed, websocket already closed!!! and reopend in cycle!!
          subscription        = client.subscribe('/exchange/rs_commands', callback_subscribe_rs_commands);
          subscription_events = client.subscribe('/exchange/rs_events',   callback_subscribe_rs_events);
       };
+
+      client.onDisconnect =  (frame) => {
+        console.log('Additional details: ' + frame.body);
+      }
        
       client.onStompError = function (frame) {
         // Will be invoked in case of error encountered at Broker
@@ -76,6 +81,22 @@ sokjs-->
         // Complaint brokers will set `message` header with a brief message. Body may contain details.
         // Compliant brokers will terminate the connection after any error
         console.log('Broker reported error: ' + frame.headers['message']);
+        console.log('Additional details: ' + frame.body);
+      };
+
+      client.onWebSocketClose = function (evt)  {
+        console.log('evt ' + evt );
+      };
+
+      client.onUnhandledMessage = function (message) {
+        console.log('message ' + message );
+      };
+
+      client.onUnhandledReceipt = function (frame)  {
+        console.log('Additional details: ' + frame.body);
+      };
+
+      client.onUnhandledFrame  = function (frame)  {
         console.log('Additional details: ' + frame.body);
       };
 
