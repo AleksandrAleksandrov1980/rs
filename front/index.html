@@ -23,6 +23,142 @@ sokjs-->
     <!-- <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js" type="text/javascript"> </script> -->
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.js" type="text/javascript"> </script> 
     <script type = "text/javascript" language = "javascript">
+
+      class CStompHlp
+      {
+
+        constructor(name_exchng_in, id_collapseCard_in){
+          this.name_exchng         = name_exchng_in;
+          this.id_collapseCard     = id_collapseCard_in;
+          this._nCounterMsgs       = 0;
+          this._nCounterLogRecords = 0;
+          this._n_counter_sended_msgs = 0;
+        }
+
+        static log(str_log){
+          console.log( '['+this.name_exchng + ']: ' + str_log);
+        }
+
+        callback_subscribe (message){
+          if (message.body){
+            CStompHlp.log('got msg with body : ' + message.body);
+            this._nCounterMsgs++;
+            this.AddLog( "< " + this._nCounterMsgs.toString()+ " : " + message.body );
+          } else {
+            CStompHlp.log('got empty message');
+          }
+        };
+
+        AddLog(str_log) {
+          let collapseCard = document.querySelector(this.id_collapseCard);
+          if( this._nCounterLogRecords++ > 30 ){ 
+            collapseCard.innerText = "";
+            this._nCounterLogRecords = 0;
+          }
+          collapseCard.innerHTML += str_log.toString()+ "<BR/>";
+        }
+
+        connect(){
+            //brokerURL : 'ws://192.168.1.59:15674/ws',
+            //brokerURL : 'ws://alexandrov-7k:15674/ws',
+            this.client = new StompJs.Client({
+              brokerURL: 'ws://192.168.1.59:15674/ws',
+              connectHeaders: {
+                login    : 'rastr',
+                passcode : 'rastr',
+              },
+              reconnectDelay:    1000,
+              heartbeatIncoming: 4000,
+              heartbeatOutgoing: 4000,
+              debug: function (str){
+                CStompHlp.log(str);
+              },
+            });
+        
+          this.client.onConnect = function (frame) {
+            // Do something, all subscribes must be done is this callback
+            // This is needed because this will be executed after a (re)connect
+            CStompHlp.log('onConnect: trying subscribe to ' + this.name_exchng + ' <> ' + this.callback_subscribe );
+            //when subscription closed, websocket already closed!!! and reopend in cycle!!
+            this.subscription_events = this.client.subscribe( this.name_exchng, this.callback_subscribe.bind(this) );
+          };
+          this.client.onConnect = this.client.onConnect.bind(this);
+
+          this.client.onDisconnect = (frame) => {
+            CStompHlp.log('onDisconnect : ' + frame.body);
+          }
+        
+          this.client.onStompError = function (frame) {
+            // Will be invoked in case of error encountered at Broker
+            // Bad login/passcode typically will cause an error
+            // Complaint brokers will set `message` header with a brief message. Body may contain details.
+            // Compliant brokers will terminate the connection after any error
+            CStompHlp.log('onStompError: ' + frame.headers['message']);
+            CStompHlp.log('onStompError Additional details: ' + frame.body);
+          };
+
+          this.client.onWebSocketClose = function (evt)  {
+            CStompHlp.log( 'onWebSocketClose: ' + evt );
+          };
+
+          this.client.onUnhandledMessage = function (message) {
+            CStompHlp.log( 'onUnhandledMessage: message = ' + message );
+          };
+
+          this.client.onUnhandledReceipt = function (frame)  {
+            CStompHlp.log('onUnhandledReceipt: ' + frame.body);
+          };
+
+          this.client.onUnhandledFrame  = function (frame)  {
+            CStompHlp.log('onUnhandledFrame: ' + frame.body);
+          };
+
+          this.client.activate();
+
+        };
+
+        SendCommand(en_command, str_params){
+          let strData = `> ${en_command} : '${str_params}'`;
+          let bl_error = true;
+          for(let en in g_enCOMMDANDS) {
+            if(en === en_command){
+              bl_error = false;
+              break;
+            }
+          }
+          if(bl_error === true){
+            alert(`error. get unknown command ${strData}`);  
+            return;
+          }
+          // trying to publish a message when the broker is not connected will throw an exception
+          if(!this.client.connected){
+            alert("Broker disconnected, can't send message.Try again lette!");
+            return ;
+          }
+          this._n_counter_sended_msgs++;
+          var currentdate = new Date(); 
+          var datetime = " timestamp: " +  currentdate.getFullYear() +"/"
+                  + (currentdate.getMonth()+1)  + "/" 
+                  +  currentdate.getDate()      + " @ "  
+                  +  currentdate.getHours()     + ":"  
+                  +  currentdate.getMinutes()   + ":" 
+                  +  currentdate.getSeconds()   + ":"
+                  +  currentdate.getMilliseconds();
+                  
+          let str_params_to_serialize = str_params +" : " + this._n_counter_sended_msgs.toString() + " : " + datetime;
+          const payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params_to_serialize });
+          //client.publish({destination: '/exchange/logs', body: payLoad });
+          this.client.publish({destination: '/exchange/rs_commands', body: payLoad });
+        }
+
+      };// class CStompHlp
+
+      var g_sh_events   = new CStompHlp( '/exchange/rs_events', '#collapseCard_rs_events' );
+      g_sh_events.connect();
+      var g_sh_commands = new CStompHlp( '/exchange/rs_commands', '#collapseCard' );
+      g_sh_commands.connect();
+
+
         
       var subscription;
       var nCounter = 0;
@@ -45,6 +181,7 @@ sokjs-->
         GRAM_STATE       : "STATE",
       });
       
+      /*
       //alexandrov-7k
       //brokerURL: 'ws://192.168.1.59:15674/ws',
       //brokerURL  : 'ws://alexandrov-7k:15674/ws',
@@ -265,7 +402,7 @@ sokjs-->
           client.publish({destination: '/exchange/rs_commands', body: JSON.stringify(payLoad)});
         }
       }
-
+*/
     </script>
     <!-- StompJs.end. -->
 
@@ -381,32 +518,32 @@ sokjs-->
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
          <div class="container">
 
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('STATE');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('STATE');">
             STATE
           </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('RUN_PROC');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('RUN_PROC');">
             RUN_PROC
           </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('EXTERMINATE_PROC');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('EXTERMINATE_PROC');">
             EXTERMINATE_PROC
           </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('CREATE_DIR');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('CREATE_DIR');">
             CREATE_DIR
           </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('CLEAR_DIR');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('CLEAR_DIR');">
             CLEAR_DIR
           </button>  
 
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('GRAM_START');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_START');">
             GRAM_START
           </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('GRAM_STOP');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_STOP');">
             GRAM_STOP
           </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('GRAM_KIT');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_KIT');">
             GRAM_KIT
           </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="SendCommand('GRAM_STATE');">
+          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_STATE');">
             GRAM_STATE
           </button>  
 
