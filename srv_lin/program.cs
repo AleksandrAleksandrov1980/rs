@@ -2,17 +2,6 @@ using srv_lin;
 using Serilog;
 using System.Runtime.InteropServices;
 
-//serilog
-//https://stackoverflow.com/questions/48251515/serilog-not-creating-log-file-when-running-on-linux
-//https://onloupe.com/blog/can-i-log-to-file-mel/
-
-//t grafana loki https://github.com/josephwoodward/Serilog-Sinks-Loki
-// elastic https://www.humankode.com/asp-net-core/logging-with-elasticsearch-kibana-asp-net-core-and-docker/
-
-// maui https://mauiman.dev/maui_cli_commandlineinterface.html
-//https://egvijayanand.in/2021/04/11/net-maui-debug-with-comet-in-vs-code/
-//https://learn.microsoft.com/en-us/dotnet/maui/get-started/first-app?view=net-maui-6.0&tabs=vswin&pivots=devices-android
-
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {
