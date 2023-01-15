@@ -11,7 +11,6 @@ public class Worker : BackgroundService
     private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
     public string? m_str_dir_wrk;
     private object _obj_sync_command = new Object();
-    private CWriter m_writer = new CWriter();
     public Ccommunicator? m_communicator;
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
@@ -162,37 +161,6 @@ public class Worker : BackgroundService
         GRAM_KIT         = 8,
         GRAM_STATE       = 9,
     */
-
-    public int OnCommand( CListener.Command command )
-    {
-        int nRes = 0;
-        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
-        lock(_obj_sync_command)
-        {
-            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
-            m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
-            switch(command.command)
-            {
-                case CListener.enCommands.GRAM_START:
-                    nRes = on_GRAM_START();                      
-                break;
-
-                case CListener.enCommands.GRAM_STATE:
-                    nRes = on_GRAM_STATE();
-                break;
-
-                case CListener.enCommands.GRAM_STOP:
-                    nRes = on_GRAM_STOP();
-                break;
-                
-                default:
-                    nRes = -1;
-                    Log.Error($"unknown command!");
-                break;
-            }
-        }
-        return 1;
-    }
 
     public int OnCommand( Ccommunicator.Command command )
     {
