@@ -27,9 +27,10 @@ sokjs-->
       class CStompHlp
       {
 
-        constructor(name_exchng_in, id_collapseCard_in){
+        constructor(name_exchng_in, id_chnl_state_in, id_collapse_card_in){
           this.name_exchng         = name_exchng_in;
-          this.id_collapseCard     = id_collapseCard_in;
+          this.id_chnl_state       = id_chnl_state_in;
+          this.id_collapseCard     = id_collapse_card_in;
           this._nCounterMsgs       = 0;
           this._nCounterLogRecords = 0;
           this._n_counter_sended_msgs = 0;
@@ -58,6 +59,18 @@ sokjs-->
           collapseCard.innerHTML += str_log.toString()+ "<BR/>";
         }
 
+        SetChnlState(new_state)
+        {
+          let elem = document.getElementById(this.id_chnl_state);
+          if(elem != null){
+            if(new_state===true){
+              elem.style.background = 'green';
+            }else{
+              elem.style.background = 'red';
+            }
+          }
+        }
+
         connect(){
             //brokerURL : 'ws://192.168.1.59:15674/ws',
             //brokerURL : 'ws://alexandrov-7k:15674/ws',
@@ -81,12 +94,15 @@ sokjs-->
             CStompHlp.log('onConnect: trying subscribe to ' + this.name_exchng + ' <> ' + this.callback_subscribe );
             //when subscription closed, websocket already closed!!! and reopend in cycle!!
             this.subscription_events = this.client.subscribe( this.name_exchng, this.callback_subscribe.bind(this) );
+            this.SetChnlState(true);
           };
           this.client.onConnect = this.client.onConnect.bind(this);
 
           this.client.onDisconnect = (frame) => {
             CStompHlp.log('onDisconnect : ' + frame.body);
+            this.SetChnlState(false);
           }
+          this.client.onDisconnect = this.client.onDisconnect.bind(this);
         
           this.client.onStompError = function (frame) {
             // Will be invoked in case of error encountered at Broker
@@ -99,7 +115,9 @@ sokjs-->
 
           this.client.onWebSocketClose = function (evt)  {
             CStompHlp.log( 'onWebSocketClose: ' + evt );
+            this.SetChnlState(false);
           };
+          this.client.onWebSocketClose = this.client.onWebSocketClose.bind(this)
 
           this.client.onUnhandledMessage = function (message) {
             CStompHlp.log( 'onUnhandledMessage: message = ' + message );
@@ -153,13 +171,12 @@ sokjs-->
 
       };// class CStompHlp
 
-      var g_sh_events   = new CStompHlp( '/exchange/rs_events', '#collapseCard_rs_events' );
+      var g_sh_events   = new CStompHlp( '/exchange/rs_events', 'cb_exc_evts_state', '#collapseCard_rs_events' );
       g_sh_events.connect();
-      var g_sh_commands = new CStompHlp( '/exchange/rs_commands', '#collapseCard' );
-      g_sh_commands.connect();
+      var g_sh_commands = new CStompHlp( '/exchange/rs_commands', 'cb_exc_cmds_state', '#collapseCard' );
+      g_sh_commands.connect(); //cb_exc_cmds_state
 
-
-        
+       
       var subscription;
       var nCounter = 0;
       var nCounterMsgs = 0;
@@ -568,6 +585,12 @@ sokjs-->
         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
+         <br>
+              
+          <div class="card-body" id="cb_exc_cmds_state" style="background-color: gray;">
+           state of commands exchange
+          </div>
+        
          <div class="card shadow mb-4">
           <!-- Card Header - Accordion -->
           <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
@@ -584,6 +607,12 @@ sokjs-->
           <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
 
          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
+         
+
+         <div class="card-body" id="cb_exc_evts_state" style="background-color: gray;">
+          state of events exchange
+         </div>
+
          <div class="card shadow mb-4">
           <!-- Card Header - Accordion -->
           <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
