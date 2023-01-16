@@ -1,9 +1,12 @@
 using Serilog;
 using System.Text.Json;
 using System.Diagnostics;
+using srv_lin;
 
 public class CGramophone
 {
+    public  Ccommunicator Communicator { get; set; } 
+
     public class CRecord
     {
         public bool Act { get; set; } = true;
@@ -87,6 +90,8 @@ public class CGramophone
             //Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            //Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            Communicator.Publish($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Process? process = Process.Start(psi);
             if(process == null)
             {
@@ -173,11 +178,15 @@ public class CGramophone
         return 1;
     }
 
-    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record )
+    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record, Ccommunicator? communicator )
     {
+        if(communicator==null)
+        {
+            Log.Error("no communcator suplied");
+            return -1000;
+        }
         CGramophone gramophone = new CGramophone();
-        gramophone.Play( cncl_tkn,  str_path_record);
-       
-        return 1;
+        gramophone.Communicator = communicator;
+        return gramophone.Play( cncl_tkn,  str_path_record );
     }
 }

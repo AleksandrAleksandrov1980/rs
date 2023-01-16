@@ -10,3 +10,15 @@
 // maui https://mauiman.dev/maui_cli_commandlineinterface.html
 //https://egvijayanand.in/2021/04/11/net-maui-debug-with-comet-in-vs-code/
 //https://learn.microsoft.com/en-us/dotnet/maui/get-started/first-app?view=net-maui-6.0&tabs=vswin&pivots=devices-android
+
+
+    /*
+    using System.Threading.Channels;
+    public class CPublishMsg
+    {
+
+    }
+    private Channel<CPublishMsg>  m_channel_to_publish =  Channel.CreateBounded<CPublishMsg>(7);
+            CPublishMsg publishMsg;
+        m_channel_to_publish.Writer.WriteAsync(publishMsg);
+    */

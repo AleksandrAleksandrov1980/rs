@@ -47,7 +47,7 @@ public class Worker : BackgroundService
         m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
         m_tskThreadGram = Task.Run(()=>
         {
-            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json" );
+            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_communicator );
         });
         return 1;
     }
@@ -187,7 +187,7 @@ public class Worker : BackgroundService
                 
                 default:
                     nRes = -1;
-                    Log.Error($"unknown command!");
+                    Log.Error($"unhadled command!");
                 break;
             }
         }

@@ -15,6 +15,20 @@ public class Ccommunicator: IDisposable
     private string? m_str_exch_events;
     public delegate int OnCommand( Command command );
 
+    public enum enCommands 
+    {
+        ERROR            = -1,
+        STATE            =  1,
+        RUN_PROC         =  2,
+        EXTERMINATE_PROC =  3,
+        CREATE_DIR       =  4,
+        CLEAR_DIR        =  5,
+        GRAM_START       =  6,
+        GRAM_STOP        =  7,
+        GRAM_KIT         =  8,
+        GRAM_STATE       =  9,
+    }
+
     public void Dispose() 
     {
         Log.Information("Writer.Dispose!");
@@ -26,20 +40,6 @@ public class Ccommunicator: IDisposable
         m_connection = null;
     }
 
-    public enum enCommands 
-    {
-        ERROR            = -1,
-        STATE            = 1,
-        RUN_PROC         = 2,
-        EXTERMINATE_PROC = 3,
-        CREATE_DIR       = 4,
-        CLEAR_DIR        = 5,
-        GRAM_START       = 6,
-        GRAM_STOP        = 7,
-        GRAM_KIT         = 8,
-        GRAM_STATE       = 9,
-    }
-
     public class CommandSerialized
     {
         public string? str_command{ get; set; }
@@ -48,7 +48,7 @@ public class Ccommunicator: IDisposable
 
     public static class enCommands1 
     {
-        public static readonly string STATE   = enCommands.STATE.ToString();
+        public static readonly string STATE = enCommands.STATE.ToString();
     }
 
     public class Command
@@ -140,7 +140,11 @@ public class Ccommunicator: IDisposable
                     exchange.Dispose();
                 }
             }
-            //m_connection.IsOpen
+            if(m_connection == null)
+            {
+                Log.Error($"no connection");    
+                return;
+            }
             exchange = m_connection.CreateModel();
             Log.Warning($"EXCHANGE_ declare-> [{str_exch_name}]");
             exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:true );
@@ -149,19 +153,31 @@ public class Ccommunicator: IDisposable
         catch(Exception ex)
         {
             m_n_publish_errors++;   
-            Log.Error($" when declare exchange {str_exch_name} : {ex.Message}");
+            Log.Error($"when declare exchange {str_exch_name} : {ex.Message}");
         }
     }
 
+    object m_obj_sync_publish = new Object();
 
     public int Publish(string strMsg)
     {
-        byte[] body = Encoding.UTF8.GetBytes(strMsg);
-        Log.Information($"publish to [{m_str_exch_events}] : [{strMsg}]");
-        MakeExchange( ref m_channel_events, m_str_exch_events );
-        //DeclareExchange( m_channel_events, m_str_exch_events);
-        //Task ttt = Task.Run(()=>{m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );});
-        m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
+        try
+        {
+            lock(m_obj_sync_publish)
+            {
+                Log.Information($"publish to [{m_str_exch_events}] : [{strMsg}]");
+                MakeExchange( ref m_channel_events, m_str_exch_events );
+                //DeclareExchange( m_channel_events, m_str_exch_events);
+                //Task ttt = Task.Run(()=>{m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );});
+                byte[] body = Encoding.UTF8.GetBytes(strMsg);
+                m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
+            }
+        }
+        catch(Exception ex)
+        {
+            m_n_publish_errors++;   
+            Log.Error($"exception [{ex.Message}]");
+        }
         return 1;
     }
 
