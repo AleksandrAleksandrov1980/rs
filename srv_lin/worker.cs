@@ -1,6 +1,7 @@
 using Serilog;
 using System.Diagnostics;
 using System.Reflection;
+using FluentFTP;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -114,6 +115,59 @@ public class Worker : BackgroundService
 
     private void Tst_DownloadFileFTP()
     {
+        try
+        {
+            // create an FTP client and specify the host, username and password
+            // (delete the credentials to use the "anonymous" account)
+            //var client = new FtpClient("123.123.123.123", "david", "pass123");
+            //var client = new FtpClient("192.168.1.59", "anon", "anon");
+            FtpClient ftp_client = new FtpClient("127.0.0.1", "anon", "anon",21);
+  //          ftp_client.Config.DataConnectionEncryption = false;
+            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Implicit;
+            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+//            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            ftp_client.Config.FXPDataType = FtpDataType.Binary;
+            ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            //ftp_client.Config.DataConnectionType = FtpDataConnectionType.PASV;
+            ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
+            ftp_client.Config.LogToConsole = true;
+            ftp_client.ValidateCertificate += (FluentFTP.Client.BaseClient.BaseFtpClient control, FtpSslValidationEventArgs e)=>{ 
+                e.Accept = true;
+            };
+            //ftp_client.ValidateCertificate 
+            //ftp_client.Config.DataConnectionEncryption = true;
+            //ftp_client.Config.EnableThreadSafeDataConnections = false;
+            //FtpConfig ftp_conf = new FtpConfig();
+            //ftp_conf.DataConnectionType = FtpDataConnectionType.AutoPassive;
+//client.Config.
+            // connect to the server and automatically detect working FTP settings
+            ftp_client.AutoConnect();
+            // get a list of files and directories in the "/htdocs" folder
+            foreach (FtpListItem item in ftp_client.GetListing("/")) {
+                // if this is a file
+                if (item.Type == FtpObjectType.File) {
+                    // get the file size
+                    long size = ftp_client.GetFileSize(item.FullName);
+                    Log.Information($"{item.FullName} : size:{size}");
+                    // calculate a hash for the file on the server side (default algorithm)
+                    //FtpHash hash = ftp_client.GetChecksum(item.FullName);
+                }
+                // get modified date/time of the file or folder
+                DateTime time = ftp_client.GetModifiedTime(item.FullName);
+            }
+
+            // download the file again
+            ftp_client.DownloadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_1");
+            ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
+            // disconnect! good bye!
+            ftp_client.Disconnect();
+        }
+        catch( Exception ex)
+        {
+            Log.Error($"ftp: {ex.Message}");
+        }
+
+        return;
         //https://stackoverflow.com/questions/860638/how-do-i-create-a-directory-on-ftp-server-using-c
         System.Net.WebRequest frequest = System.Net.WebRequest.Create("ftp://192.168.1.59/");
         //frequest.Method = System.Net.WebRequestMethods.Ftp.ListDirectory;
@@ -220,7 +274,7 @@ public class Worker : BackgroundService
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            //Tst_DownloadFileFTP();
+            Tst_DownloadFileFTP();
             
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(_logger);
