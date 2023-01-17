@@ -6,8 +6,8 @@ using FluentFTP;
 namespace srv_lin;
 public class Worker : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
-    private readonly IConfiguration _configuration;
+    private readonly ILogger<Worker> m_logger;
+    private readonly IConfiguration m_configuration;
     public Task<int>? m_tskThreadGram = null;
     private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
     public string? m_str_dir_wrk;
@@ -16,8 +16,8 @@ public class Worker : BackgroundService
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
-        _logger = logger;
-        _configuration = configuration;
+        m_logger = logger;
+        m_configuration = configuration;
     }
   
     public class CParams
@@ -34,7 +34,7 @@ public class Worker : BackgroundService
 
     private int on_GRAM_START()
     {
-        //=  Task.Run(() => {  CListener.ThreadListen(par, _logger,  OnCommand) ; } );
+        //=  Task.Run(() => {  CListener.ThreadListen(par, m_logger,  OnCommand) ; } );
 
         if(m_tskThreadGram!=null)
         {
@@ -122,18 +122,18 @@ public class Worker : BackgroundService
             //var client = new FtpClient("123.123.123.123", "david", "pass123");
             //var client = new FtpClient("192.168.1.59", "anon", "anon");
             FtpClient ftp_client = new FtpClient("192.168.1.59", "anon", "anon",21);
-  //          ftp_client.Config.DataConnectionEncryption = false;
+            //          ftp_client.Config.DataConnectionEncryption = false;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Implicit;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-//            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            //            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
             ftp_client.Config.FXPDataType = FtpDataType.Binary; 
-     //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
             ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-   //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
-   ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-    //        ftp_client.Config.DataConnectionEncryption = false;
+            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            //        ftp_client.Config.DataConnectionEncryption = false;
             ftp_client.Config.DownloadDataType = FtpDataType.Binary;
-      //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
             ftp_client.Config.ValidateCertificateRevocation = false;
             //ftp_client.SslProtocolActive
             //ftp_client.Config.ValidateAnyCertificate = false;
@@ -152,9 +152,8 @@ public class Worker : BackgroundService
             //ftp_client.Config.EnableThreadSafeDataConnections = false;
             //FtpConfig ftp_conf = new FtpConfig();
             //ftp_conf.DataConnectionType = FtpDataConnectionType.AutoPassive;
-//client.Config.
             // connect to the server and automatically detect working FTP settings
-            //FtpProfile ftp_profile = ftp_client.AutoConnect();
+            //FtpProfile ftp_profile = ftp_client.AutoConnect();// вот это к херам переопределяет по новой все настройки в соотвествии с её приоритетами!!! от SFTP -> plain FTP
             FtpProfile ftp_profile = new FtpProfile();
             ftp_profile.Encryption = FtpEncryptionMode.None;
             ftp_client.Connect();
@@ -166,12 +165,11 @@ public class Worker : BackgroundService
                     long size = ftp_client.GetFileSize(item.FullName);
                     Log.Information($"{item.FullName} : size:{size}");
                     // calculate a hash for the file on the server side (default algorithm)
-                    //FtpHash hash = ftp_client.GetChecksum(item.FullName);
+                    //FtpHash hash = ftp_client.GetChecksum(item.FullName); // FILEZILLA так не умеет
                 }
                 // get modified date/time of the file or folder
                 DateTime time = ftp_client.GetModifiedTime(item.FullName);
             }
-
             // download the file again
             ftp_client.DownloadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_1");
             ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
@@ -268,20 +266,20 @@ public class Worker : BackgroundService
     {
         try
         {
-            _logger.LogInformation("start main()");
-            m_str_dir_wrk = _configuration.GetValue<string>("platform:dir_wrk");
+            m_logger.LogInformation("start main()");
+            m_str_dir_wrk = m_configuration.GetValue<string>("platform:dir_wrk");
             if(m_str_dir_wrk==null)
             {
-                _logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
+                m_logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
                return;
             }
-            _logger.LogInformation($"create dir:{m_str_dir_wrk} ");
+            m_logger.LogInformation($"create dir:{m_str_dir_wrk} ");
             System.IO.Directory.CreateDirectory(m_str_dir_wrk);
             string str_dir_log = m_str_dir_wrk+"/logs/";
-            _logger.LogInformation($"create dir:{str_dir_log} ");
+            m_logger.LogInformation($"create dir:{str_dir_log} ");
             System.IO.Directory.CreateDirectory(str_dir_log);
             string str_path_log = str_dir_log+"rs.log";
-            _logger.LogInformation($"path log:{str_path_log} ");
+            m_logger.LogInformation($"path log:{str_path_log} ");
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
@@ -290,20 +288,20 @@ public class Worker : BackgroundService
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            Tst_DownloadFileFTP();
+            //Tst_DownloadFileFTP();
             
             CInstance c=CInstance.GetCurrent();
-            c.SetMsLogger(_logger);
+            c.SetMsLogger(m_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");
 
             CParams par = new CParams();
-            par.m_str_name          = _configuration.GetValue<string>("r_params:name","");
-            par.m_str_host          = _configuration.GetValue<string>("r_params:q_host","");
-            par.m_n_port            = _configuration.GetValue<int>   ("r_params:q_port",0); // default 5672
-            par.m_str_exch_commands = _configuration.GetValue<string>("r_params:q_exch_commands",""); 
-            par.m_str_exch_events   = _configuration.GetValue<string>("r_params:q_exch_events",""); 
-            par.m_str_user          = _configuration.GetValue<string>("r_params:q_user",""); 
-            par.m_str_pass          = _configuration.GetValue<string>("r_params:q_pass","");
+            par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
+            par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
+            par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",0); // default 5672
+            par.m_str_exch_commands = m_configuration.GetValue<string>("r_params:q_exch_commands",""); 
+            par.m_str_exch_events   = m_configuration.GetValue<string>("r_params:q_exch_events",""); 
+            par.m_str_user          = m_configuration.GetValue<string>("r_params:q_user",""); 
+            par.m_str_pass          = m_configuration.GetValue<string>("r_params:q_pass","");
             par.m_cncl_tkn          = stoppingToken;
 
             var  proc = Process.GetCurrentProcess();
@@ -322,9 +320,9 @@ public class Worker : BackgroundService
             strTmp += $"q_exch_cmds : {par.m_str_exch_commands}\n"; 
             strTmp += $"q_exch_evts : {par.m_str_exch_events}\n"; 
             strTmp += $"q_user      : {par.m_str_user}\n"; 
-            //_logger.LogWarning($" : {str_q_log_pass}");
+            //m_logger.LogWarning($" : {str_q_log_pass}");
             strTmp += $"--------------------------------------------------------------------\n" ; 
-            _logger.LogWarning(strTmp);
+            m_logger.LogWarning(strTmp);
             Log.Warning(strTmp);
 
 /*
@@ -332,15 +330,15 @@ public class Worker : BackgroundService
             Log.Information($"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}]---------------------------------------");
             Log.Information($"-----------------------------------------------------------------------------------------");
 
-            _logger.LogWarning($"--------------------------------------------------------------------" ); 
-            _logger.LogWarning($"name        : {par.m_str_name}");
-            _logger.LogWarning($"q_host      : {par.m_str_host}");
-            _logger.LogWarning($"q_port      : {par.m_n_port}"); 
-            _logger.LogWarning($"q_exch_cmds : {par.m_str_exch_commands}"); 
-            _logger.LogWarning($"q_exch_evts : {par.m_str_exch_events}"); 
-            _logger.LogWarning($"q_user      : {par.m_str_user}"); 
-            //_logger.LogWarning($" : {str_q_log_pass}");
-            _logger.LogWarning($"--------------------------------------------------------------------" ); 
+            m_logger.LogWarning($"--------------------------------------------------------------------" ); 
+            m_logger.LogWarning($"name        : {par.m_str_name}");
+            m_logger.LogWarning($"q_host      : {par.m_str_host}");
+            m_logger.LogWarning($"q_port      : {par.m_n_port}"); 
+            m_logger.LogWarning($"q_exch_cmds : {par.m_str_exch_commands}"); 
+            m_logger.LogWarning($"q_exch_evts : {par.m_str_exch_events}"); 
+            m_logger.LogWarning($"q_user      : {par.m_str_user}"); 
+            //m_logger.LogWarning($" : {str_q_log_pass}");
+            m_logger.LogWarning($"--------------------------------------------------------------------" ); 
 */
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
@@ -350,9 +348,9 @@ public class Worker : BackgroundService
                         m_communicator = null;
                     }
                     m_communicator = new Ccommunicator();
-                    Task taskCommuicator = Task.Run( ()=>{ m_communicator.Consume(par, _logger, OnCommand); });
+                    Task taskCommuicator = Task.Run( ()=>{ m_communicator.Consume(par, m_logger, OnCommand); });
                     await taskCommuicator;
-                    //m_communicator.Consume(par, _logger, OnCommand);
+                    //m_communicator.Consume(par, m_logger, OnCommand);
                     if(m_communicator!=null){
                         m_communicator.Dispose();
                         m_communicator = null;
@@ -368,9 +366,9 @@ public class Worker : BackgroundService
                 }
             }
             /*
-            CListener.ThreadListen( par, _logger, OnCommand );
+            CListener.ThreadListen( par, m_logger, OnCommand );
 
-            m_writer.Init( par, _logger );
+            m_writer.Init( par, m_logger );
             int i = 0;
             for(i=0;i<10;i++){
                 m_writer.Publish($"{i} : hello world!");
@@ -380,7 +378,7 @@ public class Worker : BackgroundService
             //https://github.com/MassTransit/MassTransit
             //https://github.com/EasyNetQ/EasyNetQ
             //#pragma warning disable CS4014
-            //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, _logger), TaskCreationOptions.LongRunning
+            //Task<int> t= Task.Factory.StartNew<int>(() => CListener.ThreadListen(par, m_logger), TaskCreationOptions.LongRunning
             //                                        ).ConfigureAwait(true);// false //https://blog.stephencleary.com/2012/07/dont-block-on-async-code.html
             */
 
@@ -388,14 +386,14 @@ public class Worker : BackgroundService
             Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
             Task taskListener = Task.Run(()=>{  
                 Console.WriteLine($"THREAD_2_: {Thread.CurrentThread.ManagedThreadId}");
-                CListener.ThreadListen( par, _logger, OnCommand );
+                CListener.ThreadListen( par, m_logger, OnCommand );
                  Console.WriteLine($"THREAD_3_: {Thread.CurrentThread.ManagedThreadId}");
                 });
             Console.WriteLine($"THREAD_4_: {Thread.CurrentThread.ManagedThreadId}");
            */ 
            /*
            Console.WriteLine($"THREAD_1_: {Thread.CurrentThread.ManagedThreadId}");
-           CListener.ThreadListen( par, _logger, OnCommand );
+           CListener.ThreadListen( par, m_logger, OnCommand );
             // ttt.Wait(500,stoppingToken);
             //await taskListener;
             //Console.ReadLine();
@@ -405,7 +403,7 @@ public class Worker : BackgroundService
         }
         catch( Exception ex)
         {
-            _logger.LogError($"Program catch exeption: {ex.Message}");
+            m_logger.LogError($"Program catch exeption: {ex.Message}");
 
             //https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service 
             // In order for the Windows Service Management system to leverage configured

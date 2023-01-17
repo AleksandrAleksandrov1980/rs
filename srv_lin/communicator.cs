@@ -183,7 +183,7 @@ public class Ccommunicator: IDisposable
 
     private int m_n_consume_errors = 0;
 
-    public int Consume( Worker.CParams par, Microsoft.Extensions.Logging.ILogger _logger, OnCommand on_command )
+    public int Consume( Worker.CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnCommand on_command )
     {
         int nRes = 0;
         Log.Information("start Listener!");
@@ -200,7 +200,7 @@ public class Ccommunicator: IDisposable
         m_factory.VirtualHost = "/";
         m_factory.UserName    = par.m_str_user; // guest - resctricted to local only
         m_factory.Password    = par.m_str_pass;
-        _logger.LogWarning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName} ");
+        m_logger.LogWarning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName} ");
         Log.Warning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName}");
         MakeConnection( ref m_connection );
         //m_connection = m_factory.CreateConnection();
