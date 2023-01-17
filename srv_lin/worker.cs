@@ -288,7 +288,7 @@ public class Worker : BackgroundService
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            Tst_DownloadFileFTP();
+            //Tst_DownloadFileFTP();
             
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(m_logger);
