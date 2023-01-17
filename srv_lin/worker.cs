@@ -121,13 +121,26 @@ public class Worker : BackgroundService
             // (delete the credentials to use the "anonymous" account)
             //var client = new FtpClient("123.123.123.123", "david", "pass123");
             //var client = new FtpClient("192.168.1.59", "anon", "anon");
-            FtpClient ftp_client = new FtpClient("127.0.0.1", "anon", "anon",21);
+            FtpClient ftp_client = new FtpClient("192.168.1.59", "anon", "anon",21);
   //          ftp_client.Config.DataConnectionEncryption = false;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Implicit;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
 //            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-            ftp_client.Config.FXPDataType = FtpDataType.Binary;
-            ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            ftp_client.Config.FXPDataType = FtpDataType.Binary; 
+     //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+   //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+   ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+    //        ftp_client.Config.DataConnectionEncryption = false;
+            ftp_client.Config.DownloadDataType = FtpDataType.Binary;
+      //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            ftp_client.Config.ValidateCertificateRevocation = false;
+            //ftp_client.SslProtocolActive
+            //ftp_client.Config.ValidateAnyCertificate = false;
+            System.Security.Cryptography.X509Certificates.X509CertificateCollection x = ftp_client.Config.ClientCertificates;
+            //ftp_client.AutoDetect
+            //ftp_client.Connect()
+            List<FtpProfile> lfp = ftp_client.AutoDetect(false);
             //ftp_client.Config.DataConnectionType = FtpDataConnectionType.PASV;
             ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
             ftp_client.Config.LogToConsole = true;
@@ -141,7 +154,10 @@ public class Worker : BackgroundService
             //ftp_conf.DataConnectionType = FtpDataConnectionType.AutoPassive;
 //client.Config.
             // connect to the server and automatically detect working FTP settings
-            ftp_client.AutoConnect();
+            //FtpProfile ftp_profile = ftp_client.AutoConnect();
+            FtpProfile ftp_profile = new FtpProfile();
+            ftp_profile.Encryption = FtpEncryptionMode.None;
+            ftp_client.Connect();
             // get a list of files and directories in the "/htdocs" folder
             foreach (FtpListItem item in ftp_client.GetListing("/")) {
                 // if this is a file
