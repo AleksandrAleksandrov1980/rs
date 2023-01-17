@@ -122,18 +122,18 @@ public class Worker : BackgroundService
             //var client = new FtpClient("123.123.123.123", "david", "pass123");
             //var client = new FtpClient("192.168.1.59", "anon", "anon");
             FtpClient ftp_client = new FtpClient("192.168.1.59", "anon", "anon",21);
-  //          ftp_client.Config.DataConnectionEncryption = false;
+            //          ftp_client.Config.DataConnectionEncryption = false;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Implicit;
             //ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-//            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            //            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
             ftp_client.Config.FXPDataType = FtpDataType.Binary; 
-     //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
             ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-   //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
-   ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-    //        ftp_client.Config.DataConnectionEncryption = false;
+            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            //        ftp_client.Config.DataConnectionEncryption = false;
             ftp_client.Config.DownloadDataType = FtpDataType.Binary;
-      //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
+            //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
             ftp_client.Config.ValidateCertificateRevocation = false;
             //ftp_client.SslProtocolActive
             //ftp_client.Config.ValidateAnyCertificate = false;
@@ -152,9 +152,8 @@ public class Worker : BackgroundService
             //ftp_client.Config.EnableThreadSafeDataConnections = false;
             //FtpConfig ftp_conf = new FtpConfig();
             //ftp_conf.DataConnectionType = FtpDataConnectionType.AutoPassive;
-//client.Config.
             // connect to the server and automatically detect working FTP settings
-            //FtpProfile ftp_profile = ftp_client.AutoConnect();
+            //FtpProfile ftp_profile = ftp_client.AutoConnect();// вот это к херам переопределяет по новой все настройки в соотвествии с её приоритетами!!! от SFTP -> plain FTP
             FtpProfile ftp_profile = new FtpProfile();
             ftp_profile.Encryption = FtpEncryptionMode.None;
             ftp_client.Connect();
@@ -166,7 +165,7 @@ public class Worker : BackgroundService
                     long size = ftp_client.GetFileSize(item.FullName);
                     Log.Information($"{item.FullName} : size:{size}");
                     // calculate a hash for the file on the server side (default algorithm)
-                    //FtpHash hash = ftp_client.GetChecksum(item.FullName);
+                    //FtpHash hash = ftp_client.GetChecksum(item.FullName); // FILEZILLA так не умеет
                 }
                 // get modified date/time of the file or folder
                 DateTime time = ftp_client.GetModifiedTime(item.FullName);
