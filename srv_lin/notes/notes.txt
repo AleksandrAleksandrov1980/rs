@@ -1,4 +1,5 @@
-2023.01.17 : C:\Windows\System32\config\systemprofile\AppData\Local\filezilla-server\
+2023.01.17 : https://github.com/hasura - The Hasura GraphQL Engine gives you fast, instant realtime GraphQL on any Postgres application, existing or new
+2023.01.17 : C:\Windows\System32\config\systemprofile\AppData\Local\filezilla-server\ - stores configs there
 2023.01.15 : https://deniskyashif.com/2019/12/08/csharp-channels-part-1/
 
 //serilog

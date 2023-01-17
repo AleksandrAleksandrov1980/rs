@@ -170,7 +170,6 @@ public class Worker : BackgroundService
                 // get modified date/time of the file or folder
                 DateTime time = ftp_client.GetModifiedTime(item.FullName);
             }
-
             // download the file again
             ftp_client.DownloadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_1");
             ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
