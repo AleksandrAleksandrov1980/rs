@@ -1,13 +1,16 @@
-﻿
-using Serilog;
+﻿using Serilog;
 using Npgsql;
-// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+using System.Diagnostics;
+
 //https://www.nuget.org/packages/Npgsql/
 //https://www.postgresql.org/docs/7.4/jdbc-binary-data.html
 
-//pg_hba.conf!!
+//!_postgresql.conf
+//lc_messages = 'en_US.UTF-8'
+
+//!_pg_hba.conf
 // hostnossl    all        all             all                     md5
+
 try
 {
     string str_path_log = @"C:/rs_wrk/logs/frw.log";
@@ -23,22 +26,18 @@ try
     //string str_path_file = @"C:\rs_wrk\rs20230112.log";
     string str_path_file_in  = @"C:/rs_wrk/par.7z";
     string str_path_file_out = @"C:/rs_wrk/res";
+    Log.Warning($"lets start party! ");
 
-    string tbHost= "192.168.1.59";
-    //string tbPort="5432";
-    string tbPort="5433";
-        //string tbUser= "postgres";
-        //string tbPass= "../3,.4eV#$%3,xcmx2345ASD";
-    //string tbUser = "utest";
-    string tbUser = "postgres";
-    //string tbPass = "sdasd234df";
-    string tbPass = "dfsdf23df4DF54t";
-    //string tbDataBaseName = "tst1";
-    string tbDataBaseName = "rstore";
+    string str_db_host = "192.168.1.59";
+    string str_db_port = "5433"; //default 5432, but i have two srvrs
+    string str_db_user = "postgres";
+    string str_db_pass = "dfsdf23df4DF54t";
+    string str_db_name = "rstore";
     // PostgeSQL-style connection string
-    string connstring = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};"+
-    "Pooling=false; Timeout=300; CommandTimeout=300;", tbHost, tbPort, tbUser,tbPass, tbDataBaseName);
-    using (var conn = new NpgsqlConnection(connstring))
+    string str_db_conn = $"Server={str_db_host}; Port={str_db_port}; "+
+        $"User Id={str_db_user}; Password={str_db_pass}; Database={str_db_name}; "+
+        $"Pooling=false; Timeout=300; CommandTimeout=300; ";
+    using( var conn = new NpgsqlConnection(str_db_conn) )
     {
         conn.Open();
         /*
@@ -61,11 +60,11 @@ try
                 }
             }
         }*/
-
-        //string sQL = "SELECT photo from picturetable WHERE id = 65";
         string sQL = "SELECT dump from dumps WHERE id = 2";
-        using (var command = new NpgsqlCommand(sQL, conn))
+        using( var command = new NpgsqlCommand(sQL, conn) )
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             byte[] productImageByte = null;
             var rdr = command.ExecuteReader();
             if (rdr.Read())
@@ -75,11 +74,8 @@ try
             rdr.Close();
             if (productImageByte != null)
             {
-                //using (MemoryStream productImageStream = new System.IO.MemoryStream(productImageByte))
                 using (MemoryStream ms = new System.IO.MemoryStream(productImageByte))
                 {
-                    //ImageConverter imageConverter = new System.Drawing.ImageConverter();
-                    //pictureBox1.Image = imageConverter.ConvertFrom(productImageByte) as System.Drawing.Image;
                     using (FileStream file = new FileStream( str_path_file_out, FileMode.Create, System.IO.FileAccess.Write )) 
                     {
                         byte[] bytes = new byte[ms.Length];
@@ -87,17 +83,12 @@ try
                         file.Write(bytes, 0, bytes.Length);
                         Log.Warning($"saved -> {str_path_file_out}  : length {ms.Length}");
                         ms.Close();
-                        /*
-                        byte[] bytes = new byte[ms.Length];
-                        ms.Read(bytes, 0, (int)ms.Length);
-                        file.Write(bytes, 0, bytes.Length);
-                        ms.Close();
-                        */
                     }
                 }
             }
+            sw.Stop();
+            Log.Warning($"read elapsed time {sw.Elapsed}");
         }
-
     }
 }
 catch(Exception ex)
