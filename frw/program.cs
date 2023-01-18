@@ -2,6 +2,8 @@
 using Npgsql;
 using System.Diagnostics;
 
+//dotnet publish "C:\projects\git_main\rs\frw\frw.csproj" -c Release -o C:\projects\git_main\rs\frw\publish -r win-x64 --self-contained -p:PublishTrimmed=true
+
 //https://www.nuget.org/packages/Npgsql/
 //https://www.postgresql.org/docs/7.4/jdbc-binary-data.html
 
