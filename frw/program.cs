@@ -6,6 +6,8 @@ Console.WriteLine("Hello, World!");
 //https://www.nuget.org/packages/Npgsql/
 //https://www.postgresql.org/docs/7.4/jdbc-binary-data.html
 
+//pg_hba.conf!!
+// hostnossl    all        all             all                     md5
 try
 {
     string str_path_log = @"C:/rs_wrk/logs/frw.log";
@@ -22,7 +24,7 @@ try
     string str_path_file_in  = @"C:/rs_wrk/par.7z";
     string str_path_file_out = @"C:/rs_wrk/res";
 
-    string tbHost= "127.0.0.1";
+    string tbHost= "192.168.1.59";
     //string tbPort="5432";
     string tbPort="5433";
         //string tbUser= "postgres";
@@ -34,8 +36,8 @@ try
     //string tbDataBaseName = "tst1";
     string tbDataBaseName = "rstore";
     // PostgeSQL-style connection string
-    string connstring = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};",
-                                        tbHost, tbPort, tbUser,tbPass, tbDataBaseName);
+    string connstring = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};"+
+    "Pooling=false; Timeout=300; CommandTimeout=300;", tbHost, tbPort, tbUser,tbPass, tbDataBaseName);
     using (var conn = new NpgsqlConnection(connstring))
     {
         conn.Open();
