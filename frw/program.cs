@@ -6,7 +6,11 @@ using System.Diagnostics;
 //https://www.postgresql.org/docs/7.4/jdbc-binary-data.html
 
 //!_postgresql.conf
-//lc_messages = 'en_US.UTF-8'
+//lc_messages = 'en_US.UTF-8' #!u!!!
+//work_mem = 100MB #не повлияло на блоб https://github.com/pydanny/pydanny-event-notes/blob/master/DjangoConEurope2012/10-steps-to-better-postgresql-performance.rst 
+//maintenance_work_mem = 1000MB           #!u
+//effective_cache_size = 2GB              #!u
+
 
 //!_pg_hba.conf
 // hostnossl    all        all             all                     md5
