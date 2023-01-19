@@ -20,9 +20,11 @@ try
     //string str_path_file = @"C:\rs_wrk\compile.tar_1";
     //string str_path_file = @"C:\rs_wrk\rs20230112.log";
     string str_path_file_in  = @"C:/rs_wrk/par.7z";
-    string str_path_file_out = @"C:/rs_wrk/res";
+    //string str_path_file_out = @"C:/rs_wrk/res";
+    string str_path_file_out = @"/var/rs_wrk/res";
 
-    string tbHost= "127.0.0.1";
+    //string tbHost= "127.0.0.1";
+    string tbHost= "192.168.1.59";
     //string tbPort="5432";
     string tbPort="5433";
         //string tbUser= "postgres";
