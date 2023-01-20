@@ -2,6 +2,7 @@
 using Npgsql;
 using System.Diagnostics;
 using FluentFTP;
+//using FastCRC;
 
 //dotnet publish "C:\projects\git_main\rs\frw\frw.csproj" -c Release -o C:\projects\git_main\rs\frw\publish -r win-x64 --self-contained -p:PublishTrimmed=true
 
@@ -13,6 +14,47 @@ Log.Logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day,
         rollOnFileSizeLimit: true)
     .CreateLogger();
+
+//public static class ChecksumUtil
+//{
+    /*
+    public enum HashingAlgoTypes
+{
+	MD5,
+	SHA1,
+	SHA256,
+	SHA384,
+	SHA512
+}*/
+
+        Stopwatch sw2 = new Stopwatch();
+        sw2.Start();
+        string str_hash_fun = "SHA512";
+    //"MD5"
+    //SHA1,
+	//SHA256,
+	//SHA384,
+	//SHA512
+    string str_f_path = @"C:\rs_wrk\res";
+    string str_hash_val = GetChecksum( str_hash_fun, str_f_path );
+    sw2.Stop();
+    Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
+    Console.ReadLine();
+
+
+	static string GetChecksum(string str_hash, string filename)
+	{
+		using (var hasher = System.Security.Cryptography.HashAlgorithm.Create(str_hash))
+		{
+			using (var stream = System.IO.File.OpenRead(filename))
+			{
+				var hash = hasher.ComputeHash(stream);
+				return BitConverter.ToString(hash).Replace("-", "");
+			}
+		}
+	}
+//}
+
 
 int rw_ftp()
 {
@@ -92,6 +134,17 @@ int rw_ftp()
         ftp_client.Disconnect();
         sw.Stop();
         Log.Warning($"Ok. read elapsed time {sw.Elapsed}");
+        Stopwatch sw2 = new Stopwatch();
+        sw2.Start();
+        string str_hash_fun = "SHA1";
+        //"MD5"
+        //	SHA1,
+	//SHA256,
+	//SHA384,
+	//SHA512
+        string str_hash_val = GetChecksum( str_hash_fun, str_f_path );
+        sw2.Stop();
+        Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
     }
     catch( Exception ex)
     {
