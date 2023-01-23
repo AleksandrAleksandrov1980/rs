@@ -6,9 +6,13 @@ sudo -i
 systemctl stop srv_lin.service
 cp /home/ustas/projects/git_main/rs/srv_lin/srv_lin.service /etc/systemd/system/
 #cp /etc/systemd/system/srv_lin.service /home/ustas/projects/git_main/rs/srv_lin/ 
+
 cat  /etc/systemd/system/srv_lin.service
+
 systemctl start srv_lin.service
-ystemctl status srv_lin.service
+
+systemctl status srv_lin.service
+
 systemctl daemon-reload
 journalctl -xe
 
