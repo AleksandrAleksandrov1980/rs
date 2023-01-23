@@ -197,6 +197,25 @@ sokjs-->
         GRAM_KIT         : "GRAM_KIT",
         GRAM_STATE       : "STATE",
       });
+
+      function CheckFtp(){
+        try {
+          //
+          /*
+          oReq.open("PUT", "ftp://`<username`>:`<password`>@mydomain.de/folder/test.txt", true);
+          req.setRequestHeader('Content-Type', "text/plain");
+          req.send("Content of test.txt. This will be in test.txt");
+          */
+          var xhr = new XMLHttpRequest();
+          xhr.open("PUT", "ftp://anon:anon@192.168.1.59/PlainRastr.cpp", true);
+          xhr.setRequestHeader('Content-Type', 'text/plain');
+          xhr.send('hrlo');
+          console(xhr.responseText);
+        }
+        catch(err) {
+          console( "exc: "+ err.message);
+        }
+      }
       
       /*
       //alexandrov-7k
@@ -500,6 +519,9 @@ sokjs-->
                 </button>
                 <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="GetData('car')" > 
                   Get Data-> car 
+                </button>
+                <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="CheckFtp()" > 
+                  CheckFtp 
                 </button>
               </div>
             </div>
