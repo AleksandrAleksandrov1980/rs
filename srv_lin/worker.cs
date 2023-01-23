@@ -113,6 +113,11 @@ public class Worker : BackgroundService
        return 1;
     }
 
+    private int on_FILE_UPLOAD(string str_params)
+    {
+        return 1;
+    }
+
     private void Tst_DownloadFileFTP()
     {
         try
@@ -252,6 +257,11 @@ public class Worker : BackgroundService
                 case Ccommunicator.enCommands.GRAM_STOP:
                     nRes = on_GRAM_STOP();
                 break;
+
+                case Ccommunicator.enCommands.FILE_UPLOAD:
+                    nRes = on_FILE_UPLOAD(command.pars);
+                break;
+
                 
                 default:
                     nRes = -1;

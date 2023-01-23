@@ -27,6 +27,7 @@ public class Ccommunicator: IDisposable
         GRAM_STOP        =  7,
         GRAM_KIT         =  8,
         GRAM_STATE       =  9,
+        FILE_UPLOAD      =  10,
     }
 
     public void Dispose() 
