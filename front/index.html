@@ -157,7 +157,11 @@ sokjs-->
           this._n_counter_sended_msgs++;
          
           let payLoad = null;
-          if(en_command===g_enCOMMDANDS.FILE_UPLOAD){            
+          if      (en_command===g_enCOMMDANDS.DIR_MAKE){
+            let el = document.getElementById("path_to_dir_mk");
+            let str_path_to_dir = el.value;   
+            payLoad = JSON.stringify({ str_command: en_command, str_pars: [ str_path_to_dir ]});
+          }else if(en_command===g_enCOMMDANDS.FILE_UPLOAD){            
             let el = null;
             el = document.getElementById("path_to_file_upload");
             let str_path_to_file_upload = el.value;
@@ -165,7 +169,7 @@ sokjs-->
             let str_path_to_dir_upload = el.value;   
             payLoad = JSON.stringify({ str_command: en_command, str_pars: [str_path_to_file_upload, str_path_to_dir_upload ]});
           }
-          else
+          else 
           {
             let currentdate = new Date(); 
             let datetime = " timestamp: " +  currentdate.getFullYear() +"/"
@@ -208,12 +212,12 @@ sokjs-->
         RUN_PROC         : "RUN_PROC",
         EXTERMINATE_PROC : "EXTERMINATE_PROC",
         CREATE_DIR       : "CREATE_DIR",
-        CLEAR_DIR        : "CLEAR_DIR",
         GRAM_START       : "GRAM_START",
         GRAM_STOP        : "GRAM_STOP",
         GRAM_KIT         : "GRAM_KIT",
         GRAM_STATE       : "STATE",
         FILE_UPLOAD      : "FILE_UPLOAD",
+        DIR_MAKE         : "DIR_MAKE",
       });
 
       function CheckFtp(){
@@ -470,10 +474,10 @@ sokjs-->
 -->
         <div class="card shadow mb-4">
          <div class="card-body">
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MK');">
+          <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MAKE');">
             создать директорию на сервере.
           </button>
-          <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
           <input type="text" id="path_to_dir_mk" size="50" value ="/CALCS/2023_01_24___02_03_04_567" onkeyup="UpdateDirUpload();"
             onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
           <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
@@ -495,9 +499,6 @@ sokjs-->
           </button>
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('EXTERMINATE_PROC');">
             EXTERMINATE_PROC
-          </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('CREATE_DIR');">
-            CREATE_DIR
           </button>
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('CLEAR_DIR');">
             CLEAR_DIR
