@@ -157,11 +157,13 @@ sokjs-->
           this._n_counter_sended_msgs++;
          
           let payLoad = null;
-          if(en_command===g_enCOMMDANDS.FILE_UPLOAD){
-            
-            let el = document.getElementById("path_to_file_upload");
+          if(en_command===g_enCOMMDANDS.FILE_UPLOAD){            
+            let el = null;
+            el = document.getElementById("path_to_file_upload");
             let str_path_to_file_upload = el.value;
-            payLoad = JSON.stringify({ str_command: en_command, str_pars: str_path_to_file_upload });
+            el = document.getElementById("path_to_dir_mk");
+            let str_path_to_dir_upload = el.value;   
+            payLoad = JSON.stringify({ str_command: en_command, str_pars: [str_path_to_file_upload, str_path_to_dir_upload ]});
           }
           else
           {
@@ -186,6 +188,11 @@ sokjs-->
       var g_sh_commands = new CStompHlp( '/exchange/rs_commands', 'cb_exc_cmds_state', '#collapseCard' );
       g_sh_commands.connect(); //cb_exc_cmds_state
 
+      function UpdateDirUpload(){
+        let el_path_to_dir_mk = document.getElementById("path_to_dir_mk");
+        let el_path_to_dir_upload = document.getElementById("path_to_dir_upload");
+        el_path_to_dir_upload.value = el_path_to_dir_mk.value; 
+      }
        
       var subscription;
       var nCounter = 0;
@@ -454,10 +461,28 @@ sokjs-->
            <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');" >
            <input type="reset" value="Очистить"></p>
          </form>
--->
-         <input type="text" id = "path_to_file_upload" pattern="//{/}" size="100" value ="//alexandrov-7k.ems.int/rs_wrk/res">
-         <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');" >
 
+                   <div class="collapse show" id="collapseCard">
+            <div class="card-body">
+             
+            </div>
+          </div>
+-->
+       <div class="card shadow mb-4">
+        <div class="card-body">
+         <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
+         <input type="text" id="path_to_dir_mk" size="50" value ="/CALCS/2023_01_24___02_03_04_567" onkeyup="UpdateDirUpload();"
+          onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
+         <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MK');">
+          создать директорию на сервере.
+         </button>
+         <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
+         <input type="text" id="path_to_file_upload" size="100" value="//alexandrov-7k.ems.int/rs_wrk/res">
+         <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');"  class="btn btn-info btn-round" >
+         <input type="text" id="path_to_dir_upload" size="50" readonly="true" value="efrrefe" >
+        </div>       
+        </div>
+       
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
          <!--<div class="container" -->
          <div class="panel-body ">
@@ -522,12 +547,12 @@ sokjs-->
           <!-- Card Header - Accordion -->
           <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
               role="button" aria-expanded="true" aria-controls="collapseCard">
-              <h6 class="m-0 font-weight-bold text-primary"> Комманды брокера. </h6>
+              <h6 class="m-0 font-weight-bold text-primary"> Комманды серверу. </h6>
           </a>
           <!-- Card Content - Collapse -->
           <div class="collapse show" id="collapseCard">
             <div class="card-body">
-              <!--  здесь будут выводится сообщения брокера. -->
+              <!--  здесь будут выводится комманды . -->
             </div>
           </div>
           </div>
@@ -544,12 +569,12 @@ sokjs-->
           <!-- Card Header - Accordion -->
           <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
               role="button" aria-expanded="true" aria-controls="collapseCard">
-              <h6 class="m-0 font-weight-bold text-primary"> События брокера. </h6>
+              <h6 class="m-0 font-weight-bold text-primary"> События сервера. </h6>
           </a>
           <!-- Card Content - Collapse -->
           <div class="collapse show" id="collapseCard_rs_events">
             <div class="card-body">
-              <!--  здесь будут выводится события брокера. -->
+              <!--  здесь будут выводится события . -->
             </div>
           </div>
           </div>
