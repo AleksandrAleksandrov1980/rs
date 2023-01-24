@@ -468,19 +468,19 @@ sokjs-->
             </div>
           </div>
 -->
-       <div class="card shadow mb-4">
-        <div class="card-body">
-         <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
-         <input type="text" id="path_to_dir_mk" size="50" value ="/CALCS/2023_01_24___02_03_04_567" onkeyup="UpdateDirUpload();"
-          onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
-         <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MK');">
-          создать директорию на сервере.
-         </button>
-         <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
-         <input type="text" id="path_to_file_upload" size="100" value="//alexandrov-7k.ems.int/rs_wrk/res">
-         <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');"  class="btn btn-info btn-round" >
-         <input type="text" id="path_to_dir_upload" size="50" readonly="true" value="efrrefe" >
-        </div>       
+        <div class="card shadow mb-4">
+         <div class="card-body">
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MK');">
+            создать директорию на сервере.
+          </button>
+          <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
+          <input type="text" id="path_to_dir_mk" size="50" value ="/CALCS/2023_01_24___02_03_04_567" onkeyup="UpdateDirUpload();"
+            onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
+          <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
+          <input type="text" id="path_to_file_upload" size="100" value="//alexandrov-7k.ems.int/rs_wrk/res">
+          <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');"  class="btn btn-info btn-round" >
+          <input type="text" id="path_to_dir_upload" size="50" readonly="true" value="efrrefe" >
+         </div>       
         </div>
        
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
