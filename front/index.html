@@ -26,16 +26,24 @@ sokjs-->
 
       const g_enCOMMDANDS = Object.freeze({
         STATE            : "STATE",
-        RUN_PROC         : "RUN_PROC",
-        EXTERMINATE_PROC : "EXTERMINATE_PROC",
+        PROC_RUN         : "PROC_RUN",
+        PROC_EXTERMINATE : "PROC_EXTERMINATE",
         CREATE_DIR       : "CREATE_DIR",
         GRAM_START       : "GRAM_START",
         GRAM_STOP        : "GRAM_STOP",
         GRAM_KIT         : "GRAM_KIT",
         GRAM_STATE       : "STATE",
         FILE_UPLOAD      : "FILE_UPLOAD",
+        FILE_DOWNLOAD    : "FILE_DOWNLOAD",
         DIR_MAKE         : "DIR_MAKE",
       });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        let el = document.getElementById("path_to_dir_mk");
+        el.value = "/CALCS/"+GetTmStamp();
+        document.getElementById("path_to_dir_upload").value = el.value;
+        document.getElementById("path_to_file_download").value = el.value + "/results.xml";
+      }, false);
     
       class CStompHlp
       {
@@ -173,37 +181,21 @@ sokjs-->
           command.for = "xz";
           command.from = "web_s";
           command.sign = "unsiggned";
+          let el = null;
           let payLoad = null;
-          if      (en_command===g_enCOMMDANDS.DIR_MAKE){
-            let el = document.getElementById("path_to_dir_mk");
-            let str_path_to_dir = el.value;   
-            //payLoad = JSON.stringify({ str_command: en_command, str_pars: [ str_path_to_dir ]});
-            command.pars = [str_path_to_dir];
-            //payLoad =  JSON.stringify(command);
+          if      (en_command===g_enCOMMDANDS.STATE){
+          }else if(en_command===g_enCOMMDANDS.DIR_MAKE){
+            command.pars = [ document.getElementById("path_to_dir_mk").value] ;
           }else if(en_command===g_enCOMMDANDS.FILE_UPLOAD){            
-            let el = null;
-            el = document.getElementById("path_to_file_upload");
-            let str_path_to_file_upload = el.value;
-            el = document.getElementById("path_to_dir_mk");
-            let str_path_to_dir_upload = el.value;
-            command.pars = [str_path_to_file_upload, str_path_to_dir_upload ];   
-            //payLoad = JSON.stringify({ str_command: en_command, str_pars: [str_path_to_file_upload, str_path_to_dir_upload ]});
-          }
-          else 
-          {
-
-            /*
-            let currentdate = new Date(); 
-            let datetime = " timestamp: " +  currentdate.getFullYear() +"/"
-                    + (currentdate.getMonth()+1)  + "/" 
-                    +  currentdate.getDate()      + " @ "  
-                    +  currentdate.getHours()     + ":"  
-                    +  currentdate.getMinutes()   + ":" 
-                    +  currentdate.getSeconds()   + ":"
-                    +  currentdate.getMilliseconds();
-            let str_params_to_serialize = str_params +" : " + this._n_counter_sended_msgs.toString() + " : " + datetime;
-            payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params_to_serialize });
-            */
+            command.pars = [ document.getElementById("path_to_file_upload").value, document.getElementById("path_to_dir_upload").value ];   
+          }else if(en_command===g_enCOMMDANDS.PROC_RUN){
+            command.pars = [ document.getElementById("path_to_file_exec").value, document.getElementById("file_exec_params").value ];  
+          }else if(en_command===g_enCOMMDANDS.PROC_EXTERMINATE){
+            command.pars = [ document.getElementById("proc_term").value ];  
+          }else if(en_command===g_enCOMMDANDS.FILE_DOWNLOAD){
+            command.pars = [ document.getElementById("path_to_file_download").value, document.getElementById("path_to_dir_download").value ];   
+          }else{
+            alert("Unknown command! " + en_command )
           }
           payLoad = JSON.stringify(command);
           this.client.publish({destination: '/exchange/rs_commands', body: payLoad });
@@ -213,12 +205,12 @@ sokjs-->
 
       function GetTmStamp(){
         let currentdate = new Date(); 
-        let datetime = currentdate.getFullYear()  + "/"
-                    + (currentdate.getMonth()+1)  + "/" 
-                    +  currentdate.getDate()      + " @ "  
-                    +  currentdate.getHours()     + ":"  
-                    +  currentdate.getMinutes()   + ":" 
-                    +  currentdate.getSeconds()   + ":"
+        let datetime = currentdate.getFullYear()  + "_"
+                    + (currentdate.getMonth()+1)  + "_" 
+                    +  currentdate.getDate()      + "___"  
+                    +  currentdate.getHours()     + "_"  
+                    +  currentdate.getMinutes()   + "_" 
+                    +  currentdate.getSeconds()   + "_"
                     +  currentdate.getMilliseconds();
         return datetime;
       }
@@ -235,7 +227,7 @@ sokjs-->
       };
 
       //var c = new CCommand();
-      //c.str_command = g_enCOMMDANDS.RUN_PROC;
+      //c.str_command = g_enCOMMDANDS.PROC_RUN;
       //let str_command = JSON.stringify(c);
 
 
@@ -248,27 +240,11 @@ sokjs-->
         let el_path_to_dir_mk = document.getElementById("path_to_dir_mk");
         let el_path_to_dir_upload = document.getElementById("path_to_dir_upload");
         el_path_to_dir_upload.value = el_path_to_dir_mk.value; 
+        document.getElementById("path_to_file_download").value = document.getElementById("path_to_dir_mk").value + "/results.xml"
       }
        
-      var subscription;
-      var nCounter = 0;
-      var nCounterMsgs = 0;
-
-      var subscription_events;
-      var nCounter_events = 0;
-      var nCounterMsgs_events = 0;
-
-
-
-
       function CheckFtp(){
         try {
-          //
-          /*
-          oReq.open("PUT", "ftp://`<username`>:`<password`>@mydomain.de/folder/test.txt", true);
-          req.setRequestHeader('Content-Type', "text/plain");
-          req.send("Content of test.txt. This will be in test.txt");
-          */
           var xhr = new XMLHttpRequest();
           xhr.open("PUT", "ftp://anon:anon@192.168.1.59/PlainRastr.cpp", true);
           xhr.setRequestHeader('Content-Type', 'text/plain');
@@ -279,13 +255,35 @@ sokjs-->
           console( "exc: "+ err.message);
         }
       }
-      
-      /*
-  
 
       async function Sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
+
+      async function PlayScn1(){
+        let delay = 1000;
+
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.STATE,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.DIR_MAKE,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.FILE_UPLOAD,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.PROC_RUN,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.PROC_EXTERMINATE,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.FILE_DOWNLOAD,"");
+        await Sleep(delay);
+        g_sh_commands.SendCommand(g_enCOMMDANDS.STATE,"");
+        await Sleep(delay);
+
+        await Sleep(delay);
+      }
+      
+      /*
+      
 
       var g_prms_cycle_scn1 = undefined;
       var g_bl_cycle_scn1_exit = false;
@@ -487,45 +485,46 @@ sokjs-->
           </div>  
          </div>
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
-<!--
-         <form name="test" method="post" action="input1.php">
-          
-          <p><b>Ваше имя:</b><br>
-           <input type="text" size="40">
-          </p>
-          <p><b>Каким браузером в основном пользуетесь:</b><Br>
-           <input type="radio" name="browser" value="ie"> Internet Explorer<Br>
-           <input type="radio" name="browser" value="opera"> Opera<Br>
-           <input type="radio" name="browser" value="firefox"> Firefox<Br>
-          </p>
-          <p>Комментарий<Br>
-           <textarea name="comment" cols="40" rows="3"></textarea></p>
-           
-           <p><b>введите путь к файлу находящемуся на сетовой шаре (формат //компьютер/папка/файл):</b><br>
-            <input type="text" id = "path_to_file_upload111" pattern="//{/}" size="100" value ="//alexandrov-7k.ems.int/rs_wrk/res">
-           <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');" >
-           <input type="reset" value="Очистить"></p>
-         </form>
 
-                   <div class="collapse show" id="collapseCard">
-            <div class="card-body">
-             
-            </div>
-          </div>
--->
+
         <div class="card shadow mb-4">
          <div class="card-body">
+          <!--DIR_MAKE-->
           <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MAKE');">
-            создать директорию на сервере.
-          </button>
-          <input type="text" id="path_to_dir_mk" size="50" value ="/CALCS/2023_01_24___02_03_04_567" onkeyup="UpdateDirUpload();"
+          <input type="text" id="path_to_dir_mk" size="50"  onkeyup="UpdateDirUpload();"
             onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MAKE');">
+            создать путь к папке
+          </button>
+          <!--FILE_UPLOAD-->
           <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
-          <input type="text" id="path_to_file_upload" size="100" value="//alexandrov-7k.ems.int/rs_wrk/res">
-          <p><input type="submit" value="Отправить" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');"  class="btn btn-info btn-round" >
-          <input type="text" id="path_to_dir_upload" size="50" readonly="true" value="efrrefe" >
-         </div>       
+          <input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res">
+          <!--<p><input type="submit" value="отправить файл в папку-> "   class="btn btn-info btn-round" > -->
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
+            отправить файл в папку
+          </button> <br>
+          <input type="text" id="path_to_dir_upload" size="50" >
+          <!--PROC_RUN-->
+          <p><b>путь к программе в рабочем каталоге сервера (формат /папка1/папка2/программа): + параметры программы</b><br>
+          <input type="text" id="path_to_file_exec" size="30" value="/CALC/astra">
+          <input type="text" id="file_exec_params" size="30" value="1 s">
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_RUN');">
+            запустить 
+          </button>
+          <!--PROC_EXTERMINATE-->
+          <p><b>прибить процесс с ИД</b><br>
+          <input type="text" id="proc_term" size="5" type="number" value="13" >
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_EXTERMINATE');">
+             прибить 
+          </button>
+          <!--FILE_DOWNLOAD-->
+          <p><b> путь к файлу на сервере (формат /папка1/папка2/файл):</b><br>
+          <input type="text" id="path_to_file_download" size="50" >
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_DOWNLOAD');">
+            скачать файл 
+          </button> <br>
+          <input type="text" id="path_to_dir_download" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res_2">
+        </div>       
         </div>
        
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
@@ -534,16 +533,8 @@ sokjs-->
 
           <button type="button"  class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('STATE');">
             STATE
-          </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('RUN_PROC');">
-            RUN_PROC
-          </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('EXTERMINATE_PROC');">
-            EXTERMINATE_PROC
-          </button>
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('CLEAR_DIR');">
-            CLEAR_DIR
-          </button>  
+          </button> 
+          <br><br>
 
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_START');">
             GRAM_START
@@ -557,6 +548,7 @@ sokjs-->
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_STATE');">
             GRAM_STATE
           </button>  
+          <br><br>
 
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="PlayScn1();">
             PlayScn1
@@ -567,14 +559,13 @@ sokjs-->
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="PlayScn3();">
             PlayScn3
           </button> 
-          
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_prms_cycle_scn1 = AsyncLunchCycleScn1();">
             CyclePlayScn1.begin!
           </button> 
           <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="AsyncStopCycleScn1();">
             CyclePlayScn1.end.
           </button> 
-
+          <br>
         </div>
         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
 
