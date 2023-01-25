@@ -24,6 +24,18 @@ sokjs-->
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.js" type="text/javascript"> </script> 
     <script type = "text/javascript" language = "javascript">
 
+      const g_enCOMMDANDS = Object.freeze({
+        STATE            : "STATE",
+        RUN_PROC         : "RUN_PROC",
+        EXTERMINATE_PROC : "EXTERMINATE_PROC",
+        CREATE_DIR       : "CREATE_DIR",
+        GRAM_START       : "GRAM_START",
+        GRAM_STOP        : "GRAM_STOP",
+        GRAM_KIT         : "GRAM_KIT",
+        GRAM_STATE       : "STATE",
+        FILE_UPLOAD      : "FILE_UPLOAD",
+        DIR_MAKE         : "DIR_MAKE",
+      });
     
       class CStompHlp
       {
@@ -156,21 +168,31 @@ sokjs-->
           }
           this._n_counter_sended_msgs++;
          
+          let command = new CCommand();
+          command.command = en_command;
+          command.for = "xz";
+          command.from = "web_s";
+          command.sign = "unsiggned";
           let payLoad = null;
           if      (en_command===g_enCOMMDANDS.DIR_MAKE){
             let el = document.getElementById("path_to_dir_mk");
             let str_path_to_dir = el.value;   
-            payLoad = JSON.stringify({ str_command: en_command, str_pars: [ str_path_to_dir ]});
+            //payLoad = JSON.stringify({ str_command: en_command, str_pars: [ str_path_to_dir ]});
+            command.pars = [str_path_to_dir];
+            //payLoad =  JSON.stringify(command);
           }else if(en_command===g_enCOMMDANDS.FILE_UPLOAD){            
             let el = null;
             el = document.getElementById("path_to_file_upload");
             let str_path_to_file_upload = el.value;
             el = document.getElementById("path_to_dir_mk");
-            let str_path_to_dir_upload = el.value;   
-            payLoad = JSON.stringify({ str_command: en_command, str_pars: [str_path_to_file_upload, str_path_to_dir_upload ]});
+            let str_path_to_dir_upload = el.value;
+            command.pars = [str_path_to_file_upload, str_path_to_dir_upload ];   
+            //payLoad = JSON.stringify({ str_command: en_command, str_pars: [str_path_to_file_upload, str_path_to_dir_upload ]});
           }
           else 
           {
+
+            /*
             let currentdate = new Date(); 
             let datetime = " timestamp: " +  currentdate.getFullYear() +"/"
                     + (currentdate.getMonth()+1)  + "/" 
@@ -181,11 +203,41 @@ sokjs-->
                     +  currentdate.getMilliseconds();
             let str_params_to_serialize = str_params +" : " + this._n_counter_sended_msgs.toString() + " : " + datetime;
             payLoad = JSON.stringify({ str_command: en_command, str_pars: str_params_to_serialize });
+            */
           }
+          payLoad = JSON.stringify(command);
           this.client.publish({destination: '/exchange/rs_commands', body: payLoad });
         }
 
       };// class CStompHlp
+
+      function GetTmStamp(){
+        let currentdate = new Date(); 
+        let datetime = currentdate.getFullYear()  + "/"
+                    + (currentdate.getMonth()+1)  + "/" 
+                    +  currentdate.getDate()      + " @ "  
+                    +  currentdate.getHours()     + ":"  
+                    +  currentdate.getMinutes()   + ":" 
+                    +  currentdate.getSeconds()   + ":"
+                    +  currentdate.getMilliseconds();
+        return datetime;
+      }
+
+      class CCommand{
+        constructor(){
+          this.command = null;
+          this.for = "";
+          this.from = "";
+          this.tm_mark = GetTmStamp();
+          this.pars = [];
+          this.sign = "";
+        }
+      };
+
+      //var c = new CCommand();
+      //c.str_command = g_enCOMMDANDS.RUN_PROC;
+      //let str_command = JSON.stringify(c);
+
 
       var g_sh_events   = new CStompHlp( '/exchange/rs_events', 'cb_exc_evts_state', '#collapseCard_rs_events' );
       g_sh_events.connect();
@@ -207,18 +259,7 @@ sokjs-->
       var nCounterMsgs_events = 0;
 
 
-      const g_enCOMMDANDS = Object.freeze({
-        STATE            : "STATE",
-        RUN_PROC         : "RUN_PROC",
-        EXTERMINATE_PROC : "EXTERMINATE_PROC",
-        CREATE_DIR       : "CREATE_DIR",
-        GRAM_START       : "GRAM_START",
-        GRAM_STOP        : "GRAM_STOP",
-        GRAM_KIT         : "GRAM_KIT",
-        GRAM_STATE       : "STATE",
-        FILE_UPLOAD      : "FILE_UPLOAD",
-        DIR_MAKE         : "DIR_MAKE",
-      });
+
 
       function CheckFtp(){
         try {
@@ -271,7 +312,7 @@ sokjs-->
 
       async function PlayScn1(){
         let delay = 1000;
-        AddLog('<------------- Scn1.begin ------------------>');
+        AddLog('<------------- Scn1.begin ----------------- >');
         await Sleep(delay);
         SendCommand(g_enCOMMDANDS.STATE,"");
         await Sleep(delay);
@@ -299,20 +340,20 @@ sokjs-->
         SendCommand(g_enCOMMDANDS.STATE,"");
         await Sleep(1000);
         //SendCommand(g_enCOMMDANDS.GRAM_START,"");
-        AddLog('<------------- Scn1.end. ------------------>');
+        AddLog('<------------- Scn1.end. ----------------- >');
         await Sleep(delay);
       }
 
       function PlayScn2(){
-        AddLog('<------------- Scn2.begin ------------------>');
+        AddLog('<------------- Scn2.begin ----------------- >');
         SendCommand(g_enCOMMDANDS.STATE,"");
-        AddLog('<------------- Scn2.end. ------------------>');
+        AddLog('<------------- Scn2.end. ----------------- >');
       }
 
       function PlayScn3(){
-        AddLog('<------------- Scn3.begin ------------------>');
+        AddLog('<------------- Scn3.begin ----------------- >');
         SendCommand(g_enCOMMDANDS.STATE,"");
-        AddLog('<------------- Scn3.end. ------------------>');
+        AddLog('<------------- Scn3.end. ----------------- >');
       }
 
       function SendCom(){
