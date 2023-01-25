@@ -28,11 +28,10 @@ sokjs-->
         STATE            : "STATE",
         PROC_RUN         : "PROC_RUN",
         PROC_EXTERMINATE : "PROC_EXTERMINATE",
-        CREATE_DIR       : "CREATE_DIR",
         GRAM_START       : "GRAM_START",
         GRAM_STOP        : "GRAM_STOP",
         GRAM_KIT         : "GRAM_KIT",
-        GRAM_STATE       : "STATE",
+        GRAM_STATE       : "GRAM_STATE",
         FILE_UPLOAD      : "FILE_UPLOAD",
         FILE_DOWNLOAD    : "FILE_DOWNLOAD",
         DIR_MAKE         : "DIR_MAKE",
@@ -194,6 +193,10 @@ sokjs-->
             command.pars = [ document.getElementById("proc_term").value ];  
           }else if(en_command===g_enCOMMDANDS.FILE_DOWNLOAD){
             command.pars = [ document.getElementById("path_to_file_download").value, document.getElementById("path_to_dir_download").value ];   
+          }else if(en_command===g_enCOMMDANDS.GRAM_START){
+          }else if(en_command===g_enCOMMDANDS.GRAM_STATE){
+          }else if(en_command===g_enCOMMDANDS.GRAM_KIT){
+          }else if(en_command===g_enCOMMDANDS.GRAM_STOP){
           }else{
             alert("Unknown command! " + en_command )
           }
@@ -226,15 +229,10 @@ sokjs-->
         }
       };
 
-      //var c = new CCommand();
-      //c.str_command = g_enCOMMDANDS.PROC_RUN;
-      //let str_command = JSON.stringify(c);
-
-
       var g_sh_events   = new CStompHlp( '/exchange/rs_events', 'cb_exc_evts_state', '#collapseCard_rs_events' );
       g_sh_events.connect();
       var g_sh_commands = new CStompHlp( '/exchange/rs_commands', 'cb_exc_cmds_state', '#collapseCard' );
-      g_sh_commands.connect(); //cb_exc_cmds_state
+      g_sh_commands.connect(); 
 
       function UpdateDirUpload(){
         let el_path_to_dir_mk = document.getElementById("path_to_dir_mk");
@@ -282,12 +280,11 @@ sokjs-->
         await Sleep(delay);
       }
 
-
       var g_prms_cycle_scn1 = undefined;
       var g_bl_cycle_scn1_exit = false;
       async function AsyncLunchCycleScn1(){
         if(g_prms_cycle_scn1 !== undefined)
-          return ;
+          return;
         return  new Promise( async p1 => {
           for(;;)
           {
@@ -434,7 +431,6 @@ sokjs-->
           <!--FILE_UPLOAD-->
           <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
           <input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res">
-          <!--<p><input type="submit" value="отправить файл в папку-> "   class="btn btn-info btn-round" > -->
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
             отправить файл в папку
           </button> <br>
@@ -520,13 +516,11 @@ sokjs-->
           </div>
           <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
 
-         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
-         
+         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->   
 
          <div class="card-body" id="cb_exc_evts_state" style="background-color: gray;">
           state of events exchange
          </div>
-
          <div class="card shadow mb-4">
           <!-- Card Header - Accordion -->
           <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
