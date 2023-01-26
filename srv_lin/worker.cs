@@ -225,9 +225,9 @@ public class Worker : BackgroundService
 
     /*
         STATE            = 1,
-        RUN_PROC         = 2,
-        EXTERMINATE_PROC = 3,
-        CREATE_DIR       = 4,
+        PROC_RUN         = 2,
+        PROC_EXTERMINATE = 3,
+        DIR_MAKE       = 4,
         CLEAR_DIR        = 5,
         GRAM_START       = 6,
         GRAM_STOP        = 7,
