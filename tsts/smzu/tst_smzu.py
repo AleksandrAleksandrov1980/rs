@@ -45,10 +45,11 @@ def tst_mdp_file( rastr, path_file_mdp, path_file_log ):
     try:
         print(f"read_file_mdp:{path_file_mdp}")
         rastr.Load( Get_RG_REPL(), path_file_mdp, '' )
-        path_file_save_1 =  os.path.dirname(path_file_log) + "/" + Path(path_file_log).stem + "____11111__.os"
-        rastr.Save( path_file_save_1, '' )
+        rastr_set_val(rastr, "ut_vir_common", "kod", 22 )
         print(f"set_path_log:{path_file_mdp}")
         rastr_set_val(rastr, "ut_vir_common", "log_path2file", path_file_log )
+        path_file_save_1 =  os.path.dirname(path_file_log) + "/" + Path(path_file_log).stem + "____11111__.os"
+        rastr.Save( path_file_save_1, '' )
         print(f"call Emergencies")
         newVal = c32.VARIANT(pythoncom.VT_VARIANT,0)
         nRes = rastr.Emergencies(newVal)
