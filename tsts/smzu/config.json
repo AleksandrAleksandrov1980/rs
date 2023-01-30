@@ -1,0 +1,9 @@
+{
+    "path_tst_dir" : "D:/Vms/SHARA/crosses/!TESTS/SMZU/",
+    "xml_file_res" : "res<DATE>.xml",
+    "tsts":
+    [
+        "/IA/2022_02_14_tstst/10_00_51/mdp_debug_1___11111.os",
+        "/ODU_CT/2022_02_11_3_3_3_tst/11_01_25/mdp_debug_1______1.os"
+    ]
+}
