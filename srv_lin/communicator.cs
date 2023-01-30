@@ -15,18 +15,32 @@ public class Ccommunicator: IDisposable
     private string? m_str_exch_events;
     public delegate int OnCommand( Command command );
 
+    /*
+        STATE            : "STATE",
+        PROC_RUN         : "PROC_RUN",
+        PROC_EXTERMINATE : "PROC_EXTERMINATE",
+        GRAM_START       : "GRAM_START",
+        GRAM_STOP        : "GRAM_STOP",
+        GRAM_KIT         : "GRAM_KIT",
+        GRAM_STATE       : "GRAM_STATE",
+        FILE_UPLOAD      : "FILE_UPLOAD",
+        FILE_DOWNLOAD    : "FILE_DOWNLOAD",
+        DIR_MAKE         : "DIR_MAKE",
+    */
+
     public enum enCommands 
     {
         ERROR            = -1,
         STATE            =  1,
-        RUN_PROC         =  2,
-        EXTERMINATE_PROC =  3,
-        CREATE_DIR       =  4,
-        CLEAR_DIR        =  5,
+        PROC_RUN         =  2,
+        PROC_EXTERMINATE =  3,
+        DIR_MAKE         =  4,
         GRAM_START       =  6,
         GRAM_STOP        =  7,
         GRAM_KIT         =  8,
         GRAM_STATE       =  9,
+        FILE_UPLOAD      =  10,
+        FILE_DOWNLOAD    =  11,
     }
 
     public void Dispose() 
@@ -39,11 +53,22 @@ public class Ccommunicator: IDisposable
         m_connection?.Dispose();
         m_connection = null;
     }
-
+/*
+{"command":"DIR_MAKE",
+"for":"xz",
+"from":"web_s",
+"tm_mark":"2023_1_26___8_56_26_740",
+"pars":["/CALCS/2023_1_26___8_49_30_934"],
+"sign":"unsiggned"
+*/
     public class CommandSerialized
     {
-        public string? str_command{ get; set; }
-        public string? str_pars   { get; set; }
+        public string? command { get; set; }
+        public string? to      { get; set; }
+        public string? from    { get; set; }
+        public string? tm_mark { get; set; }
+        public string[]? pars    { get; set; }
+        public string?   sign    { get; set; }
     }
 
     public static class enCommands1 
@@ -75,10 +100,10 @@ public class Ccommunicator: IDisposable
         {
             if(command_serialized != null)
             {
-                command = StrToCommand(command_serialized.str_command);
+                command = StrToCommand(command_serialized.command);
                 if(command != enCommands.ERROR)
                 {
-                    pars = new string( command_serialized.str_pars);
+                    pars = new string( command_serialized.pars.ToString());
                 }
             }
             else

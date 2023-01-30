@@ -2,6 +2,9 @@
 using Npgsql;
 using System.Diagnostics;
 using FluentFTP;
+//using System.IO.Hashing; - in 7?
+using System.Net;
+
 
 //dotnet publish "C:\projects\git_main\rs\frw\frw.csproj" -c Release -o C:\projects\git_main\rs\frw\publish -r win-x64 --self-contained -p:PublishTrimmed=true
 
@@ -13,6 +16,40 @@ Log.Logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day,
         rollOnFileSizeLimit: true)
     .CreateLogger();
+
+
+static void TestHash()
+{
+    Stopwatch sw2 = new Stopwatch();
+    sw2.Start();
+    string str_hash_fun = "MD5";
+    //"MD5" - broken for cryptografy - 32 symbols
+    //SHA1, - broken for cryptografy
+    //SHA256,
+    //SHA384,
+    //SHA512
+    string str_f_path = @"C:\rs_wrk\res";
+    string str_hash_val = GetChecksum( str_hash_fun, str_f_path );
+    sw2.Stop();
+    Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
+    Console.ReadLine();
+}
+
+
+static string GetChecksum(string str_hash, string filename)
+{
+    using (var hasher = System.Security.Cryptography.HashAlgorithm.Create(str_hash))
+    {
+        if(hasher == null)
+            throw new Exception("Can't create hasher!");
+        using (var stream = System.IO.File.OpenRead(filename))
+        {
+            var hash = hasher.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "");
+        }
+    }
+}
+
 
 int rw_ftp()
 {
@@ -92,6 +129,17 @@ int rw_ftp()
         ftp_client.Disconnect();
         sw.Stop();
         Log.Warning($"Ok. read elapsed time {sw.Elapsed}");
+        Stopwatch sw2 = new Stopwatch();
+        sw2.Start();
+        string str_hash_fun = "SHA1";
+        //"MD5"
+        //	SHA1,
+	//SHA256,
+	//SHA384,
+	//SHA512
+        string str_hash_val = GetChecksum( str_hash_fun, str_f_path );
+        sw2.Stop();
+        Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
     }
     catch( Exception ex)
     {
@@ -280,7 +328,122 @@ int rw_db()
     return 1;
 }
 
-rw_ftp();
+//rw_ftp();
 //rw_db();
 //rw_dir();
+/*
+partial class Program
+{
+  static void Main(string[] args)
+  {
+    foreach (var arg in args)
+    {
+      Console.WriteLine(arg);
+    }
+  }
+}
+*/
+
+static string GetLocalIPAddress()
+{
+    var host = Dns.GetHostEntry(Dns.GetHostName());
+    foreach (var ip in host.AddressList)
+    {
+        if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+        {
+            return ip.ToString();
+        }
+    }
+    throw new Exception("No network adapters with an IPv4 address in the system!");
+}
+
+// alexandrov-7k.ems.int
+//alexandrov-7k.ems.int
+//C:/rs_wrk/res
+//\\alexandrov-7k.ems.int\rs_wrk
+//file://alexandrov-7k.ems.int/rs_wrk/
+//alexandrov-7k.ems.int/rs_wrk/
+//frw.exe -uf "12323/res" "alexandrov-7k.ems.int/rs_wrk/res" 
+Main("lll");
+
+
+int SmbCopyFile( string str_from, string str_to )
+{
+    try
+    {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+        FileInfo fi1 = new FileInfo(str_from); 
+        Log.Information($"copy.begin [{str_from}] --> [{str_to}]");
+        File.Copy( str_from, str_to, true );
+        FileInfo fi2 = new FileInfo(str_to); 
+        if(fi1.Length != fi2.Length)
+        {
+            throw new Exception("size!!");
+        }
+        sw.Stop();
+        Log.Warning($"");
+        Log.Information($"copy.end. [{str_from}] --> [{str_to}] + time {sw.Elapsed}");
+        return 1;
+
+    }
+    catch(Exception ex)
+    {
+        Log.Error($"Can't copy file: {ex.Message}");
+        return -1;
+    }
+}
+
+static string GetMd5( string str_path_to_file)
+{
+    using (var hasher = System.Security.Cryptography.HashAlgorithm.Create("MD5"))
+    {
+        if(hasher == null)
+            throw new Exception("Can't create hasher!");
+        using (var stream = System.IO.File.OpenRead(str_path_to_file))
+        {
+            var hash = hasher.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "");
+        }
+    }
+}
+
+//GetMd5
+static int RegisterFile(string str_path_to_file)
+{
+    string str_hash = GetMd5(str_path_to_file);
+    FileInfo fi = new FileInfo(str_path_to_file); 
+    string str = fi.DirectoryName;
+    return 1;
+}
+
+void Main(string s)
+{
+    try
+    {
+        int nRes = 0;
+        Console.WriteLine(GetLocalIPAddress());
+        switch(args[0] )
+        {
+            case "-f":
+                if(args.Length < 3 )
+                {
+                    new Exception($"not enough arguments get only {args.Length}");
+                }
+                nRes = SmbCopyFile( args[1], args[2] );// 1->2
+            break;
+
+            default :
+                throw new Exception($" unknown first command : {args[0]}");
+            break;
+        }
+        Console.WriteLine(args);
+    }
+    catch(Exception ex)
+    {
+        Log.Error($"Exception: {ex.Message}");
+        Environment.ExitCode = 13;
+    }
+    Environment.ExitCode = 1;
+}
 
