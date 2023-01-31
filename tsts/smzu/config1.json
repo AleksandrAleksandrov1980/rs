@@ -3,7 +3,19 @@
     "xml_file_res" : "res<DATE>.xml",
     "tsts":
     [
-        "/IA/2022_02_14_tstst/10_00_51/mdp_debug_1___11111.os"
-        //"/ODU_CT/2022_02_11_3_3_3_tst/11_01_25/mdp_debug_1______1.os"
+        "/IA/2022_02_14_tstst/10_00_51/mdp_debug_1___11111.os",
+        "/ODU_CT/2022_02_11_3_3_3_tst/11_01_25/mdp_debug_1______1.os",
+        "/ODU_CT/2022_02_11_3_3_3_tst/2022_02_14___13_35_52/mdp_debug_1_11111.os",
+        "/ODU_SB/2022_05_24_tst_3_3_3_hf1/sb-smzu1/07_52_36/mdp_debug_1_111.os",
+        "/ODU_SB/2022_11_11/mdp_debug_1.os",
+        "/ODU_SB/2022_12_06___10_52_36_boev/mdp_debug_1",
+        "/ODU_SZ/2022_07_01_tstst_hf2/mdp_debug_1___1.os",
+        "/ODU_SZ/2022_11_09_dyn/d_1.os",
+        "/ODU_SZ/2022_12_02_dyn_main/mdp_debug_1_.os",
+        "/ODU_SZ/2022_12_12_srvt-smzu1-sz/LAST/LAST/mdp_debug_1_.os",
+        "/ODU_UG/2022_02_14_tststs_3_3_3/11_41_33_smzup1-oduy/mdp_debug_1_11111.os",
+        "/ODU_UG/2022_11_15___14_35_01/mdp_debug_1_111_par.os",
+        "/ODU_UR/2022_02_11_smzu2___3_3_3_hf1_tst/12_40_54/МДП/mdp_debug_1_111.os",
+        "/ODU_UR/2022_11_15___00_55_27/МДП/mdp_debug_1_par.os"
     ]
 }

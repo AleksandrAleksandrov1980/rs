@@ -7,6 +7,9 @@ from pathlib import Path
 from datetime import datetime
 import pythoncom
 from pathlib import Path
+import time
+import logging
+from logging import StreamHandler, Formatter
 
 #set-executionpolicy remotesigned
 #python -m pip install --upgrade pywin32
@@ -41,30 +44,33 @@ def rastr_set_val( rastr, namet, namec, val ):
     #newVal                       = second paramter,pVal, the new device name as a VARIANT
     col._oleobj_.Invoke( 4, 0, pythoncom.INVOKE_PROPERTYPUT, 0, nRow, val )
 #---------------------------------------------------------------------------------------------------------
-def tst_mdp_file( rastr, path_file_mdp, path_file_log ):
+def tst_mdp_file( rastr, path_file_mdp : str, path_dir_out : str, path_file_log :str, logg ):
     try:
-        print(f"read_file_mdp:{path_file_mdp}")
+        logg.info(f"read_file_mdp:{path_file_mdp}")
         rastr.Load( Get_RG_REPL(), path_file_mdp, '' )
         rastr_set_val(rastr, "ut_vir_common", "kod", 22 )
-        print(f"set_path_log:{path_file_log}")
+        logg.info(f"dir_out: {path_dir_out}   set_path_log:{path_file_log}")
         rastr_set_val(rastr, "ut_vir_common", "log_path2file", path_file_log )
-        path_file_save_1 =  os.path.dirname(path_file_log) + "/" + Path(path_file_log).stem + "____11111__.os"
+        path_file_save_1 =  path_dir_out + "/" + Path(path_file_log).stem + "____11111__.os"
         rastr.Save( path_file_save_1, '' )
-        print(f"call Emergencies")
+        logg.info(f"call Emergencies")
         newVal = c32.VARIANT(pythoncom.VT_VARIANT,0)
-        nRes = rastr.Emergencies(newVal)
-        path_file_save_2 = os.path.dirname(path_file_log) + "/" + Path(path_file_log).stem + "____22222__.os"
-        print(f"save {path_file_save_2}")
+        results = rastr.Emergencies(newVal)
+        path_file_save_2 = path_dir_out + "/" + Path(path_file_log).stem + "____22222__.os"
+        logg.info(f"results   [{results}]")
+        logg.info(f"save file {path_file_save_2}")
         rastr.Save( path_file_save_2, '' )
+        return results
     except OSError as err:
-        print("OS error:", err)
+        logg.info("OS error:", err)
     except ValueError:
-        print("Could not convert data to an integer.")
+        logg.info("Could not convert data to an integer.")
     except Exception as ex:
-        print(f"EXCEPTION: {ex}")
+        logg.info(f"EXCEPTION: {ex}")
     except :
-        print('xz')
-    print("thats all folks!")
+        logg.info('exception xz')
+    logg.info("ERROR!")
+    return
 #---------------------------------------------------------------------------------------------------------
 def get_name__current_script():
     return os.path.basename(__file__)
@@ -82,11 +88,64 @@ def read_conf():
     #with open("D:/rs/py_db_wrt/config.json") as json_data_file: # for WIN-SERVICE !!!
     #path_json = os.getcwd() + "/"+"config.json";
     path_json = dir_current_script + "/"+"config.json"
-    with open(path_json) as json_data_file: # for WIN-SERVICE !!!
+    with open(path_json,encoding="utf-8") as json_data_file: # for WIN-SERVICE !!!
         jcnf = json.load(json_data_file)
     return jcnf
 #---------------------------------------------------------------------------------------------------------
+def find_field_indx(results, namef ):
+    found = False
+    i = 0
+    for name_f in results[1][0]:
+        if(name_f == namef):
+            found = True
+            break
+        i += 1
+    if(found == False):
+         raise Exception( "not find index for "+ namef)
+    return i
+#---------------------------------------------------------------------------------------------------------
+def results_trace(results, logg):
+    try:
+        logg.info( f"kod={results[0]}" )
+        indx_ns          = find_field_indx( results, "ns"          )
+        indx_kod         = find_field_indx( results, "kod"         )
+        indx_nvir        = find_field_indx( results, "nvir"        )
+        indx_npor        = find_field_indx( results, "npor"        )
+        indx_name_schem  = find_field_indx( results, "name_schem"  )
+        indx_itog_mdp    = find_field_indx( results, "itog_mdp"    )
+        indx_itog_mdp_pa = find_field_indx( results, "itog_mdp_pa" )
+        indx_padp_real   = find_field_indx( results, "padp_real"   )
+        indx_itog_mdp_ap = find_field_indx( results, "itog_mdp_ap" )
+        indx_itog_mdp_pa_ap = find_field_indx( results, "itog_mdp_pa_ap" )
+        indx_kod_mdp     = find_field_indx( results, "kod_mdp"     )
+        indx_kod_mdp_pa  = find_field_indx( results, "kod_mdp_pa"  )
+        i = 0
+        for arr in results[1]:
+            if(i>=4):
+                ns          = arr[ indx_ns          ]
+                kod         = arr[ indx_kod         ]
+                nvir        = arr[ indx_nvir        ]
+                npor        = arr[ indx_npor        ]
+                name_schem  = arr[ indx_name_schem  ]
+                itog_mdp    = arr[ indx_itog_mdp    ]
+                itog_mdp_pa = arr[ indx_itog_mdp_pa ]
+                padp_real   = arr[ indx_padp_real   ]
+                itog_mdp_ap = arr[ indx_itog_mdp_ap ]
+                itog_mdp_pa_ap = arr[indx_itog_mdp_pa_ap]
+                kod_mdp     = arr[ indx_kod_mdp     ]
+                kod_mdp_pa  = arr[ indx_kod_mdp_pa  ]
+                if( (ns>0) and (nvir==0) and (npor==0) ):
+                    round_to_dig = 1
+                    logg.info( f"[{ns}] [{name_schem}] kod=[{kod}]  mdp=[{ round(itog_mdp,round_to_dig) }]  mdp_pa=[{ round(itog_mdp_pa,round_to_dig) }]  adp=[{ round(padp_real, round_to_dig) }] itog_mdp_ap=[{itog_mdp_ap}] itog_mdp_pa_ap=[{itog_mdp_pa_ap}] kod_mdp=[{kod_mdp}] kod_mdp_pa=[{kod_mdp_pa}]" )
+            i += 1
+    except Exception as ex:
+        logg.info(f"EXCEPTION: {ex}")
+    except :
+        logg.info('exception xz')
+#---------------------------------------------------------------------------------------------------------
 def tsts_main():
+    tm_start_all      = time.time()
+    tm_start_proc_all = time.process_time()
     dt_string = datetime.now().strftime("res_%d_%m_%Y__%H_%M_%S.%f")[:-3]
     print(f"************************************ {dt_string} ****************************************************")
     #print( "%x" % sys.maxsize, " x644? =", sys.maxsize > 2**32 )
@@ -104,18 +163,47 @@ def tsts_main():
     cnf = read_conf()
     path_tst_dir = cnf['path_tst_dir']
     print( f"path_tst_dir= {path_tst_dir}" )
-    path_tst_dir_ress = path_tst_dir + "/!res/"+dt_string
+    path_tst_dir_ress = path_tst_dir + "/!res/"+dt_string+"/"
     os.makedirs(path_tst_dir_ress)
+    #logging.basicConfig(filename=path_tst_dir_ress+"/_calc_.log", filemode='w', format='[%(asctime)s %(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
+    logging.basicConfig(filename=path_tst_dir_ress+"/_calc_.log", filemode='w', format='[%(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
+    logging.basicConfig(level=logging.NOTSET)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    handler = StreamHandler(stream=sys.stdout)
+    handler.setFormatter(Formatter(fmt='[%(asctime)s: %(levelname)s] %(message)s'))
+    logger.addHandler(handler)
+    logger.warning(f"************************************ {dt_string} ****************************************************")
     tsts = cnf['tsts']
+    i = 0
     for tst in tsts:
-        print(tst)
-        path_file_tst    = path_tst_dir + "/"+tst
-        path_tst_dir_res = path_tst_dir_ress + "/" + os.path.dirname(tst)
+        i += 1
+        tm_start      = time.time()
+        tm_start_proc = time.process_time()
+        logger.info("****************************************************************************************************")
+        logger.info(f"[{i}] from [{len(tsts)}] : {tst}")
+        logger.info("****************************************************************************************************")
+        path_file_tst     = path_tst_dir + "/" + tst                  # in dmp
+        path_tst_dir_out  = path_tst_dir_ress  + os.path.dirname(tst) # out dumps
+        path_tst_dir_res  = path_tst_dir_out + "/calc/"               # wrk folder
         os.makedirs(path_tst_dir_res)
-        #path_file_log= os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".xml"
-        path_file_log= path_tst_dir_res + "/" + Path(path_file_tst).stem + ".log"
-        tst_mdp_file( rastr, path_file_tst, path_file_log )
-    print("")
+        path_file_log     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".log"
+        results           = tst_mdp_file( rastr, path_file_tst, path_tst_dir_out, path_file_log, logger )
+        time_elapsed      = time.time() - tm_start
+        time_elapsed_proc = time.process_time() - tm_start_proc
+        logger.info("----------------------------------------------------------------------------------------------------")
+        logger.info( f"test execution time: { time.strftime( '%H:%M:%S', time.gmtime(time_elapsed) )}   CPU execution time:  {time_elapsed_proc}  " )
+        logger.info("----------------------------------------------------------------------------------------------------")
+        path_file_xml     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".xml" # simple parse out array!
+        if results is None:
+            logger.error("GET NO RESULTS!!")
+            continue
+        results_trace( results, logger ) #parse out array
+    logger.info("************************************** TOTAL **************************************************************")
+    time_elapsed_all      = time.time() - tm_start_all
+    time_elapsed_proc_all = time.process_time() - tm_start_proc_all
+    logger.info( f"TOTAL: execution time: { time.strftime( '%H:%M:%S', time.gmtime(time_elapsed_all) )}   CPU execution time:  {time_elapsed_proc_all}  " )
+    logger.info("***********************************************************************************************************")
 #---------------------------------------------------------------------------------------------------------
 tsts_main()
 
