@@ -10,10 +10,13 @@ from pathlib import Path
 import time
 import logging
 from logging import StreamHandler, Formatter
+from tabulate import tabulate
+tabulate.WIDE_CHARS_MODE = False
 
 #set-executionpolicy remotesigned
 #python -m pip install --upgrade pywin32
 #pip install psutil
+#pip install tabulate
 #---------------------------------------------------------------------------------------------------------
 def Get_RG_REPL():
     return 1
@@ -47,9 +50,11 @@ def rastr_set_val( rastr, namet, namec, val ):
 def tst_mdp_file( rastr, path_file_mdp : str, path_dir_out : str, path_file_log :str, logg ):
     try:
         logg.info(f"read_file_mdp:{path_file_mdp}")
+        logg.info(f"\n <B> <a href=\"{os.path.dirname(path_file_mdp)}\" >  { os.path.dirname(path_file_mdp) } </a> </B>");
         rastr.Load( Get_RG_REPL(), path_file_mdp, '' )
         rastr_set_val(rastr, "ut_vir_common", "kod", 22 )
-        logg.info(f"dir_out: {path_dir_out}   set_path_log:{path_file_log}")
+        logg.info(f"dir_out: {path_dir_out} ")
+        logg.info(f"set_path_log:{path_file_log}")
         rastr_set_val(rastr, "ut_vir_common", "log_path2file", path_file_log )
         path_file_save_1 =  path_dir_out + "/" + Path(path_file_log).stem + "____11111__.os"
         rastr.Save( path_file_save_1, '' )
@@ -119,6 +124,7 @@ def results_trace(results, logg):
         indx_itog_mdp_pa_ap = find_field_indx( results, "itog_mdp_pa_ap" )
         indx_kod_mdp     = find_field_indx( results, "kod_mdp"     )
         indx_kod_mdp_pa  = find_field_indx( results, "kod_mdp_pa"  )
+        data = [[ "ns", "kod", "nvir","npor","name_schem","itog_mdp", "itog_mdp_pa", "padp_real","itog_mdp_ap", "itog_mdp_pa_ap", "kod_mdp",  "kod_mdp_pa"],]
         i = 0
         for arr in results[1]:
             if(i>=4):
@@ -135,9 +141,15 @@ def results_trace(results, logg):
                 kod_mdp     = arr[ indx_kod_mdp     ]
                 kod_mdp_pa  = arr[ indx_kod_mdp_pa  ]
                 if( (ns>0) and (nvir==0) and (npor==0) ):
+                    data.append( [ ns, kod, nvir, npor, name_schem, itog_mdp, itog_mdp_pa, padp_real, itog_mdp_ap, itog_mdp_pa_ap, kod_mdp, kod_mdp_pa ] )
                     round_to_dig = 1
                     logg.info( f"[{ns}] [{name_schem}] kod=[{kod}]  mdp=[{ round(itog_mdp,round_to_dig) }]  mdp_pa=[{ round(itog_mdp_pa,round_to_dig) }]  adp=[{ round(padp_real, round_to_dig) }] itog_mdp_ap=[{itog_mdp_ap}] itog_mdp_pa_ap=[{itog_mdp_pa_ap}] kod_mdp=[{kod_mdp}] kod_mdp_pa=[{kod_mdp_pa}]" )
             i += 1
+        #print(tabulate(data, headers="firstrow", tablefmt='rounded_grid', stralign='center', colalign=("left",) ))
+        print(tabulate( data, headers="firstrow", tablefmt='rounded_grid' ))
+        str_table = tabulate( data, headers='firstrow', tablefmt='html')
+        logg.info( f"\n{ str_table }" )
+        #print(tabulate( data, headers="firstrow", tablefmt='rounded_grid' ))
     except Exception as ex:
         logg.info(f"EXCEPTION: {ex}")
     except :
@@ -166,28 +178,34 @@ def tsts_main():
     path_tst_dir_ress = path_tst_dir + "/!res/"+dt_string+"/"
     os.makedirs(path_tst_dir_ress)
     #logging.basicConfig(filename=path_tst_dir_ress+"/_calc_.log", filemode='w', format='[%(asctime)s %(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
-    logging.basicConfig(filename=path_tst_dir_ress+"/_calc_.log", filemode='w', format='[%(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
+    logging.basicConfig(filename=path_tst_dir_ress+"/_calc_.html", filemode='w', format='[%(name)s %(levelname)s ] %(message)s<br>', datefmt='%Y-%m-%d %H:%M:%S' )
     logging.basicConfig(level=logging.NOTSET)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     handler = StreamHandler(stream=sys.stdout)
     handler.setFormatter(Formatter(fmt='[%(asctime)s: %(levelname)s] %(message)s'))
     logger.addHandler(handler)
-    logger.warning(f"************************************ {dt_string} ****************************************************")
+    logger.info("<h2>")
+    logger.info(f"************************************ {dt_string} ****************************************************")
+    logger.info("</h2>")
     tsts = cnf['tsts']
     i = 0
     for tst in tsts:
+        logger.info("<p>")
         i += 1
         tm_start      = time.time()
         tm_start_proc = time.process_time()
+        logger.info("<h3>")
         logger.info("****************************************************************************************************")
         logger.info(f"[{i}] from [{len(tsts)}] : {tst}")
         logger.info("****************************************************************************************************")
+        logger.info("</h3>")
         path_file_tst     = path_tst_dir + "/" + tst                  # in dmp
         path_tst_dir_out  = path_tst_dir_ress  + os.path.dirname(tst) # out dumps
         path_tst_dir_res  = path_tst_dir_out + "/calc/"               # wrk folder
         os.makedirs(path_tst_dir_res)
         path_file_log     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".log"
+        results           = None
         results           = tst_mdp_file( rastr, path_file_tst, path_tst_dir_out, path_file_log, logger )
         time_elapsed      = time.time() - tm_start
         time_elapsed_proc = time.process_time() - tm_start_proc
@@ -195,10 +213,12 @@ def tsts_main():
         logger.info( f"test execution time: { time.strftime( '%H:%M:%S', time.gmtime(time_elapsed) )}   CPU execution time:  {time_elapsed_proc}  " )
         logger.info("----------------------------------------------------------------------------------------------------")
         path_file_xml     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".xml" # simple parse out array!
+        logger.info(f"\n <B> <a href=\"{os.path.dirname(path_file_tst)}\" >  { os.path.dirname(path_file_tst) } </a> </B>");
         if results is None:
             logger.error("GET NO RESULTS!!")
-            continue
-        results_trace( results, logger ) #parse out array
+        else:
+            results_trace( results, logger ) #parse out array
+        logger.info("</p>")
     logger.info("************************************** TOTAL **************************************************************")
     time_elapsed_all      = time.time() - tm_start_all
     time_elapsed_proc_all = time.process_time() - tm_start_proc_all
@@ -206,5 +226,6 @@ def tsts_main():
     logger.info("***********************************************************************************************************")
 #---------------------------------------------------------------------------------------------------------
 tsts_main()
+
 
 
