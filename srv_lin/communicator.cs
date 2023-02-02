@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 namespace srv_lin;
 public class Ccommunicator: IDisposable
 {
+    private string m_str_name = "noname_yet";
     private ConnectionFactory? m_factory;
     private IConnection? m_connection;
     private IModel? m_channel_events;
@@ -53,33 +54,25 @@ public class Ccommunicator: IDisposable
         m_connection?.Dispose();
         m_connection = null;
     }
-/*
-{"command":"DIR_MAKE",
-"for":"xz",
-"from":"web_s",
-"tm_mark":"2023_1_26___8_56_26_740",
-"pars":["/CALCS/2023_1_26___8_49_30_934"],
-"sign":"unsiggned"
-*/
+
     public class CommandSerialized
     {
-        public string? command { get; set; }
-        public string? to      { get; set; }
-        public string? from    { get; set; }
-        public string? tm_mark { get; set; }
-        public string[]? pars    { get; set; }
-        public string?   sign    { get; set; }
-    }
-
-    public static class enCommands1 
-    {
-        public static readonly string STATE = enCommands.STATE.ToString();
+        public string   command { get; set; } = "";
+        public string   to      { get; set; } = "";
+        public string   from    { get; set; } = "";
+        public string   tm_mark { get; set; } = "";//guid on from
+        public string[] pars    { get; set; } ={""};
+        public string   sign    { get; set; } = "";
     }
 
     public class Command
     {
-        public enCommands command{ get; set; }
-        public string?    pars   { get; set; }
+        public enCommands en_command{ get; set; } = enCommands.ERROR;
+        public string     to        { get; set; } = "";
+        public string     from      { get; set; } = "";
+        public string     tm_mark   { get; set; } = ""; //guid on from
+        public string[]   pars      { get; set; } ={""};
+        public string     sign      { get; set; } = "";
 
         public static enCommands StrToCommand(string? str_command)
         {
@@ -100,18 +93,44 @@ public class Ccommunicator: IDisposable
         {
             if(command_serialized != null)
             {
-                command = StrToCommand(command_serialized.command);
-                if(command != enCommands.ERROR)
+                en_command = StrToCommand(command_serialized.command);
+                if(en_command != enCommands.ERROR)
                 {
-                    pars = new string( command_serialized.pars.ToString());
+                    to      = command_serialized.to;
+                    from    = command_serialized.from;
+                    tm_mark = command_serialized.tm_mark;
+                    pars    = command_serialized.pars;
                 }
             }
             else
             {
-                command = enCommands.ERROR;
-                pars = null;
+                en_command = enCommands.ERROR;
             }
         }
+    }
+
+    public enum enEvents 
+    {
+        ERROR            = -1,
+        NOTIFY           =  1,
+        START            =  2,
+        FINISH           =  3,
+    }
+
+    public class Event
+    {
+        [JsonIgnore]
+        public enEvents en_event        { get; set; } = enEvents.ERROR;
+        [JsonPropertyName("event")]
+        public string str_event         { get{return en_event.ToString();} }
+        public string   to              { get; set; } = "";
+        public string   from            { get; set; } = "";
+        public string   command         { get; set; } = "";
+        
+        public string   tm_mark_command { get; set; } = "";
+        public string   tm_mark         { get; set; } = "";//guid on from
+        public string[] results         { get; set; } ={""};
+        public string   sign            { get; set; } = "";
     }
 
     private int m_n_connection_errors = 0;
@@ -184,24 +203,48 @@ public class Ccommunicator: IDisposable
 
     object m_obj_sync_publish = new Object();
 
-    public int Publish(string strMsg)
+    public int Publish(Ccommunicator.enEvents en_evnt, string[] results)
     {
-        try
+        Ccommunicator.Event evnt = new Ccommunicator.Event();
+        evnt.en_event = en_evnt;
+        evnt.command  = "";
+        evnt.results  = results;
+        return Publish(evnt);
+    }
+
+    public int Publish(Event evnt)
+    {
+        lock(m_obj_sync_publish)
         {
-            lock(m_obj_sync_publish)
+            try
             {
+                evnt.from = m_str_name;
+                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fff");
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json_evnt = JsonSerializer.Serialize(evnt,options);
+                //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
+                Log.Information($"publish to [{m_str_exch_events}] : [{json_evnt}]");
+                MakeExchange( ref m_channel_events, m_str_exch_events );
+                byte[] body = Encoding.UTF8.GetBytes(json_evnt);
+                m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
+
+                /*
                 Log.Information($"publish to [{m_str_exch_events}] : [{strMsg}]");
                 MakeExchange( ref m_channel_events, m_str_exch_events );
                 //DeclareExchange( m_channel_events, m_str_exch_events);
                 //Task ttt = Task.Run(()=>{m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );});
-                byte[] body = Encoding.UTF8.GetBytes(strMsg);
+                string str_msg_pub = $"{m_str_name} about: [{strMsg}] ";
+                //byte[] body = Encoding.UTF8.GetBytes(strMsg);
+                byte[] body = Encoding.UTF8.GetBytes(str_msg_pub);
                 m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
+                */
+            
             }
-        }
-        catch(Exception ex)
-        {
-            m_n_publish_errors++;   
-            Log.Error($"exception [{ex.Message}]");
+            catch(Exception ex)
+            {
+                m_n_publish_errors++;   
+                Log.Error($"exception [{ex.Message}]");
+            }
         }
         return 1;
     }
@@ -217,6 +260,7 @@ public class Ccommunicator: IDisposable
             Log.Error("m_connection != null, trying to Dispose first!");
             Dispose();
         }
+        m_str_name = (par.m_str_name!=null)?par.m_str_name:"name_invalid";
         m_n_consume_errors = 0;
         //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
         m_factory = new ConnectionFactory();

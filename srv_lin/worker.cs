@@ -32,92 +32,7 @@ public class Worker : BackgroundService
         public CancellationToken m_cncl_tkn;
     }
 
-    private int on_GRAM_START()
-    {
-        //=  Task.Run(() => {  CListener.ThreadListen(par, m_logger,  OnCommand) ; } );
-
-        if(m_tskThreadGram!=null)
-        {
-            Log.Error("Gramaphone already runing, will be relaunched");
-            /*m_tskThreadGram.Dispose();
-            m_tskThreadGram = null;*/
-            //return -100;
-            on_GRAM_STOP();
-        }
-        m_cnc_tkn_src.Dispose();
-        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
-        m_tskThreadGram = Task.Run(()=>
-        {
-            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_communicator );
-        });
-        return 1;
-    }
-
-    private int on_GRAM_STOP()
-    {
-        if(m_tskThreadGram!=null)
-        {
-            m_cnc_tkn_src.Cancel();
-            bool blRes = false;
-            blRes = m_tskThreadGram.Wait(3000);
-            if(blRes==true)
-            {
-                Log.Warning("Task finished!");
-                m_cnc_tkn_src.Dispose();
-                m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
-                m_tskThreadGram = null;
-            }
-            else
-            {
-                Log.Error("Task not finished in time!");
-            }
-            //m_tskThreadGram;
-        }
-        else
-        {
-            Log.Warning("No gramaphone launched");
-        }
-        
-        return 1;
-    }
-
-    private int on_GRAM_STATE()
-    {
-       int nRes = 0;
-       if(m_tskThreadGram!=null)
-       {
-            string strState = ($"OnGramState() : Status-> {m_tskThreadGram.Status}  Excp->{m_tskThreadGram.Exception }");
-            switch (m_tskThreadGram.Status)
-            {
-                case TaskStatus.RanToCompletion:
-                    Log.Information($"OnGramState() : RanToCompletion.Result {m_tskThreadGram.Result}");
-                    strState += $": RanToCompletion.Result {m_tskThreadGram.Result}";
-                    nRes = 1;
-                break;
-
-                case TaskStatus.WaitingForActivation:
-                    Log.Information($"OnGramState() : WaitingForActivations -> busy ");           
-                    nRes = 2;
-                break;
-
-                case TaskStatus.Faulted:
-                    Log.Information($"OnGramState() : Faulted ");
-                    nRes = -13;
-                break;
-            }
-       }
-       else
-       {
-            Log.Warning("NO GRAMAPHONE");
-       }
-       return 1;
-    }
-
-    private int on_FILE_UPLOAD(string str_params)
-    {
-        return 1;
-    }
-
+ 
     private void Tst_DownloadFileFTP()
     {
         try
@@ -224,16 +139,120 @@ public class Worker : BackgroundService
     }
 
     /*
-        STATE            = 1,
-        PROC_RUN         = 2,
-        PROC_EXTERMINATE = 3,
-        DIR_MAKE       = 4,
-        CLEAR_DIR        = 5,
-        GRAM_START       = 6,
-        GRAM_STOP        = 7,
-        GRAM_KIT         = 8,
-        GRAM_STATE       = 9,
+
+        STATE            =  1,
+        PROC_RUN         =  2,
+        PROC_EXTERMINATE =  3,
+        DIR_MAKE         =  4,
+        GRAM_START       =  6,
+        GRAM_STOP        =  7,
+        GRAM_KIT         =  8,
+        GRAM_STATE       =  9,
+        FILE_UPLOAD      =  10,
+        FILE_DOWNLOAD    =  11,
+
     */
+
+    public int on_STATE(string[] str_params)
+    {
+        return -100500;
+    }
+    public int on_PROC_RUN(string[] str_params)
+    {
+        return -100500;
+    }
+    public int on_PROC_EXTERMINATE(string[] str_params)
+    {
+        return -100500;
+    }
+    public int on_DIR_MAKE(string[] str_params)
+    {
+        return -100500;
+    }
+    private int on_GRAM_START(string[] str_params)
+    {
+        if(m_tskThreadGram!=null)
+        {
+            Log.Error("Gramaphone already runing, will be relaunched");
+            on_GRAM_STOP(new string[]{""});
+        }
+        m_cnc_tkn_src.Dispose();
+        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
+        m_tskThreadGram = Task.Run(()=>
+        {
+            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_communicator );
+        });
+        return 1;
+    }
+    private int on_GRAM_STOP(string[] str_params)
+    {
+        if(m_tskThreadGram!=null)
+        {
+            m_cnc_tkn_src.Cancel();
+            bool blRes = false;
+            blRes = m_tskThreadGram.Wait(3000);
+            if(blRes==true)
+            {
+                Log.Warning("Task finished!");
+                m_cnc_tkn_src.Dispose();
+                m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
+                m_tskThreadGram = null;
+            }
+            else
+            {
+                Log.Error("Task not finished in time!");
+            }
+            //m_tskThreadGram;
+        }
+        else
+        {
+            Log.Warning("No gramaphone launched");
+        }
+        return 1;
+    }
+    private int on_GRAM_STATE(string[] str_params)
+    {
+       int nRes = 0;
+       if(m_tskThreadGram!=null)
+       {
+            string strState = ($"OnGramState() : Status-> {m_tskThreadGram.Status}  Excp->{m_tskThreadGram.Exception }");
+            switch (m_tskThreadGram.Status)
+            {
+                case TaskStatus.RanToCompletion:
+                    Log.Information($"OnGramState() : RanToCompletion.Result {m_tskThreadGram.Result}");
+                    strState += $": RanToCompletion.Result {m_tskThreadGram.Result}";
+                    nRes = 1;
+                break;
+
+                case TaskStatus.WaitingForActivation:
+                    Log.Information($"OnGramState() : WaitingForActivations -> busy ");           
+                    nRes = 2;
+                break;
+
+                case TaskStatus.Faulted:
+                    Log.Information($"OnGramState() : Faulted ");
+                    nRes = -13;
+                break;
+            }
+       }
+       else
+       {
+            Log.Warning("NO GRAMAPHONE");
+       }
+       return 1;
+    }
+    public int on_GRAM_KIT(string[] str_params)
+    {
+        return -100500;
+    }
+    private int on_FILE_UPLOAD(string[] str_params)
+    {
+        return -100500;
+    }
+    public int on_FILE_DOWNLOAD(string[] str_params)
+    {
+        return -100500;
+    }
 
     public int OnCommand( Ccommunicator.Command command )
     {
@@ -241,33 +260,40 @@ public class Worker : BackgroundService
         Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
         lock(_obj_sync_command)
         {
-            Log.Information($"comm : {command.command.ToString()} - pars : {command.pars}");
-            //m_writer.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
-            m_communicator.Publish($"comm : {command.command.ToString()} - pars : {command.pars}");
-            switch(command.command)
+            Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(",",command.pars)}");
+            Ccommunicator.Event evnt_start = new Ccommunicator.Event();
+            evnt_start.en_event        = Ccommunicator.enEvents.START;
+            evnt_start.command         = command.en_command.ToString() + " : " + String.Join(",",command.pars);
+            evnt_start.tm_mark_command = command.tm_mark;
+            m_communicator?.Publish( evnt_start );
+            switch(command.en_command)
             {
                 case Ccommunicator.enCommands.GRAM_START:
-                    nRes = on_GRAM_START();                      
+                    nRes = on_GRAM_START(command.pars);                      
                 break;
 
                 case Ccommunicator.enCommands.GRAM_STATE:
-                    nRes = on_GRAM_STATE();
+                    nRes = on_GRAM_STATE(command.pars);
                 break;
 
                 case Ccommunicator.enCommands.GRAM_STOP:
-                    nRes = on_GRAM_STOP();
+                    nRes = on_GRAM_STOP(command.pars);
                 break;
 
                 case Ccommunicator.enCommands.FILE_UPLOAD:
                     nRes = on_FILE_UPLOAD(command.pars);
                 break;
-
                 
                 default:
                     nRes = -1;
                     Log.Error($"unhadled command!");
                 break;
             }
+            Ccommunicator.Event evnt_finish = new Ccommunicator.Event();
+            evnt_finish.en_event = Ccommunicator.enEvents.FINISH;
+            evnt_finish.command = command.en_command.ToString();
+            evnt_finish.tm_mark_command = command.tm_mark;
+            m_communicator?.Publish( evnt_finish );
         }
         return 1;
     }

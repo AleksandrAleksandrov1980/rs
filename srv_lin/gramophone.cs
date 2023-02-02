@@ -91,10 +91,11 @@ public class CGramophone
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             //Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-            Communicator.Publish($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            Communicator.Publish( Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
             Process? process = Process.Start(psi);
             if(process == null)
             {
+                Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
                 Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}]");
                 return -2;
             }
@@ -105,17 +106,20 @@ public class CGramophone
             if (blRes != true)
             {
                 //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
+                Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{ $"TimeOut Pid {process.Id}" } );
                 Log.Error($"TimeOut Pid {process.Id}");
                 return -3;// timeout
             }
             int nExitCode = process.ExitCode;
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
+            Communicator.Publish( Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
             return nExitCode;
         }
         catch(Exception ex)
         {
             //Console.Write($"Error {ex.Message}\n");
+            Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
             Log.Error($"\tPlay.Exception {ex.Message}");
             //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
             return -1;
