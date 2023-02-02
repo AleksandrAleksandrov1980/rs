@@ -16,7 +16,8 @@
         let el = document.getElementById("path_to_dir_mk");
         el.value = "/CALCS/"+GetTmStamp();
         document.getElementById("path_to_dir_upload").value = el.value;
-        document.getElementById("path_to_file_download").value = el.value + "/results.xml";
+        //document.getElementById("path_to_file_download").value = el.value + "/results.xml";
+        document.getElementById("path_to_file_download").value = el.value + "/res";
       }, false);
     
       class CStompHlp
@@ -213,7 +214,7 @@
         let el_path_to_dir_mk = document.getElementById("path_to_dir_mk");
         let el_path_to_dir_upload = document.getElementById("path_to_dir_upload");
         el_path_to_dir_upload.value = el_path_to_dir_mk.value; 
-        document.getElementById("path_to_file_download").value = document.getElementById("path_to_dir_mk").value + "/results.xml"
+        document.getElementById("path_to_file_download").value = document.getElementById("path_to_dir_mk").value + "/res"
       }
        
       function CheckFtp(){

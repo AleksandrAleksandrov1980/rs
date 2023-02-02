@@ -13,6 +13,8 @@ public class Worker : BackgroundService
     public string? m_str_dir_wrk;
     private object _obj_sync_command = new Object();
     public Ccommunicator? m_communicator;
+    public const string m_str_error   = "error";
+    public const string m_str_success = "success";
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
@@ -153,21 +155,105 @@ public class Worker : BackgroundService
 
     */
 
-    public int on_STATE(string[] str_params)
+    public List<string> on_STATE(string[] str_params)
     {
-        return -100500;
+        return new List<string>{ m_str_success };
     }
-    public int on_PROC_RUN(string[] str_params)
+    public List<string> on_PROC_RUN(string[] str_params)
     {
-        return -100500;
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = str_params[0];
+            string strArgs = "";
+            if(str_params.Length > 1)
+            {
+                for(int i = 1 ; i<str_params.Length ; i++ )
+                {
+                    strArgs += str_params[i];
+                    strArgs += " ";
+                }
+            }
+            psi.Arguments = strArgs;
+            Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            //Environment.ExpandEnvironmentVariables(@"%SystemRoot%\system32\cmdkey.exe");
+            Process? process = Process.Start(psi);
+            if( process == null )
+            {
+                ls_ress.Add($"{m_str_error}:can't lunch [{psi.FileName} {psi.Arguments}]");
+                Log.Error(ls_ress[0]);
+            }
+            ls_ress.Add($"{m_str_success}: [{process.Id}] lunched [{psi.FileName} {psi.Arguments}]");
+            ls_ress.Add($"{process.Id}");
+         }
+        catch(Exception ex)
+        {
+            ls_ress.Add($"{m_str_error}:excption { ex.Message }");
+            Log.Error(ls_ress[ls_ress.Count-1]);
+        }
+        return ls_ress;
     }
-    public int on_PROC_EXTERMINATE(string[] str_params)
+
+    public Process? GetProcByID(int id)
     {
-        return -100500;
+        Process[] processlist = Process.GetProcesses();
+        //foreach(var proc in processlist ){ Log.Information($"{proc.Id}  :  {proc.ProcessName}");
+        return processlist.FirstOrDefault(pr => pr.Id == id);
     }
-    public int on_DIR_MAKE(string[] str_params)
+
+    public List<string> on_PROC_EXTERMINATE(string[] str_params)
     {
-        return -100500;
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            bool isNumeric = int.TryParse( str_params[0], out int n_pid );
+            if(isNumeric == false)
+                throw new Exception($"can't parse {str_params[0]}");
+            //!!! theris en error in this function! Process p = Process.GetProcessById(n_pid);
+            Process? p2 = GetProcByID(n_pid);
+            if(p2 == null)
+                throw new Exception($"no such process {str_params[0]}");
+            p2.Kill(true);
+            bool bl_exit = p2.WaitForExit(1000);
+            if(bl_exit == true)
+            {
+                ls_ress.Add($"{m_str_success}: proc_kill: {n_pid}");
+                Log.Information(ls_ress[ls_ress.Count-1]);
+            }
+            else
+            {
+                ls_ress.Add($"{m_str_error}: proc_kill: {n_pid}");
+                Log.Error(ls_ress[ls_ress.Count-1]);
+            }
+        }
+        catch(Exception ex)
+        {
+            ls_ress.Add($"{m_str_error}: exception: {ex.Message}");
+            Log.Error(ls_ress[ls_ress.Count-1]);
+        }
+        return ls_ress;
+    }
+    
+    public List<string> on_DIR_MAKE(string[] str_params)
+    {
+        List<string> ls_ress = new List<string>();
+        foreach(var str_param in str_params)
+        {
+            try
+            {
+                string str_path_to_new_dir = m_str_dir_wrk +"/" +str_param;
+                System.IO.Directory.CreateDirectory(str_path_to_new_dir);
+                Log.Information($"on_DIR_MAKE: make:{str_path_to_new_dir}");
+                ls_ress.Add($"{m_str_success}: create dir {str_path_to_new_dir}");
+            }
+            catch(Exception ex ) 
+            {
+                Log.Error($"on_DIR_MAKE: Exception: {ex.Message}");
+                ls_ress.Add($"{m_str_error}:{ex.Message}");
+            }
+        }
+        return ls_ress;
     }
     private int on_GRAM_START(string[] str_params)
     {
@@ -202,7 +288,6 @@ public class Worker : BackgroundService
             {
                 Log.Error("Task not finished in time!");
             }
-            //m_tskThreadGram;
         }
         else
         {
@@ -245,13 +330,56 @@ public class Worker : BackgroundService
     {
         return -100500;
     }
-    private int on_FILE_UPLOAD(string[] str_params)
+    private List<string>  on_FILE_UPLOAD(string[] str_params)
     {
-        return -100500;
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            string str_from  = str_params[0];
+            string str_namef = Path.GetFileName(str_from);
+            string str_to    = m_str_dir_wrk+"/"+str_params[1]+ "/"+str_namef;
+            FileInfo fi1 = new FileInfo(str_from); 
+            File.Copy( str_from, str_to, true );
+            FileInfo fi2 = new FileInfo(str_to); 
+            if(fi1.Length != fi2.Length)
+            {
+                throw new Exception($"wrong file size!");
+            }
+            Log.Information($"copyed {str_from} to {str_to}");
+            ls_ress.Add($"{m_str_success}: copyed {str_from} -> {str_to}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message}");
+            ls_ress.Add($"{m_str_error}:{ex.Message}");
+        }
+        return ls_ress;
     }
-    public int on_FILE_DOWNLOAD(string[] str_params)
+
+    public List<string> on_FILE_DOWNLOAD(string[] str_params)
     {
-        return -100500;
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            string str_namef = Path.GetFileName(str_params[0]);
+            string str_from  = m_str_dir_wrk+"/"+str_params[0];
+            string str_to    = str_params[1]+ "\\"+str_namef;
+            FileInfo fi1 = new FileInfo(str_from); 
+            File.Copy( str_from, str_to, true );
+            FileInfo fi2 = new FileInfo(str_to); 
+            if(fi1.Length != fi2.Length)
+            {
+                throw new Exception($"wrong file size!");
+            }
+            Log.Information($"copyed {str_from} to {str_to}");
+            ls_ress.Add($"{m_str_success}: copyed {str_from} -> {str_to}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message}");
+            ls_ress.Add($"{m_str_error}:{ex.Message}");
+        }
+        return ls_ress;
     }
 
     public int OnCommand( Ccommunicator.Command command )
@@ -260,14 +388,31 @@ public class Worker : BackgroundService
         Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
         lock(_obj_sync_command)
         {
-            Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(",",command.pars)}");
+            Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(", ",command.pars)}");
             Ccommunicator.Event evnt_start = new Ccommunicator.Event();
             evnt_start.en_event        = Ccommunicator.enEvents.START;
-            evnt_start.command         = command.en_command.ToString() + " : " + String.Join(",",command.pars);
+            evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
             evnt_start.tm_mark_command = command.tm_mark;
             m_communicator?.Publish( evnt_start );
+            List<string> ls_ress = new List<string>();
             switch(command.en_command)
             {
+                case Ccommunicator.enCommands.STATE:
+                    ls_ress = on_STATE(command.pars);                      
+                break;
+
+                case Ccommunicator.enCommands.PROC_RUN:
+                    ls_ress = on_PROC_RUN(command.pars);                      
+                break;
+
+                case Ccommunicator.enCommands.PROC_EXTERMINATE:
+                    ls_ress = on_PROC_EXTERMINATE(command.pars);                      
+                break;
+
+                case Ccommunicator.enCommands.DIR_MAKE:
+                    ls_ress = on_DIR_MAKE(command.pars);                      
+                break;
+
                 case Ccommunicator.enCommands.GRAM_START:
                     nRes = on_GRAM_START(command.pars);                      
                 break;
@@ -276,23 +421,32 @@ public class Worker : BackgroundService
                     nRes = on_GRAM_STATE(command.pars);
                 break;
 
+                case Ccommunicator.enCommands.GRAM_KIT:
+                    nRes = on_GRAM_KIT(command.pars);
+                break;
+
                 case Ccommunicator.enCommands.GRAM_STOP:
                     nRes = on_GRAM_STOP(command.pars);
                 break;
 
                 case Ccommunicator.enCommands.FILE_UPLOAD:
-                    nRes = on_FILE_UPLOAD(command.pars);
+                    ls_ress = on_FILE_UPLOAD(command.pars);
+                break;
+
+                case Ccommunicator.enCommands.FILE_DOWNLOAD:
+                    ls_ress = on_FILE_DOWNLOAD(command.pars);
                 break;
                 
                 default:
                     nRes = -1;
-                    Log.Error($"unhadled command!");
+                    Log.Error($"unhadled command : {command.en_command.ToString()}!");
                 break;
             }
             Ccommunicator.Event evnt_finish = new Ccommunicator.Event();
             evnt_finish.en_event = Ccommunicator.enEvents.FINISH;
             evnt_finish.command = command.en_command.ToString();
             evnt_finish.tm_mark_command = command.tm_mark;
+            evnt_finish.results = ls_ress.ToArray();
             m_communicator?.Publish( evnt_finish );
         }
         return 1;

@@ -126,7 +126,6 @@ public class Ccommunicator: IDisposable
         public string   to              { get; set; } = "";
         public string   from            { get; set; } = "";
         public string   command         { get; set; } = "";
-        
         public string   tm_mark_command { get; set; } = "";
         public string   tm_mark         { get; set; } = "";//guid on from
         public string[] results         { get; set; } ={""};
@@ -227,18 +226,6 @@ public class Ccommunicator: IDisposable
                 MakeExchange( ref m_channel_events, m_str_exch_events );
                 byte[] body = Encoding.UTF8.GetBytes(json_evnt);
                 m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
-
-                /*
-                Log.Information($"publish to [{m_str_exch_events}] : [{strMsg}]");
-                MakeExchange( ref m_channel_events, m_str_exch_events );
-                //DeclareExchange( m_channel_events, m_str_exch_events);
-                //Task ttt = Task.Run(()=>{m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );});
-                string str_msg_pub = $"{m_str_name} about: [{strMsg}] ";
-                //byte[] body = Encoding.UTF8.GetBytes(strMsg);
-                byte[] body = Encoding.UTF8.GetBytes(str_msg_pub);
-                m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
-                */
-            
             }
             catch(Exception ex)
             {
