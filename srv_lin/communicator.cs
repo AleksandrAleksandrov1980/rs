@@ -5,29 +5,22 @@ using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Runtime.Serialization;
+using System.Net;
+using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace srv_lin;
 public class Ccommunicator: IDisposable
 {
-    private string m_str_name = "noname_yet";
+    private string m_str_name     = "noname_yet";
+    public string m_str_host_name = "get_host_name_err";   
+    public string m_str_host_ip   = "get_host_ip_err";   
+    public int    m_n_pid = -1;
     private ConnectionFactory? m_factory;
     private IConnection? m_connection;
     private IModel? m_channel_events;
     private string? m_str_exch_events;
     public delegate int OnCommand( Command command );
-
-    /*
-        STATE            : "STATE",
-        PROC_RUN         : "PROC_RUN",
-        PROC_EXTERMINATE : "PROC_EXTERMINATE",
-        GRAM_START       : "GRAM_START",
-        GRAM_STOP        : "GRAM_STOP",
-        GRAM_KIT         : "GRAM_KIT",
-        GRAM_STATE       : "GRAM_STATE",
-        FILE_UPLOAD      : "FILE_UPLOAD",
-        FILE_DOWNLOAD    : "FILE_DOWNLOAD",
-        DIR_MAKE         : "DIR_MAKE",
-    */
 
     public enum enCommands 
     {
@@ -211,14 +204,46 @@ public class Ccommunicator: IDisposable
         return Publish(evnt);
     }
 
+    public string GetLocalHostName()
+    {
+        string nameh = "get_name_error";
+        try 
+        {
+            nameh = Dns.GetHostName();
+        }
+        catch(Exception e)
+        {
+        }
+        return nameh;
+    }
+
+    public string GetIpv4()
+    {
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+        }
+        catch(Exception ex )
+        {
+        }
+        return "get_ip_error";
+    }
+
     public int Publish(Event evnt)
     {
         lock(m_obj_sync_publish)
         {
             try
             {
-                evnt.from = m_str_name;
-                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fff");
+                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
+                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json_evnt = JsonSerializer.Serialize(evnt,options);
                 //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
@@ -247,8 +272,11 @@ public class Ccommunicator: IDisposable
             Log.Error("m_connection != null, trying to Dispose first!");
             Dispose();
         }
-        m_str_name = (par.m_str_name!=null)?par.m_str_name:"name_invalid";
+        m_str_name      = (par.m_str_name!=null)?par.m_str_name:"name_invalid";
+        m_str_host_name = GetLocalHostName();
+        m_str_host_ip   = GetIpv4();
         m_n_consume_errors = 0;
+        m_n_pid            = Process.GetCurrentProcess().Id;
         //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
         m_factory = new ConnectionFactory();
         m_factory.HostName    = par.m_str_host;
