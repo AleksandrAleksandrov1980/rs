@@ -18,6 +18,10 @@
         document.getElementById("path_to_dir_upload").value = el.value;
         //document.getElementById("path_to_file_download").value = el.value + "/results.xml";
         document.getElementById("path_to_file_download").value = el.value + "/res";
+        //<input type="text" id="path_to_file_exec" size="30" value="C:/projects13/RastrWin/main/RastrWin/Release/master.exe"> 
+        //<input type="text" id="file_exec_params" size="30" value="-j222 D:/Vms/SHARA/crosses/IA/2023_02_01_file2/calc//s1.log"> 
+        document.getElementById("path_to_file_exec").value = "/home/ustas/projects/git_r/Astral/build/astra";
+        document.getElementById("file_exec_params").value = "-se /var/rs_wrk/CALCS/2023_2_4___7_18_5_997/roc_debug_from_SQL_2.os";
       }, false);
     
       class CStompHlp
