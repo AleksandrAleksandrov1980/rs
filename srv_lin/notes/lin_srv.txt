@@ -1,3 +1,23 @@
+
+!!! log also writed at "/var/log/daemon.log"
+sudo nano "daemon.log" "daemon.log.1" "daemon.log.2.gz" "daemon.log.3.gz"
+!!!  753M фев  6 11:24 daemon.log
+sudo truncate /var/log/daemon.log --size 0
+sudo truncate /var/log/daemon.log.1 --size 0
+
+!!! log also writed at "/var/log/syslog.log"!753M фев  6 11:24 daemon.log
+!!!  525M фев  6 00:00 syslog.1
+!!! truncate not work on it!!
+sudo rm /var/log/syslog.log 
+sudo rm /var/log/syslog.log.1
+//! or
+sudo -i
+cat /dev/null > /var/log/syslog
+cat /dev/null > /var/log/syslog.1
+
+ ls -l --block-size=1M
+
+
 https://swimburger.net/blog/dotnet/how-to-run-a-dotnet-core-console-app-as-a-service-using-systemd-on-linux
 cd  /home/ustas/projects/git_main/rs/srv_lin/publish
 dotnet publish "srv_lin.csproj" -c Release -o /home/ustas/projects/git_main/rs/srv_lin/publish -r linux-x64 --self-contained -p:PublishTrimmed=true
