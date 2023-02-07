@@ -181,10 +181,10 @@ public class Worker : BackgroundService
             Process? process = Process.Start(psi);
             if( process == null )
             {
-                ls_ress.Add($"{m_str_error}:can't lunch [{psi.FileName} {psi.Arguments}]");
+                ls_ress.Add($"{m_str_error}:can't launch [{psi.FileName} {psi.Arguments}]");
                 Log.Error(ls_ress[0]);
             }
-            ls_ress.Add($"{m_str_success}: [{process.Id}] lunched [{psi.FileName} {psi.Arguments}]");
+            ls_ress.Add($"{m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
             ls_ress.Add($"{process.Id}");
          }
         catch(Exception ex)
