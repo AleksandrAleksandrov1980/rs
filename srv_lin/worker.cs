@@ -140,21 +140,6 @@ public class Worker : BackgroundService
          }
     }
 
-    /*
-
-        STATE            =  1,
-        PROC_RUN         =  2,
-        PROC_EXTERMINATE =  3,
-        DIR_MAKE         =  4,
-        GRAM_START       =  6,
-        GRAM_STOP        =  7,
-        GRAM_KIT         =  8,
-        GRAM_STATE       =  9,
-        FILE_UPLOAD      =  10,
-        FILE_DOWNLOAD    =  11,
-
-    */
-
     public List<string> on_STATE(string[] str_params)
     {
         return new List<string>{ m_str_success };
@@ -184,9 +169,12 @@ public class Worker : BackgroundService
                 ls_ress.Add($"{m_str_error}:can't launch [{psi.FileName} {psi.Arguments}]");
                 Log.Error(ls_ress[0]);
             }
-            ls_ress.Add($"{m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
-            ls_ress.Add($"{process.Id}");
-         }
+            else
+            {
+                ls_ress.Add($"{m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
+                ls_ress.Add($"{process.Id}");
+            }
+        }
         catch(Exception ex)
         {
             ls_ress.Add($"{m_str_error}:excption { ex.Message }");
