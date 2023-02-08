@@ -183,7 +183,7 @@ public class Ccommunicator: IDisposable
             }
             exchange = m_connection.CreateModel();
             Log.Warning($"EXCHANGE_ declare-> [{str_exch_name}]");
-            exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+            exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:false );
             Log.Information($"EXCHANGE_ declared-> [{str_exch_name}]");
         }
         catch(Exception ex)
@@ -296,7 +296,7 @@ public class Ccommunicator: IDisposable
         using(IModel channel_commands = m_connection.CreateModel())
         {
             Log.Warning($"EXCHANGE_COMMANDS-> [{par.m_str_exch_commands}]");
-            channel_commands.ExchangeDeclare( exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:true );
+            channel_commands.ExchangeDeclare( exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:false );
             var queue_name = channel_commands.QueueDeclare().QueueName;
             channel_commands.QueueBind( queue: queue_name, exchange: par.m_str_exch_commands, routingKey: "" );
             Log.Information($"Waiting for commands queue [{queue_name}]");
