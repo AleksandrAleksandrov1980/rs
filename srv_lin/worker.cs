@@ -16,6 +16,11 @@ public class Worker : BackgroundService
     public const string m_str_error   = "error";
     public const string m_str_success = "success";
 
+    private string m_str_ftp_host = "";
+    private string m_str_ftp_user = "";
+    private string m_str_ftp_pass = "";
+    private int    m_n_ftp_port   = -13;
+
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
         m_logger = logger;
@@ -32,112 +37,6 @@ public class Worker : BackgroundService
         public string? m_str_user = ""; 
         public string? m_str_pass = "";
         public CancellationToken m_cncl_tkn;
-    }
-
- 
-    private void Tst_DownloadFileFTP()
-    {
-        try
-        {
-            // create an FTP client and specify the host, username and password
-            // (delete the credentials to use the "anonymous" account)
-            //var client = new FtpClient("123.123.123.123", "david", "pass123");
-            //var client = new FtpClient("192.168.1.59", "anon", "anon");
-            FtpClient ftp_client = new FtpClient("192.168.1.59", "anon", "anon",21);
-            //          ftp_client.Config.DataConnectionEncryption = false;
-            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Implicit;
-            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-            //            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-            ftp_client.Config.FXPDataType = FtpDataType.Binary; 
-            //       ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
-            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-            //ftp_client.Config.EncryptionMode = FtpEncryptionMode.Explicit;
-            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
-            //        ftp_client.Config.DataConnectionEncryption = false;
-            ftp_client.Config.DownloadDataType = FtpDataType.Binary;
-            //      ftp_client.Config.SslProtocols = System.Security.Authentication.SslProtocols.None;
-            ftp_client.Config.ValidateCertificateRevocation = false;
-            //ftp_client.SslProtocolActive
-            //ftp_client.Config.ValidateAnyCertificate = false;
-            System.Security.Cryptography.X509Certificates.X509CertificateCollection x = ftp_client.Config.ClientCertificates;
-            //ftp_client.AutoDetect
-            //ftp_client.Connect()
-            List<FtpProfile> lfp = ftp_client.AutoDetect(false);
-            //ftp_client.Config.DataConnectionType = FtpDataConnectionType.PASV;
-            ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
-            ftp_client.Config.LogToConsole = true;
-            ftp_client.ValidateCertificate += (FluentFTP.Client.BaseClient.BaseFtpClient control, FtpSslValidationEventArgs e)=>{ 
-                e.Accept = true;
-            };
-            //ftp_client.ValidateCertificate 
-            //ftp_client.Config.DataConnectionEncryption = true;
-            //ftp_client.Config.EnableThreadSafeDataConnections = false;
-            //FtpConfig ftp_conf = new FtpConfig();
-            //ftp_conf.DataConnectionType = FtpDataConnectionType.AutoPassive;
-            // connect to the server and automatically detect working FTP settings
-            //FtpProfile ftp_profile = ftp_client.AutoConnect();// вот это к херам переопределяет по новой все настройки в соотвествии с её приоритетами!!! от SFTP -> plain FTP
-            FtpProfile ftp_profile = new FtpProfile();
-            ftp_profile.Encryption = FtpEncryptionMode.None;
-            ftp_client.Connect();
-            // get a list of files and directories in the "/htdocs" folder
-            foreach (FtpListItem item in ftp_client.GetListing("/")) {
-                // if this is a file
-                if (item.Type == FtpObjectType.File) {
-                    // get the file size
-                    long size = ftp_client.GetFileSize(item.FullName);
-                    Log.Information($"{item.FullName} : size:{size}");
-                    // calculate a hash for the file on the server side (default algorithm)
-                    //FtpHash hash = ftp_client.GetChecksum(item.FullName); // FILEZILLA так не умеет
-                }
-                // get modified date/time of the file or folder
-                DateTime time = ftp_client.GetModifiedTime(item.FullName);
-            }
-            // download the file again
-            ftp_client.DownloadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_1");
-            ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
-            // disconnect! good bye!
-            ftp_client.Disconnect();
-        }
-        catch( Exception ex)
-        {
-            Log.Error($"ftp: {ex.Message}");
-        }
-
-        return;
-        //https://stackoverflow.com/questions/860638/how-do-i-create-a-directory-on-ftp-server-using-c
-        System.Net.WebRequest frequest = System.Net.WebRequest.Create("ftp://192.168.1.59/");
-        //frequest.Method = System.Net.WebRequestMethods.Ftp.ListDirectory;
-        frequest.Method = System.Net.WebRequestMethods.Ftp.ListDirectoryDetails;
-        frequest.Credentials = new System.Net.NetworkCredential("anon", "");
-        using (var resp = (System.Net.FtpWebResponse) frequest.GetResponse())
-        {
-            Console.WriteLine(resp.StatusCode);
-            Stream responseStream = resp.GetResponseStream();
-            StreamReader reader = new StreamReader(responseStream);
-            string str = reader.ReadToEnd();
-            //Console.WriteLine(reader.ReadToEnd());
-            Log.Information(str);
-        }
-
-        //https://stackoverflow.com/questions/2781654/ftpwebrequest-download-file
-        //string inputfilepath = @"C:\Temp\FileName.exe";
-        string fileDownload = "compile.tar";
-        string inputfilepath = @"C:\rs_wrk\"+fileDownload;
-        string ftphost = "192.168.1.59";
-        string ftpfilepath = "/"+fileDownload;
-        string ftpfullpath = "ftp://" + ftphost + ftpfilepath;
-        using (System.Net.WebClient request = new System.Net.WebClient())
-        {
-            request.Credentials = new System.Net.NetworkCredential("anon", "");
-            //request.UploadFile(ftpfullpath+"_1",inputfilepath);
-            byte[] fileData = request.DownloadData(ftpfullpath);
-            using (FileStream file = File.Create(inputfilepath))
-            {
-                file.Write(fileData, 0, fileData.Length);
-                file.Close();
-            }
-            Log.Information("Download Complete");
-         }
     }
 
     public List<string> on_STATE(string[] str_params)
@@ -341,7 +240,8 @@ public class Worker : BackgroundService
 
     private void ftp_hlp( _enFtpDirection en_ftp_dir, string str_path_from, string str_path_to )
     {
-        using(FtpClient ftp_client = new FtpClient( "192.168.1.59", "anon", "anon", 21 ) )
+        //using(FtpClient ftp_client = new FtpClient( "192.168.1.59", "anon", "anon", 21 ) )
+        using(FtpClient ftp_client = new FtpClient( m_str_ftp_host, m_str_ftp_user, m_str_ftp_pass, m_n_ftp_port ) )
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -555,6 +455,10 @@ public class Worker : BackgroundService
                 m_logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
                return;
             }
+            m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
+            m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
+            m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
+            m_n_ftp_port   = m_configuration.GetValue<int?>("r_params:ftp:port") ?? -1;
             m_logger.LogInformation($"create dir:{m_str_dir_wrk} ");
             System.IO.Directory.CreateDirectory(m_str_dir_wrk);
             string str_dir_log = m_str_dir_wrk+"/logs/";
@@ -570,7 +474,6 @@ public class Worker : BackgroundService
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
             string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            //Tst_DownloadFileFTP();
             
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(m_logger);
@@ -603,6 +506,11 @@ public class Worker : BackgroundService
             strTmp += $"q_exch_evts : {par.m_str_exch_events}\n"; 
             strTmp += $"q_user      : {par.m_str_user}\n"; 
             //m_logger.LogWarning($" : {str_q_log_pass}");
+            strTmp += $"--------------------------------------------------------------------\n" ; 
+            strTmp += $"ftp.host      : {m_str_ftp_host}\n"; 
+            strTmp += $"ftp.user      : {m_str_ftp_user}\n";
+            //strTmp += $"ftp.pass      : {m_str_ftp_host}\n"; 
+            strTmp += $"ftp.port      : {m_n_ftp_port}\n";  
             strTmp += $"--------------------------------------------------------------------\n" ; 
             m_logger.LogWarning(strTmp);
             Log.Warning(strTmp);
