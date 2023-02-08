@@ -143,17 +143,18 @@ sokjs-->
           <!--FILE_UPLOAD-->
           <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
           <!--<input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res"> -->
-          <input type="text" id="path_to_file_upload" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res"> 
+          <!--<input type="text" id="path_to_file_upload" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res"> -->
+          <input type="text" id="path_to_file_upload" size="50" value="C:\rs_wrk\res">
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
-            отправить файл в папку
+            &darr; отправить файл в папку
           </button> <br>
           <input type="text" id="path_to_dir_upload" size="50" >
           <!--PROC_RUN-->
           <p><b>путь к программе в рабочем каталоге сервера (формат /папка1/папка2/программа): + параметры программы</b><br>
           <!-- <input type="text" id="path_to_file_exec" size="30" value="/CALC/astra"> -->
           <!-- <input type="text" id="file_exec_params" size="30" value="1 s"> -->
-          <input type="text" id="path_to_file_exec" size="30" value=""> 
-          <input type="text" id="file_exec_params" size="30" value=""> 
+          <input type="text" id="path_to_file_exec" size="40" value=""> 
+          <input type="text" id="file_exec_params" size="70" value=""> 
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_RUN');">
             запустить 
           </button>
@@ -167,10 +168,11 @@ sokjs-->
           <p><b> путь к файлу на сервере (формат /папка1/папка2/файл):</b><br>
           <input type="text" id="path_to_file_download" size="50" >
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_DOWNLOAD');">
-            скачать файл 
+            &darr; скачать файл в папку
           </button> <br>
           <!--<input type="text" id="path_to_dir_download" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res_2"> -->
-          <input type="text" id="path_to_dir_download" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res_2"> 
+          <!-- <input type="text" id="path_to_dir_download" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res_2"> -->
+          <input type="text" id="path_to_dir_download" size="50" value="c:\rs_wrk\res_2\">
         </div>       
         </div>
        

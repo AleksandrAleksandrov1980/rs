@@ -318,23 +318,118 @@ public class Worker : BackgroundService
     {
         return -100500;
     }
+
+    static string GetChecksum(string str_hash, string filename)
+    {
+        using (var hasher = System.Security.Cryptography.HashAlgorithm.Create(str_hash))
+        {
+            if(hasher == null)
+                throw new Exception("Can't create hasher!");
+            using (var stream = System.IO.File.OpenRead(filename))
+            {
+                var hash = hasher.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "");
+            }
+        }
+    }
+
+    private enum _enFtpDirection
+    {
+        UPLOAD,
+        DOWNLOAD
+    }
+
+    private void ftp_hlp( _enFtpDirection en_ftp_dir, string str_path_from, string str_path_to )
+    {
+        using(FtpClient ftp_client = new FtpClient( "192.168.1.59", "anon", "anon", 21 ) )
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            ftp_client.Config.FXPDataType = FtpDataType.Binary; 
+            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
+            ftp_client.Config.DownloadDataType = FtpDataType.Binary;
+            ftp_client.Config.ValidateCertificateRevocation = false;
+            System.Security.Cryptography.X509Certificates.X509CertificateCollection x = ftp_client.Config.ClientCertificates;
+            ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
+            ftp_client.Config.LogToConsole = true;
+            ftp_client.ValidateCertificate += (FluentFTP.Client.BaseClient.BaseFtpClient control, FtpSslValidationEventArgs e)=>{ e.Accept = true; };
+            FtpProfile ftp_profile = new FtpProfile();
+            ftp_profile.Encryption = FtpEncryptionMode.None;
+            ftp_client.Connect();
+            if(en_ftp_dir == _enFtpDirection.UPLOAD)
+            {
+                string str_namef    = Path.GetFileName(str_path_from);
+                string str_ftp_file = str_path_to + "/"+str_namef;
+                ftp_client.CreateDirectory(str_path_to);
+                ftp_client.UploadFile(str_path_from,str_ftp_file);
+                FileInfo fi = new FileInfo(str_path_from); 
+                long size_ftp_file = ftp_client.GetFileSize(str_ftp_file);
+                if(fi.Length != size_ftp_file)
+                {
+                    throw new Exception("size!!");
+                }
+            }
+            else
+            {
+                string str_namef           = Path.GetFileName(str_path_from);
+                string str_path_file_local = str_path_to+"/"+str_namef;
+                //string str_ftp_file = str_path_ftp_dir+ "/"+str_namef;
+                //ftp_client.CreateDirectory(str_path_ftp_dir);
+                long size_ftp_file = ftp_client.GetFileSize(str_path_from);
+                ftp_client.DownloadFile(str_path_file_local,str_path_from);
+                FileInfo fi = new FileInfo(str_path_file_local); 
+                if(fi.Length != size_ftp_file)
+                {
+                    throw new Exception("size!!");
+                }
+                //ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
+                try
+                {
+                    Stopwatch sw2 = new Stopwatch();
+                    sw2.Start();
+                    string str_hash_fun = "MD5"; //"MD5" "SHA1" "SHA256" "SHA384" "SHA512"
+                    string str_hash_val = GetChecksum( str_hash_fun, str_path_file_local );
+                    sw2.Stop();
+                    Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
+                }
+                catch(Exception)
+                {
+                }
+            }
+            ftp_client.Disconnect();
+            sw.Stop();
+            Log.Warning($"Ok. elapsed time {sw.Elapsed}");
+        }
+    }
+
     private List<string>  on_FILE_UPLOAD(string[] str_params)
     {
         List<string> ls_ress = new List<string>();
         try
         {
-            string str_from  = str_params[0];
-            string str_namef = Path.GetFileName(str_from);
-            string str_to    = m_str_dir_wrk+"/"+str_params[1]+ "/"+str_namef;
-            FileInfo fi1 = new FileInfo(str_from); 
-            File.Copy( str_from, str_to, true );
-            FileInfo fi2 = new FileInfo(str_to); 
-            if(fi1.Length != fi2.Length)
+            if(false) // file_copy from_share to dir
             {
-                throw new Exception($"wrong file size!");
+                string str_from  = str_params[0];
+                string str_namef = Path.GetFileName(str_from);
+                string str_to    = m_str_dir_wrk+"/"+str_params[1]+ "/"+str_namef;
+                FileInfo fi1 = new FileInfo(str_from); 
+                File.Copy( str_from, str_to, true );
+                FileInfo fi2 = new FileInfo(str_to); 
+                if(fi1.Length != fi2.Length)
+                {
+                    throw new Exception($"wrong file size!");
+                }
+                Log.Information($"copyed {str_from} to {str_to}");
+                ls_ress.Add($"{m_str_success}: copyed {str_from} to {str_to}");
             }
-            Log.Information($"copyed {str_from} to {str_to}");
-            ls_ress.Add($"{m_str_success}: copyed {str_from} -> {str_to}");
+            else // file_copy from dir to ftp
+            {
+                ftp_hlp( _enFtpDirection.UPLOAD, str_params[0], str_params[1] );
+                Log.Information($"copyed {str_params[0]} to {str_params[1]}");
+                ls_ress.Add($"{m_str_success}: copyed {str_params[0]} to {str_params[1]}");
+            }
+            
         }
         catch(Exception ex)
         {
@@ -349,18 +444,27 @@ public class Worker : BackgroundService
         List<string> ls_ress = new List<string>();
         try
         {
-            string str_namef = Path.GetFileName(str_params[0]);
-            string str_from  = m_str_dir_wrk+"/"+str_params[0];
-            string str_to    = str_params[1]+ "\\"+str_namef;
-            FileInfo fi1 = new FileInfo(str_from); 
-            File.Copy( str_from, str_to, true );
-            FileInfo fi2 = new FileInfo(str_to); 
-            if(fi1.Length != fi2.Length)
+            if(false)
             {
-                throw new Exception($"wrong file size!");
+                string str_namef = Path.GetFileName(str_params[0]);
+                string str_from  = m_str_dir_wrk+"/"+str_params[0];
+                string str_to    = str_params[1]+ "\\"+str_namef;
+                FileInfo fi1 = new FileInfo(str_from); 
+                File.Copy( str_from, str_to, true );
+                FileInfo fi2 = new FileInfo(str_to); 
+                if(fi1.Length != fi2.Length)
+                {
+                    throw new Exception($"wrong file size!");
+                }
+                Log.Information($"copyed {str_from} to {str_to}");
+                ls_ress.Add($"{m_str_success}: copyed {str_from} to {str_to}");
             }
-            Log.Information($"copyed {str_from} to {str_to}");
-            ls_ress.Add($"{m_str_success}: copyed {str_from} -> {str_to}");
+            else
+            {
+                ftp_hlp( _enFtpDirection.DOWNLOAD, str_params[0], str_params[1] );
+                Log.Information($"DOWNLOAD {str_params[0]} to {str_params[1]}");
+                ls_ress.Add($"{m_str_success}: DOWNLOAD {str_params[0]} to {str_params[1]}");
+            }
         }
         catch(Exception ex)
         {

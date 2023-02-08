@@ -14,8 +14,8 @@
 
       document.addEventListener('DOMContentLoaded', function() {
         let el = document.getElementById("path_to_dir_mk");
-        //el.value = "/CALCS/"+GetTmStamp(); //!!!! timeStamp
-        el.value = "/CALCS/2023_2_4___7_18_5_997"; 
+        //el.value = "/CALCS/2023_2_4___7_18_5_997/"; 
+        el.value = "/CALCS/"+GetTmStamp()+"/"; //!!!! timeStamp
         document.getElementById("path_to_dir_upload").value = el.value;
         //document.getElementById("path_to_file_download").value = el.value + "/results.xml";
         document.getElementById("path_to_file_download").value = el.value + "/res";
