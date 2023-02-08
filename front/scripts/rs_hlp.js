@@ -28,26 +28,63 @@
       class CStompHlp
       {
 
-        constructor(name_exchng_in, id_chnl_state_in, id_collapse_card_in){
+        constructor(name_exchng_in, id_chnl_state_in, id_collapse_card_in, id_t){
           this.name_exchng         = name_exchng_in;
           this.id_chnl_state       = id_chnl_state_in;
           this.id_collapseCard     = id_collapse_card_in;
           this._nCounterMsgs       = 0;
           this._nCounterLogRecords = 0;
           this._n_counter_sended_msgs = 0;
+          this._arr_objs           = [];
+          this._id_t               = id_t;
         }
 
         static log(str_log){
           console.log( '['+this.name_exchng + ']: ' + str_log);
         }
 
+        table_populate(){
+          let table = document.querySelector(this._id_t);
+          if(table!=null){
+            if(this._arr_objs.length>0){
+              if ( $.fn.dataTable.isDataTable( this._id_t ) ) {
+                let table = $(this._id_t).DataTable();
+                table.clear(); // Clear your data
+                table.rows.add(this._arr_objs); // Add rows with newly updated data
+                table.draw(); //then draw it
+              }else{
+                let columns = [];
+                for (let key of Object.keys(this._arr_objs[0])) {
+                  columns.push({ data: key, title: key} );
+                }	
+                $(this._id_t).DataTable( { // Table.Initialization!
+                  data: this._arr_objs,  
+                  columns,
+                  serverSide: false
+                } );
+              }
+            }
+          }else{
+            CStompHlp.log('no table: ' + this._id_t);
+          }
+        }
+
         callback_subscribe (message){
-          if (message.body){
-            CStompHlp.log('got msg with body : ' + message.body);
-            this._nCounterMsgs++;
-            this.AddLog( "< " + this._nCounterMsgs.toString()+ " : " + message.body );
-          } else {
-            CStompHlp.log('got empty message');
+          try{
+            if (message.body){
+              CStompHlp.log('got msg with body : ' + message.body);
+              this._nCounterMsgs++;
+              //this.AddLog( "< " + this._nCounterMsgs.toString()+ " : " + message.body );
+              let obj_msg = JSON.parse(message.body);
+              obj_msg.Num = this._nCounterMsgs;
+              this._arr_objs.push(obj_msg);
+              this.table_populate();
+            } else {
+              CStompHlp.log('got empty message');
+            }
+          }catch(err){
+            CStompHlp.log('catched exception!: ' + err);
+            this.AddLog( "< " + this._nCounterMsgs.toString()+ "  error parse! : " + message.body );
           }
         };
 
@@ -95,6 +132,7 @@
             CStompHlp.log('onConnect: trying subscribe to ' + this.name_exchng + ' <> ' + this.callback_subscribe );
             //when subscription closed, websocket already closed!!! and reopend in cycle!!
             this.subscription_events = this.client.subscribe( this.name_exchng, this.callback_subscribe.bind(this) );
+            this.table_populate = this.table_populate.bind(this);
             this.SetChnlState(true);
           };
           this.client.onConnect = this.client.onConnect.bind(this);
@@ -210,9 +248,9 @@
         }
       };
 
-      var g_sh_events   = new CStompHlp( '/exchange/rs_events', 'cb_exc_evts_state', '#collapseCard_rs_events' );
+      var g_sh_events   = new CStompHlp( '/exchange/rs_events', 'cb_exc_evts_state', '#events_log', '#table_events' );
       g_sh_events.connect();
-      var g_sh_commands = new CStompHlp( '/exchange/rs_commands', 'cb_exc_cmds_state', '#collapseCard' );
+      var g_sh_commands = new CStompHlp( '/exchange/rs_commands', 'cb_exc_cmds_state', '#commands_log', '#table_commands' );
       g_sh_commands.connect(); 
 
       function UpdateDirUpload(){
