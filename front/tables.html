@@ -83,7 +83,6 @@ sokjs-->
           <div class="container-fluid">
             <!-- Page Heading -->
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-             <div> <h1 class="h3 mb-0 text-gray-800"> DATA !</h1> 
 
              <div>
               <div class="container">
@@ -101,207 +100,22 @@ sokjs-->
                 </button>
               </div>
             </div>
-          
-				 <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
-				 <div class="card shadow mb-4">
-				   <div class="card-header py-3">
-             <h6 class="m-0 font-weight-bold text-primary">
-				        MyDataTables Example
-					   </h6>
+         </div>
+		 <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+         <div class="card shadow mb-4">
+           <div class="card-header py-3">
+             <h6 class="m-0 font-weight-bold text-primary"> MyDataTables Example </h6>
            </div>
-				 <div>
+         <div>
            <div class="card-body">
              <div class="table-responsive">
-               <table id="r_table" class="table table-bordered"  width="100%">
-                 <thead>
-                   <tr> <!--
-                     <th>Name</th>
-                     <th>Position</th>
-                     <th>Office</th>
-                     <th>Age</th>
-                     <th>Start date</th>
-                     <th>Salary</th> -->
-                   </tr>
-                 </thead>
-               </table>
+               <table id="r_table" class="table table-bordered"  width="100%"> </table>
              </div>
             </div>
           </div>  
          </div>
          <!--  XXXXXXXXXXXXXXXXXXXXXXXX-DataTable.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
-
-
-        <div class="card shadow mb-4">
-         <div class="card-body">
-          <!--DIR_MAKE-->
-          <p><b>путь к папке в рабочем каталоге сервера (формат /папка1/папка2):</b><br>
-          <input type="text" id="path_to_dir_mk" size="50"  onkeyup="UpdateDirUpload();"
-            onkeypress="this.onkeyup();" onpaste="this.onkeyup();" oninput="this.onkeyup();">
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MAKE');">
-            создать путь к папке
-          </button>
-          <!--FILE_UPLOAD-->
-          <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
-          <!--<input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res"> -->
-          <input type="text" id="path_to_file_upload" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res"> 
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
-            отправить файл в папку
-          </button> <br>
-          <input type="text" id="path_to_dir_upload" size="50" >
-          <!--PROC_RUN-->
-          <p><b>путь к программе в рабочем каталоге сервера (формат /папка1/папка2/программа): + параметры программы</b><br>
-          <!-- <input type="text" id="path_to_file_exec" size="30" value="/CALC/astra"> -->
-          <!-- <input type="text" id="file_exec_params" size="30" value="1 s"> -->
-          <input type="text" id="path_to_file_exec" size="30" value=""> 
-          <input type="text" id="file_exec_params" size="30" value=""> 
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_RUN');">
-            запустить 
-          </button>
-          <!--PROC_EXTERMINATE-->
-          <p><b>прибить процесс с ИД</b><br>
-          <input type="text" id="proc_term" size="5" type="number" value="13" >
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_EXTERMINATE');">
-             прибить 
-          </button>
-          <!--FILE_DOWNLOAD-->
-          <p><b> путь к файлу на сервере (формат /папка1/папка2/файл):</b><br>
-          <input type="text" id="path_to_file_download" size="50" >
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_DOWNLOAD');">
-            скачать файл 
-          </button> <br>
-          <!--<input type="text" id="path_to_dir_download" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res_2"> -->
-          <input type="text" id="path_to_dir_download" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res_2"> 
-        </div>       
-        </div>
-       
-         <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.begin-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
-         <!--<div class="container" -->
-         <div class="panel-body ">
-
-          <button type="button"  class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('STATE');">
-            STATE
-          </button> 
-          <br><br>
-
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_START');">
-            GRAM_START
-          </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_STOP');">
-            GRAM_STOP
-          </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_KIT');">
-            GRAM_KIT
-          </button>  
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_sh_commands.SendCommand('GRAM_STATE');">
-            GRAM_STATE
-          </button>  
-          <br><br>
-
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="PlayScn1();">
-            PlayScn1
-          </button> 
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="g_prms_cycle_scn1 = AsyncLunchCycleScn1();">
-            CyclePlayScn1.begin!
-          </button> 
-          <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="AsyncStopCycleScn1();">
-            CyclePlayScn1.end.
-          </button> 
-          <br>
-        </div>
-        <!--  XXXXXXXXXXXXXXXXXXXXXXXX-ButtonsBrokerCmnd.end.-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
-
-         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->
-         <br>
-              
-          <div class="card-body" id="cb_exc_cmds_state" style="background-color: gray;">
-           state of commands exchange
-          </div>
-        
-         <div class="card shadow mb-4">
-          <!-- Card Header - Accordion -->
-          <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
-              role="button" aria-expanded="true" aria-controls="collapseCard">
-              <h6 class="m-0 font-weight-bold text-primary"> Комманды серверу. </h6>
-          </a>
-          <!-- Card Content - Collapse -->
-          <div class="collapse show" id="collapseCard">
-            <div class="card-body">
-              <!--  здесь будут выводится комманды . -->
-              <div>
-              <div class="table-responsive">
-                <table id="table_commands" class="table table-bordered"  width="100%">
-                  <!--
-                  <thead>
-                    <tr> 
-                      <th>Name</th>
-                      <th>Position</th>
-                      <th>Office</th>
-                      <th>Age</th>
-                      <th>Start date</th>
-                      <th>Salary</th> 
-                    </tr>
-                  
-                  </thead>
-                  -->
-                </table>
-              </div>
-              </div>
-
-              <div class="card-body" id="commands_log">
-
-              </div>
-
-            </div>
-          </div>
-          </div>
-          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Commands.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
-
-         <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.begin  XXXXXXXXXXXXXXXXXXXXXXXX -->   
-
-         <div class="card-body" id="cb_exc_evts_state" style="background-color: gray;">
-          state of events exchange
          </div>
-         <div class="card shadow mb-4">
-          <!-- Card Header - Accordion -->
-          <a href="#collapseCard" class="d-block card-header py-3" data-toggle="collapse"
-              role="button" aria-expanded="true" aria-controls="collapseCard">
-              <h6 class="m-0 font-weight-bold text-primary"> События сервера. </h6>
-          </a>
-          <!-- Card Content - Collapse -->
-          <div class="collapse show" id="collapseCard_rs_events">
-            <div class="card-body">
-              <!--  здесь будут выводится события . -->
-              <div> 
-
-              <div>
-                <div class="table-responsive">
-                  <table id="table_events" class="table table-bordered"  width="100%">
-                    <!--
-                    <thead>
-                      <tr> 
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Office</th>
-                        <th>Age</th>
-                        <th>Start date</th>
-                        <th>Salary</th> 
-                      </tr>
-                    
-                    </thead>
-                    -->
-                  </table>
-                </div>
-                </div>
-  
-                <div class="card-body" id="events_log">
-                </div>
-              </div> 
-            </div>
-          </div>
-          </div>
-          <!-- XXXXXXXXXXXXXXXXXXXXXXXX Collapsable Card.Events.end. XXXXXXXXXXXXXXXXXXXXXXXX -->
-
-          </div>
           <!-- /.container-fluid --> </div>
         <!-- End of Main Content -->
 
@@ -373,8 +187,8 @@ sokjs-->
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 	
-	<script>
-	  var g_str_jwt_tkn = 'no';
+<script>
+	var g_str_jwt_tkn = 'no';
 		
     function httpGet(theUrl){
       var xmlHttp = new XMLHttpRequest();
@@ -383,63 +197,63 @@ sokjs-->
       return xmlHttp.responseText;
     }
 		
-    function httpGetAsync(theUrl, callback, use_tkn){
-      var xmlHttp = new XMLHttpRequest();
-      xmlHttp.onreadystatechange = function(){ 
+      function httpGetAsync(theUrl, callback, use_tkn){
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function(){ 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-        callback(xmlHttp.responseText);
-      }
-      xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-      if(use_tkn === true){
-        let str_jwt_tkn = localStorage.getItem('jwt_token');
-        if( isstring(str_jwt_tkn) === true){
-          //xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
-          //xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-          //xmlHttp.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-          //headers = curl_slist_append( headers, "Content-Type: application/json;charset=UTF-8" );
-          //xmlHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');	
-          //xmlHttp.setRequestHeader('charset=UTF-8');	
-          xmlHttp.setRequestHeader('authorization', 'Bearer ' + str_jwt_tkn);	
+          callback(xmlHttp.responseText);
         }
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+        if(use_tkn === true){
+          let str_jwt_tkn = localStorage.getItem('jwt_token');
+          if( isstring(str_jwt_tkn) === true){
+            //xmlHttp.setRequestHeader("Access-Control-Allow-Origin", "*");
+            //xmlHttp.setRequestHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+            //xmlHttp.setRequestHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+            //headers = curl_slist_append( headers, "Content-Type: application/json;charset=UTF-8" );
+            //xmlHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');	
+            //xmlHttp.setRequestHeader('charset=UTF-8');	
+            xmlHttp.setRequestHeader('authorization', 'Bearer ' + str_jwt_tkn);	
+          }
+        }
+        xmlHttp.send(null);
       }
-      xmlHttp.send(null);
-    }
 		
 	  function cb_get_tkn(resTxt){
-      let obj = JSON.parse(resTxt);
-      console.log('get_tkn-> '+obj.token);
-      g_str_jwt_tkn = obj.token;
-      localStorage.setItem('jwt_token', g_str_jwt_tkn); // write
-      console.log(localStorage.getItem('jwt_token')); // read
+        let obj = JSON.parse(resTxt);
+        console.log('get_tkn-> '+obj.token);
+        g_str_jwt_tkn = obj.token;
+        localStorage.setItem('jwt_token', g_str_jwt_tkn); // write
+        console.log(localStorage.getItem('jwt_token')); // read
 	  }
 		
 	  function GetTkn(){
         //curl "http://alexandrov-7k/be/i/user/create?name=hello&password=1fdsfsd45r&email=werwere@mil.ru" > tkh.txt
-      let name_el   = document.getElementById('name1');
-      let str_name  = name_el?.value;
-      let str_email = str_name;
-      let passw_el  = document.getElementById('password1');
-      let str_passw = passw_el.value;
-      //alert("Кролик номер 1["+ window.location.hostname+"/be/i"+"]-> "+ "name:["+str_name + "] passw:["+str_passw + "] email:"+str_email );
-      let str_req = 'http://alexandrov-7k/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
-      //let str_req = window.location.hostname  +'/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
+        let name_el   = document.getElementById('name1');
+        let str_name  = name_el?.value;
+        let str_email = str_name;
+        let passw_el  = document.getElementById('password1');
+        let str_passw = passw_el.value;
+        //alert("Кролик номер 1["+ window.location.hostname+"/be/i"+"]-> "+ "name:["+str_name + "] passw:["+str_passw + "] email:"+str_email );
+        let str_req = 'http://alexandrov-7k/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
+        //let str_req = window.location.hostname  +'/be/i/user/create?name='+str_name+'&password='+str_passw+'&email='+str_email;
 	    console.log('str_req->'+str_req );
 		  //httpGet( str_req);
-      httpGetAsync(str_req, cb_get_tkn, false);
+        httpGetAsync(str_req, cb_get_tkn, false);
 	  }
 
 	  function isobject(A){
-      if( (typeof A === "object" || typeof A === 'function') && (A !== null) ) {
-        return true;
-      }
-      return false;
+        if( (typeof A === "object" || typeof A === 'function') && (A !== null) ) {
+            return true;
+        }
+        return false;
 	  }
 
 	  function isstring(S){
-      if( (typeof S === "string" ) && (S !== null) ) {
-        return true;
-      }
-      return false;
+        if( (typeof S === "string" ) && (S !== null) ) {
+            return true;
+        }
+        return false;
 	  }
 
 	  function cb_data(resTxt){
@@ -449,15 +263,14 @@ sokjs-->
 	  }
 
 	  function GetData(strParam){
-      console.log('click.GetData()');
-		  if( isstring(g_str_jwt_tkn) === false )
-		  {
-	      return console.log('no.tkn!');
+          console.log('click.GetData()');
+		  if( isstring(g_str_jwt_tkn) === false ) {
+	         return console.log('no.tkn!');
 		  }
-  		//let str_req = 'http://alexandrov-7k/be/i/user/';
+  		  //let str_req = 'http://alexandrov-7k/be/i/user/';
 		  let str_req = 'http://alexandrov-7k/be/i/'+strParam+'/';
-		  console.log('str_req->'+str_req );
-      httpGetAsync( str_req, cb_data, true);
+		  console.log( 'str_req->'+str_req );
+          httpGetAsync( str_req, cb_data, true );
 		  //SET TKN="Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDg4ODM1NjksImV4cCI6MTY1MTQ3NTU2OX0.YnaretUtVV3OgYLs21lDIhwn8iq730X1aHsowcQcbVY"
 	  }
 
@@ -469,7 +282,7 @@ sokjs-->
       //console.log(Object.keys(arrObjs[0]));
       let columns = [];
       for (let key of Object.keys(arrObjs[0])) {
-      columns.push({ data: key, title: key} );
+        columns.push({ data: key, title: key} );
       }	
       $(document).ready(function() {
         $('#r_table').DataTable( {
@@ -558,12 +371,6 @@ sokjs-->
     <!-- Page level custom scripts -->
     <script src="js/demo/datatables-demo.js"></script> 
 
-        <!-- StompJs.begin -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js" type="text/javascript"> </script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.js" type="text/javascript"> </script> -->
-    <script src="vendor/stompjs-6.1.2/bundles/stomp.umd.js" type="text/javascript"> </script>
-    <script src="scripts/rs_hlp.js" type="text/javascript"> </script>
-    <!-- StompJs.end. -->
 
 		  
   </body>

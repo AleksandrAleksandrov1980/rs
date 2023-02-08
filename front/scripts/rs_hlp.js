@@ -54,13 +54,19 @@
                 table.draw(); //then draw it
               }else{
                 let columns = [];
+                let id_col_num = -1;
+                let i = 0;
                 for (let key of Object.keys(this._arr_objs[0])) {
+                  if(key==="num")
+                    id_col_num = i;
                   columns.push({ data: key, title: key} );
+                  i++;
                 }	
                 $(this._id_t).DataTable( { // Table.Initialization!
                   data: this._arr_objs,  
                   columns,
-                  serverSide: false
+                  serverSide: false,
+                  "order": [[ id_col_num, 'asc' ]]
                 } );
               }
             }
@@ -76,7 +82,7 @@
               this._nCounterMsgs++;
               //this.AddLog( "< " + this._nCounterMsgs.toString()+ " : " + message.body );
               let obj_msg = JSON.parse(message.body);
-              obj_msg.Num = this._nCounterMsgs;
+              obj_msg.num = this._nCounterMsgs;
               this._arr_objs.push(obj_msg);
               this.table_populate();
             } else {
