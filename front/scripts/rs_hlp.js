@@ -51,6 +51,8 @@
               if ( $.fn.dataTable.isDataTable( this._id_t ) ) {
                 let table = $(this._id_t).DataTable();
                 table.clear(); // Clear your data
+                if(this._arr_objs.length>300)
+                  this._arr_objs.shift();
                 table.rows.add(this._arr_objs); // Add rows with newly updated data
                 table.draw(); //then draw it
               }else{
