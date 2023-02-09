@@ -2,6 +2,7 @@ using Serilog;
 using System.Diagnostics;
 using System.Reflection;
 using FluentFTP;
+using System.Timers;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -15,6 +16,7 @@ public class Worker : BackgroundService
     public Ccommunicator? m_communicator;
     public const string m_str_error   = "error";
     public const string m_str_success = "success";
+    private static System.Timers.Timer? m_timer_heart_beat;
 
     private string m_str_ftp_host = "";
     private string m_str_ftp_user = "";
@@ -374,6 +376,21 @@ public class Worker : BackgroundService
         return ls_ress;
     }
 
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        try
+        {
+            //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime );
+            Ccommunicator.Event evnt_start = new Ccommunicator.Event();
+            evnt_start.en_event        = Ccommunicator.enEvents.HEART_BEAT;
+            m_communicator?.Publish( evnt_start );
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"OntimerEvent : {ex.Message}");
+        }
+    }
+
     public int OnCommand( Ccommunicator.Command command )
     {
         int nRes = 0;
@@ -481,8 +498,9 @@ public class Worker : BackgroundService
 
             CParams par = new CParams();
             par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
+            double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms",2000);
             par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
-            par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",0); // default 5672
+            par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",5672); // default 5672
             par.m_str_exch_commands = m_configuration.GetValue<string>("r_params:q_exch_commands",""); 
             par.m_str_exch_events   = m_configuration.GetValue<string>("r_params:q_exch_events",""); 
             par.m_str_user          = m_configuration.GetValue<string>("r_params:q_user",""); 
@@ -490,7 +508,7 @@ public class Worker : BackgroundService
             par.m_cncl_tkn          = stoppingToken;
 
             var  proc = Process.GetCurrentProcess();
-            
+           
             string strTmp = "";
             strTmp += $"\n\n"; 
             strTmp += $"-----------------------------------------------------------------------------------------\n";
@@ -499,12 +517,14 @@ public class Worker : BackgroundService
             strTmp += $"-----------------------------------------------------------------------------------------\n";
             strTmp += $"path to exe: {Process.GetCurrentProcess()?.MainModule?.FileName}\n";
             strTmp += $"--------------------------------------------------------------------\n" ; 
-            strTmp += $"name        : {par.m_str_name}\n";
-            strTmp += $"q_host      : {par.m_str_host}\n";
-            strTmp += $"q_port      : {par.m_n_port}\n"; 
-            strTmp += $"q_exch_cmds : {par.m_str_exch_commands}\n"; 
-            strTmp += $"q_exch_evts : {par.m_str_exch_events}\n"; 
-            strTmp += $"q_user      : {par.m_str_user}\n"; 
+            strTmp += $"name          : {par.m_str_name}\n";
+            strTmp += $"heart_beat_ms : {d_timer_ms}\n";
+            strTmp += $"--------------------------------------------------------------------\n" ; 
+            strTmp += $"q_host        : {par.m_str_host}\n";
+            strTmp += $"q_port        : {par.m_n_port}\n"; 
+            strTmp += $"q_exch_cmds   : {par.m_str_exch_commands}\n"; 
+            strTmp += $"q_exch_evts   : {par.m_str_exch_events}\n"; 
+            strTmp += $"q_user        : {par.m_str_user}\n"; 
             //m_logger.LogWarning($" : {str_q_log_pass}");
             strTmp += $"--------------------------------------------------------------------\n" ; 
             strTmp += $"ftp.host      : {m_str_ftp_host}\n"; 
@@ -515,21 +535,11 @@ public class Worker : BackgroundService
             m_logger.LogWarning(strTmp);
             Log.Warning(strTmp);
 
-/*
-            Log.Information($"-----------------------------------------------------------------------------------------");
-            Log.Information($"---------------------------[START][{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}]---------------------------------------");
-            Log.Information($"-----------------------------------------------------------------------------------------");
+            m_timer_heart_beat = new System.Timers.Timer(d_timer_ms);
+            m_timer_heart_beat.Elapsed += OnTimedEvent;
+            m_timer_heart_beat.AutoReset = true;
+            m_timer_heart_beat.Enabled = true;
 
-            m_logger.LogWarning($"--------------------------------------------------------------------" ); 
-            m_logger.LogWarning($"name        : {par.m_str_name}");
-            m_logger.LogWarning($"q_host      : {par.m_str_host}");
-            m_logger.LogWarning($"q_port      : {par.m_n_port}"); 
-            m_logger.LogWarning($"q_exch_cmds : {par.m_str_exch_commands}"); 
-            m_logger.LogWarning($"q_exch_evts : {par.m_str_exch_events}"); 
-            m_logger.LogWarning($"q_user      : {par.m_str_user}"); 
-            //m_logger.LogWarning($" : {str_q_log_pass}");
-            m_logger.LogWarning($"--------------------------------------------------------------------" ); 
-*/
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
                 try{

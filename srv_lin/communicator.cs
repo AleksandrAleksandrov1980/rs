@@ -108,6 +108,7 @@ public class Ccommunicator: IDisposable
         NOTIFY           =  1,
         START            =  2,
         FINISH           =  3,
+        HEART_BEAT       =  4,
     }
 
     public class Event
