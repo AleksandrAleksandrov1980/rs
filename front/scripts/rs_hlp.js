@@ -43,6 +43,7 @@
           console.log( '['+this.name_exchng + ']: ' + str_log);
         }
 
+        //https://datatables.net/
         table_populate(){
           let table = document.querySelector(this._id_t);
           if(table!=null){
@@ -66,7 +67,11 @@
                   data: this._arr_objs,  
                   columns,
                   serverSide: false,
-                  "order": [[ id_col_num, 'asc' ]]
+                  "order": [[ id_col_num, 'asc' ]],
+                  paging:         false, 
+                  scrollY:        "500px",
+                  scrollX:        true,
+                  scrollCollapse: true,
                 } );
               }
             }
