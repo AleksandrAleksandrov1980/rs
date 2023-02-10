@@ -335,8 +335,8 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message}");
-            ls_ress.Add($"{m_str_error}:{ex.Message}");
+            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message} inner_ex: {ex.InnerException?.Message} ");
+            ls_ress.Add($"{m_str_error}: {ex.Message} inner_ex: {ex.InnerException?.Message}");
         }
         return ls_ress;
     }
@@ -370,8 +370,8 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message}");
-            ls_ress.Add($"{m_str_error}:{ex.Message}");
+            Log.Error($"on_FILE_DOWNLOAD: Exception: {ex.Message} inner_ex: {ex.InnerException?.Message}");
+            ls_ress.Add($"{m_str_error}:{ex.Message} inner_ex: {ex.InnerException?.Message}");
         }
         return ls_ress;
     }

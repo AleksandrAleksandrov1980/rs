@@ -99,16 +99,16 @@ sokjs-->
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="UpdateDirUpload();g_sh_commands.SendCommand('DIR_MAKE');">
             создать путь к папке
           </button>
-          <!--FILE_UPLOAD-->
-          <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
-          <!--<input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res"> -->
-          <!--<input type="text" id="path_to_file_upload" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res"> -->
-          <!--<input type="text" id="path_to_file_upload" size="50" value="C:\rs_wrk\res"> -->
-          <input type="text" id="path_to_file_upload" size="50" value="/var/rs_wrk/res">
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
-            &darr; отправить файл в папку
+          <!--FILE_DOWNLOAD-->
+          <p><b> путь к файлу на сервере (формат /папка1/папка2/файл):</b><br>
+          <input type="text" id="path_to_file_download" size="50" >
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_DOWNLOAD');">
+            &darr; скачать файл с FTP сервера в локальную папку
           </button> <br>
-          <input type="text" id="path_to_dir_upload" size="50" >
+          <!--<input type="text" id="path_to_dir_download" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res_2"> -->
+          <!-- <input type="text" id="path_to_dir_download" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res_2"> -->
+          <!-- <input type="text" id="path_to_dir_download" size="50" value="c:\rs_wrk\res_2\"> -->
+          <input type="text" id="path_to_dir_download" size="50" value="/var/rs_wrk/res_2/"> 
           <!--PROC_RUN-->
           <p><b>путь к программе в рабочем каталоге сервера (формат /папка1/папка2/программа): + параметры программы</b><br>
           <!-- <input type="text" id="path_to_file_exec" size="30" value="/CALC/astra"> -->
@@ -119,21 +119,21 @@ sokjs-->
             запустить 
           </button>
           <!--PROC_EXTERMINATE-->
-          <p><b>прибить процесс с ИД</b><br>
+          <p><b>истребить процесс с ИД</b><br>
           <input type="text" id="proc_term" size="5" type="number" value="13" >
           <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('PROC_EXTERMINATE');">
              прибить 
           </button>
-          <!--FILE_DOWNLOAD-->
-          <p><b> путь к файлу на сервере (формат /папка1/папка2/файл):</b><br>
-          <input type="text" id="path_to_file_download" size="50" >
-          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_DOWNLOAD');">
-            &darr; скачать файл в папку
+          <!--FILE_UPLOAD-->
+          <p><b> путь к файлу на сетевом ресурсе (формат //компьютер/папка/файл), для загрузки в папку рабочего каталога сервера:</b><br>
+          <!--<input type="text" id="path_to_file_upload" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res"> -->
+          <!--<input type="text" id="path_to_file_upload" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res"> -->
+          <!--<input type="text" id="path_to_file_upload" size="50" value="C:\rs_wrk\res"> -->
+          <input type="text" id="path_to_file_upload" size="50" value="/var/rs_wrk/res">
+          <button type="button" class="btn btn-info btn-round" data-toggle="button" onclick="g_sh_commands.SendCommand('FILE_UPLOAD');">
+            &darr; отправить файл на FTP сервер в папку
           </button> <br>
-          <!--<input type="text" id="path_to_dir_download" size="50" value="//alexandrov-7k.ems.int/rs_wrk/res_2"> -->
-          <!-- <input type="text" id="path_to_dir_download" size="50" value="\\alexandrov-7k.ems.int\rs_wrk\res_2"> -->
-          <!-- <input type="text" id="path_to_dir_download" size="50" value="c:\rs_wrk\res_2\"> -->
-          <input type="text" id="path_to_dir_download" size="50" value="/var/rs_wrk/res_2/"> 
+          <input type="text" id="path_to_dir_upload" size="50" >
         </div>       
         </div>
        

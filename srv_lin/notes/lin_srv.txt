@@ -1,4 +1,10 @@
 
+!!!tmp files created in /tmp
+ustas@a17:/tmp$ sudo rm rtmp*
+sudo apt-get autoremove
+sudo du -ah / | sort -n -r | head -n 100
+
+
 !!! log also writed at "/var/log/daemon.log"
 sudo nano "daemon.log" "daemon.log.1" "daemon.log.2.gz" "daemon.log.3.gz"
 !!!  753M фев  6 11:24 daemon.log
