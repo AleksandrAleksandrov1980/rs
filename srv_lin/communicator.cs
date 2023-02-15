@@ -21,6 +21,7 @@ public class Ccommunicator: IDisposable
     private IModel? m_channel_events;
     private string? m_str_exch_events;
     public delegate int OnCommand( Command command );
+    public delegate int OnEvent( Event evnt );
 
     public enum enCommands 
     {
@@ -116,7 +117,8 @@ public class Ccommunicator: IDisposable
         [JsonIgnore]
         public enEvents en_event        { get; set; } = enEvents.ERROR;
         [JsonPropertyName("event")]
-        public string str_event         { get{return en_event.ToString();} }
+        public string str_event         { get{return en_event.ToString();} 
+                                          set{en_event = StrToEvent(value);} } 
         public string   to              { get; set; } = "";
         public string   from            { get; set; } = "";
         public string   command         { get; set; } = "";
@@ -124,16 +126,31 @@ public class Ccommunicator: IDisposable
         public string   tm_mark         { get; set; } = "";//guid on from
         public string[] results         { get; set; } ={""};
         public string   sign            { get; set; } = "";
+
+        public static enEvents StrToEvent(string? str_event)
+        {
+            if(str_event!=null)
+            {
+                foreach( var x in Enum.GetValues(typeof(enEvents)))
+                {
+                    if(str_event == x.ToString())
+                    {
+                        return (enEvents)x;
+                    }
+                }
+            } 
+            return enEvents.ERROR;
+        }
     }
 
     private int m_n_connection_errors = 0;
 
-    private void MakeConnection( ref IConnection? connection )
+    private void MakeConnection( ref IConnection? connection, ConnectionFactory? factory )
     {
         try
         {
-            if(m_factory==null)
-                throw new Exception("m_factory==null");
+            if(factory==null)
+                throw new Exception("factory==null");
             if(connection!=null)
             {
                 if(connection.IsOpen)
@@ -147,7 +164,7 @@ public class Ccommunicator: IDisposable
                     connection.Dispose();
                 }
             }
-            connection = m_factory.CreateConnection();
+            connection = factory.CreateConnection();
         }
         catch(Exception ex)
         {
@@ -264,7 +281,7 @@ public class Ccommunicator: IDisposable
 
     private int m_n_consume_errors = 0;
 
-    public int Consume( Worker.CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnCommand on_command )
+    public int ConsumeCommands( Worker.CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnCommand on_command )
     {
         int nRes = 0;
         Log.Information("start Listener!");
@@ -287,7 +304,7 @@ public class Ccommunicator: IDisposable
         m_factory.Password    = par.m_str_pass;
         m_logger.LogWarning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName} ");
         Log.Warning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName}");
-        MakeConnection( ref m_connection );
+        MakeConnection( ref m_connection, m_factory );
         //m_connection = m_factory.CreateConnection();
         //m_channel_events = m_connection.CreateModel();
         m_str_exch_events = par.m_str_exch_events;
@@ -308,7 +325,7 @@ public class Ccommunicator: IDisposable
                 //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); 
                 byte[] body = ea.Body.ToArray();
                 string message = Encoding.UTF8.GetString(body);
-                Log.Information($"get message: {message}");
+                Log.Information($"COMMANDS get message: {message}");
                 CommandSerialized? command_serialized = null;
                 try
                 {
@@ -335,8 +352,69 @@ public class Ccommunicator: IDisposable
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
             channel_commands.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
-            if(on_command == null)
-                throw new Exception("blablabla");
+            par.m_cncl_tkn.WaitHandle.WaitOne();
+            Log.Warning($"listener get cancel signal.");
+        }
+        return 1;
+    }
+
+    public int ConsumeEvents( Worker.CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnEvent on_event )
+    {
+        int nRes = 0;
+        Log.Information("start Listener!");
+        if(m_connection != null)
+        {
+            Log.Error("m_connection != null, trying to Dispose first!");
+            Dispose();
+        }
+        ConnectionFactory factory =  new ConnectionFactory();
+        factory.HostName    = par.m_str_host;
+        factory.Port        = par.m_n_port;
+        factory.VirtualHost = "/";
+        factory.UserName    = par.m_str_user; // guest - resctricted to local only
+        factory.Password    = par.m_str_pass;
+        m_logger.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} ");
+        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
+        IConnection? connection = null;
+        MakeConnection( ref connection, factory );
+        
+        using(IModel channel_events = connection.CreateModel())
+        {
+            Log.Warning($"EXCHANGE_EVENTS-> [{par.m_str_exch_events}]");
+            channel_events.ExchangeDeclare( exchange: par.m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:false );
+            var queue_name = channel_events.QueueDeclare().QueueName;
+            channel_events.QueueBind( queue: queue_name, exchange: par.m_str_exch_events, routingKey: "" );
+            Log.Information($"Waiting for commands queue [{queue_name}]");
+            var consumer = new EventingBasicConsumer(channel_events);
+            consumer.Received += ( model, ea ) =>
+            {
+                //seems like this work in different thread!!
+                //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); 
+                byte[] body = ea.Body.ToArray();
+                string message = Encoding.UTF8.GetString(body);
+                Log.Information($"EVENTS get message: {message}");
+                Event? evnt = null;
+                try
+                {
+                    evnt = JsonSerializer.Deserialize<Event>(message);
+                }
+                catch(Exception ex)
+                {
+                    Log.Error($"exception -> [{ex.Message}] when trying deserialize event [{message}]");
+                    evnt = null;    
+                }   
+                try
+                {
+                    nRes = on_event(evnt??new Event());
+                }
+                catch(Exception ex)
+                {
+                    m_n_consume_errors++;
+                    Log.Error($"exception -> [{ex.Message}] when trying proccess event [{message}] m_n_consume_errors= {m_n_consume_errors}");
+                }
+            };
+            //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
+            channel_events.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
             par.m_cncl_tkn.WaitHandle.WaitOne();
             Log.Warning($"listener get cancel signal.");
         }
