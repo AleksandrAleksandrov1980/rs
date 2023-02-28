@@ -3,33 +3,13 @@ using System.Diagnostics;
 using System.Reflection;
 using FluentFTP;
 using System.Timers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace srv_lin;
 public class Worker : BackgroundService
 {
-    private readonly ILogger<Worker> m_logger;
-    private readonly IConfiguration m_configuration;
-    public Task<int>? m_tskThreadGram = null;
-    private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
-    public string? m_str_dir_wrk;
-    private object _obj_sync_command = new Object();
-    public Ccommunicator? m_communicator;
-    public const string m_str_error   = "error";
-    public const string m_str_success = "success";
-    private static System.Timers.Timer? m_timer_heart_beat;
-
-    private string m_str_ftp_host = "";
-    private string m_str_ftp_user = "";
-    private string m_str_ftp_pass = "";
-    private int    m_n_ftp_port   = -13;
-
-    public Worker( ILogger<Worker> logger, IConfiguration configuration )
-    {
-        m_logger = logger;
-        m_configuration = configuration;
-    }
-  
-    public class CParams
+     public class CParams
     {
         public string? m_str_name = "";
         public string? m_str_host = "";
@@ -41,10 +21,145 @@ public class Worker : BackgroundService
         public CancellationToken m_cncl_tkn;
     }
 
+    public class CState
+    {
+        public class CService
+        {
+            public string       m_str_name                { get; set;} = "NO_NAME";
+            public DateTime     m_dt_last_seen            { get; set;} 
+            public int          m_n_alarm_border_millisec { get; set;} = 15000;
+            public bool         m_bl_alarm_fixed          { get; set;} = false;
+            public List<string> m_lst_errors              { get; set;} = new List<string>();
+        }
+
+        public Dictionary<string, CService> m_services {get;set;} = new Dictionary<string, CService>();
+
+        public void CheckServicesState()
+        {
+            DateTime dtNow = DateTime.Now;
+            foreach(CService service in m_services.Values )
+            {
+                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds > service.m_n_alarm_border_millisec )
+                {
+                    if(service.m_bl_alarm_fixed == false)
+                    {
+                        service.m_bl_alarm_fixed = true;
+                        service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
+                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
+                {
+                    if(service.m_bl_alarm_fixed == true)
+                    {
+                        service.m_bl_alarm_fixed = false;
+                        service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
+                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+
+
+                /*
+                if(service.m_bl_alarm_fixed == false)
+                {
+                    if( (dtNow - service.m_dt_last_seen).TotalMilliseconds > service.m_n_alarm_border_millisec )
+                    {
+                        service.m_bl_alarm_fixed = true;
+                        service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
+                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+                else
+                {
+                    if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
+                    {
+                        service.m_bl_alarm_fixed = false;
+                        service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
+                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+                */
+            }
+        }
+    }
+    private CState m_state = new CState();
+
+    private readonly ILogger<Worker> m_logger;
+    private readonly IConfiguration m_configuration;
+    public Task<int>? m_tskThreadGram = null;
+    private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
+    public string? m_str_dir_wrk;
+    private object _obj_sync_command = new Object();
+    private object _obj_sync_event = new Object();
+    public Ccommunicator? m_communicator;
+    public const string m_str_error   = "error";
+    public const string m_str_success = "success";
+    private static System.Timers.Timer? m_timer_heart_beat;
+    private string m_str_ftp_host = "";
+    private string m_str_ftp_user = "";
+    private string m_str_ftp_pass = "";
+    private int    m_n_ftp_port   = -13;
+
+    public Worker( ILogger<Worker> logger, IConfiguration configuration )
+    {
+        m_logger = logger;
+        m_configuration = configuration;
+    }
+ 
+    public int OnEvent( Ccommunicator.Event evnt )
+    {
+        try
+        {
+            lock(_obj_sync_event)
+            {
+                if(evnt.en_event == Ccommunicator.enEvents.HEART_BEAT)
+                {
+                    CState.CService? service = null;
+                    service = m_state.m_services.GetValueOrDefault(evnt.from);
+                    if(service != null)
+                    {
+                        service.m_dt_last_seen = DateTime.Now;
+                    }
+                    else
+                    {
+                        service =  new CState.CService();
+                        service.m_dt_last_seen = DateTime.Now;
+                        service.m_str_name = evnt.from;
+                        service.m_lst_errors.Add($"first time detected service at [{service.m_dt_last_seen}]");
+                        m_state.m_services.Add(service.m_str_name, service);
+                        Log.Error($"first time detected service [{service.m_str_name}] ");
+                    }
+                    m_state.CheckServicesState();
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"OnEvent  exception: [{ex.Message}]");
+        }
+        return 1;
+    }
+
     public List<string> on_STATE(string[] str_params)
     {
-        return new List<string>{ m_str_success };
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            m_state.CheckServicesState();
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(m_state,options);
+            ls_ress.Add(json);
+            ls_ress.Add(m_str_success);
+        }
+        catch(Exception ex)
+        {
+            ls_ress.Add($"{m_str_error}:excption { ex.Message }");
+            Log.Error(ls_ress[ls_ress.Count-1]);
+        }
+        ///State
+        return ls_ress; //new List<string>{ m_str_success };
     }
+
     public List<string> on_PROC_RUN(string[] str_params)
     {
         List<string> ls_ress = new List<string>();
@@ -184,6 +299,7 @@ public class Worker : BackgroundService
         }
         return 1;
     }
+
     private int on_GRAM_STATE(string[] str_params)
     {
        int nRes = 0;
@@ -215,6 +331,7 @@ public class Worker : BackgroundService
        }
        return 1;
     }
+
     public int on_GRAM_KIT(string[] str_params)
     {
         return -100500;
@@ -348,7 +465,7 @@ public class Worker : BackgroundService
         {
             if(false)
             {
-                string str_namef = Path.GetFileName(str_params[0]);
+                string str_namef = Path.GetFileName(str_params[0])??"";
                 string str_from  = m_str_dir_wrk+"/"+str_params[0];
                 string str_to    = str_params[1]+ "\\"+str_namef;
                 FileInfo fi1 = new FileInfo(str_from); 
@@ -475,7 +592,7 @@ public class Worker : BackgroundService
             m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
             m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
             m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
-            m_n_ftp_port   = m_configuration.GetValue<int?>("r_params:ftp:port") ?? -1;
+            m_n_ftp_port   = m_configuration.GetValue<int?>  ("r_params:ftp:port") ?? -1;
             m_logger.LogInformation($"create dir:{m_str_dir_wrk} ");
             System.IO.Directory.CreateDirectory(m_str_dir_wrk);
             string str_dir_log = m_str_dir_wrk+"/logs/";
@@ -548,8 +665,9 @@ public class Worker : BackgroundService
                         m_communicator = null;
                     }
                     m_communicator = new Ccommunicator();
-                    Task taskCommuicator = Task.Run( ()=>{ m_communicator.Consume(par, m_logger, OnCommand); });
-                    await taskCommuicator;
+                    Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCommands(par, m_logger, OnCommand); });
+                    Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvents(par, m_logger, OnEvent); });
+                    await taskConsumeCommands;
                     //m_communicator.Consume(par, m_logger, OnCommand);
                     if(m_communicator!=null){
                         m_communicator.Dispose();
