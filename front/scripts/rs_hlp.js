@@ -23,7 +23,23 @@
         //<input type="text" id="file_exec_params" size="30" value="-j222 D:/Vms/SHARA/crosses/IA/2023_02_01_file2/calc//s1.log"> 
         document.getElementById("path_to_file_exec").value = "/home/ustas/projects/git_r/Astral/build/astra";
         document.getElementById("file_exec_params").value = "-se /var/rs_wrk/CALCS/2023_2_4___7_18_5_997/roc_debug_from_SQL_2.os";
+        read_key();
       }, false);
+
+      function read_key(){
+        var client = new XMLHttpRequest();
+        //client.open('GET', 'c:\temp\sample.xml');
+        client.open('GET', 'C:\projects\git_main\rs\front\key\key_prv1.xml');
+        client.onreadystatechange = function() {
+          var response = client.responseText,
+              parser = new DOMParser(),
+              xmlDoc = parser.parseFromString(response,"text/xml");
+
+          //use the xml Doc however you want.
+        }
+        client.send();
+      }
+    
     
       class CStompHlp
       {

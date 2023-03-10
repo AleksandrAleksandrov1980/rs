@@ -20,5 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../shared/shared.csproj" />
+    <ProjectReference Include="../RastrSrvShare/RastrSrvShare.csproj" />
   </ItemGroup>
 </Project>

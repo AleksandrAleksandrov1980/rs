@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RSAKeyValue>
+  <Modulus>42BCczmetvpVYR59OeGJuUoFW/LCR7H2m05LYN3OxkxcuKf7RkL/7Mm1h5Y0/nDoxTh3HzkLcTFwaDDOpA/Nt0B9ixNBZUFzqGj5Yg4w+G/8Hg0Vj1L60d97zF7WtaA/jrPKdb3RDhwNNmN/PoO7S0kSz/nFziic4JGT/OGIh90=</Modulus>
+  <Exponent>AQAB</Exponent>
+  <P>9h58mcVKgUd2ydxMy5bVKnlMMKUxni/jfFxr0QJb/clOl0AUXBG1HDHaFd94uFd7T/54GPvkbPA+xdj8WRFpow==</P>
+  <Q>7IEjmGUEw+gaLcjyjcpbllLRTYchSX/0SCSPg8zLcCi7PTdq2vmHWQZcdpLGDzAbueaXKOLQXXIWhrkk4Rhgfw==</Q>
+  <DP>X5oOCmkhfMA2u0iQqBCJ8vq1BrxUXr75XYhE9SY2d4lntsbUYcMbF72hmhd5PBn3M2aEXigSXeKgb5fOxgZGgw==</DP>
+  <DQ>vbEysKfNs6g1XyW+zlVRMngIootQ+pfjgf25Enivb61ryMTrMulTUudUQFKnA0WN54R5F3UctOauBK75UoXv1w==</DQ>
+  <InverseQ>zGkjlKXQ7VoPPchzLQ0wnRHNeWWNcAo7C19/+dy+hwcAppNirWzu15KtgfIXykQrmZ3GbsHJTl2bsoBZA2q4uA==</InverseQ>
+  <D>ty3PmwCqqwMWUb28aSsYR1wo4SC8AAKRiCEVfR50/TB76o/6UWqcv+jpBCiw3OOdw3VwEolkfHa19lqLv4Sz1w+ePyHD9YRcXv6AJ82/L0Ily+1WXcSajM+7jTklSRuhdBBuyAlfyT08kDhyUn0OsoHLnF0MI1XUmGqpyooWO4k=</D>
+</RSAKeyValue>
