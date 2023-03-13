@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Diagnostics;
 
 namespace srv_lin;
+/*
 public class Ccommunicator: IDisposable
 {
     private string m_str_name     = "noname_yet";
@@ -422,3 +423,4 @@ public class Ccommunicator: IDisposable
     }
 
 }
+*/

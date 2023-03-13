@@ -5,7 +5,8 @@ using srv_lin;
 
 public class CGramophone
 {
-    public  Ccommunicator Communicator { get; set; } 
+    //public  Ccommunicator Communicator { get; set; } 
+    public RastrSrvShare.Ccommunicator? Communicator { get; set; } 
 
     public class CRecord
     {
@@ -66,7 +67,7 @@ public class CGramophone
         }
         catch (Exception ex)
         {
-            Log.Error($"Exception : {ex.Message}");
+            Log.Error($"Exception : {ex.ToString()}");
             return -1;
         }
         return 1;
@@ -91,11 +92,11 @@ public class CGramophone
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
             //Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-            Communicator.Publish( Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
+            Communicator.Publish( RastrSrvShare.Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
             Process? process = Process.Start(psi);
             if(process == null)
             {
-                Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
+                Communicator.Publish( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
                 Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}]");
                 return -2;
             }
@@ -106,25 +107,24 @@ public class CGramophone
             if (blRes != true)
             {
                 //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
-                Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{ $"TimeOut Pid {process.Id}" } );
+                Communicator.Publish( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"TimeOut Pid {process.Id}" } );
                 Log.Error($"TimeOut Pid {process.Id}");
                 return -3;// timeout
             }
             int nExitCode = process.ExitCode;
             //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
-            Communicator.Publish( Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
+            Communicator.Publish( RastrSrvShare.Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
             return nExitCode;
         }
         catch(Exception ex)
         {
             //Console.Write($"Error {ex.Message}\n");
-            Communicator.Publish( Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
-            Log.Error($"\tPlay.Exception {ex.Message}");
+            Log.Error($"\tPlay.Exception {ex.ToString()}");
+            Communicator.Publish( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
             //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
             return -1;
         }
-        return 1;
     }
 
     int Play(CancellationToken cncl_tkn, string str_path_record)
@@ -144,7 +144,7 @@ public class CGramophone
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"can't read, message-> {ex.Message}");
+                    Log.Error($"can't read, message-> {ex.ToString()}");
                 }               
                 if(record != null)
                 {
@@ -169,20 +169,20 @@ public class CGramophone
         }
         catch(System.AggregateException sae)
         {
-            Log.Warning($"canceled in wait-> {sae?.InnerException?.Message}");
+            Log.Warning($"canceled in wait-> {sae.ToString()}");
         }
         catch(System.OperationCanceledException oce)
         {
-            Log.Warning($"canceled-> {oce.Message}");
+            Log.Warning($"canceled-> {oce.ToString()}");
         }
         catch(Exception ex)
         {
-            Log.Error($"Exception-> {ex.Message}");
+            Log.Error($"Exception-> {ex.ToString()}");
         }
         return 1;
     }
 
-    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record, Ccommunicator? communicator )
+    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record,  RastrSrvShare.Ccommunicator? communicator )
     {
         if(communicator==null)
         {

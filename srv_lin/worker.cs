@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 namespace srv_lin;
 public class Worker : BackgroundService
 {
+    /*
      public class CParams
     {
         public string? m_str_name = "";
@@ -20,7 +21,7 @@ public class Worker : BackgroundService
         public string? m_str_pass = "";
         public CancellationToken m_cncl_tkn;
     }
-
+*/
     public class CState
     {
         public class CService
@@ -91,7 +92,7 @@ public class Worker : BackgroundService
     public string? m_str_dir_wrk;
     private object _obj_sync_command = new Object();
     private object _obj_sync_event = new Object();
-    public Ccommunicator? m_communicator;
+    public RastrSrvShare.Ccommunicator? m_communicator;
     public const string m_str_error   = "error";
     public const string m_str_success = "success";
     private static System.Timers.Timer? m_timer_heart_beat;
@@ -106,13 +107,13 @@ public class Worker : BackgroundService
         m_configuration = configuration;
     }
  
-    public int OnEvent( Ccommunicator.Event evnt )
+    public int OnEvent( RastrSrvShare.Ccommunicator.Event evnt )
     {
         try
         {
             lock(_obj_sync_event)
             {
-                if(evnt.en_event == Ccommunicator.enEvents.HEART_BEAT)
+                if(evnt.en_event == RastrSrvShare.Ccommunicator.enEvents.HEART_BEAT)
                 {
                     CState.CService? service = null;
                     service = m_state.m_services.GetValueOrDefault(evnt.from);
@@ -135,7 +136,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"OnEvent  exception: [{ex.Message}]");
+            Log.Error($"OnEvent  exception: [{ex.ToString()}]");
         }
         return 1;
     }
@@ -153,7 +154,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}:excption { ex.Message }");
+            ls_ress.Add($"{m_str_error}:excption { ex.ToString() }");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         ///State
@@ -193,7 +194,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}:excption { ex.Message }");
+            ls_ress.Add($"{m_str_error}:excption { ex.ToString() }");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         return ls_ress;
@@ -233,7 +234,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}: exception: {ex.Message}");
+            ls_ress.Add($"{m_str_error}: exception: {ex.ToString()}");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         return ls_ress;
@@ -253,7 +254,7 @@ public class Worker : BackgroundService
             }
             catch(Exception ex ) 
             {
-                Log.Error($"on_DIR_MAKE: Exception: {ex.Message}");
+                Log.Error($"on_DIR_MAKE: Exception: {ex.ToString()}");
                 ls_ress.Add($"{m_str_error}:{ex.Message}");
             }
         }
@@ -452,8 +453,8 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_UPLOAD: Exception: {ex.Message} inner_ex: {ex.InnerException?.Message} ");
-            ls_ress.Add($"{m_str_error}: {ex.Message} inner_ex: {ex.InnerException?.Message}");
+            Log.Error($"on_FILE_UPLOAD: Exception: {ex.ToString()} ");
+            ls_ress.Add($"{m_str_error}: {ex.ToString()} ");
         }
         return ls_ress;
     }
@@ -487,8 +488,8 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_DOWNLOAD: Exception: {ex.Message} inner_ex: {ex.InnerException?.Message}");
-            ls_ress.Add($"{m_str_error}:{ex.Message} inner_ex: {ex.InnerException?.Message}");
+            Log.Error($"on_FILE_DOWNLOAD: Exception: {ex.ToString()}");
+            ls_ress.Add($"{m_str_error}:{ex.ToString()}");
         }
         return ls_ress;
     }
@@ -498,68 +499,68 @@ public class Worker : BackgroundService
         try
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime );
-            Ccommunicator.Event evnt_start = new Ccommunicator.Event();
-            evnt_start.en_event        = Ccommunicator.enEvents.HEART_BEAT;
+            RastrSrvShare.Ccommunicator.Event evnt_start = new RastrSrvShare.Ccommunicator.Event();
+            evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.HEART_BEAT;
             m_communicator?.Publish( evnt_start );
         }
         catch(Exception ex)
         {
-            Log.Error($"OntimerEvent : {ex.Message}");
+            Log.Error($"OntimerEvent : {ex.ToString()}"); 
         }
     }
 
-    public int OnCommand( Ccommunicator.Command command )
+    public int OnCommand( RastrSrvShare.Ccommunicator.Command command )
     {
         int nRes = 0;
         Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
         lock(_obj_sync_command)
         {
             Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(", ",command.pars)}");
-            Ccommunicator.Event evnt_start = new Ccommunicator.Event();
-            evnt_start.en_event        = Ccommunicator.enEvents.START;
+            RastrSrvShare.Ccommunicator.Event evnt_start = new RastrSrvShare.Ccommunicator.Event();
+            evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
             evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
             evnt_start.tm_mark_command = command.tm_mark;
             m_communicator?.Publish( evnt_start );
             List<string> ls_ress = new List<string>();
             switch(command.en_command)
             {
-                case Ccommunicator.enCommands.STATE:
+                case RastrSrvShare.Ccommunicator.enCommands.STATE:
                     ls_ress = on_STATE(command.pars);                      
                 break;
 
-                case Ccommunicator.enCommands.PROC_RUN:
+                case RastrSrvShare.Ccommunicator.enCommands.PROC_RUN:
                     ls_ress = on_PROC_RUN(command.pars);                      
                 break;
 
-                case Ccommunicator.enCommands.PROC_EXTERMINATE:
+                case RastrSrvShare.Ccommunicator.enCommands.PROC_EXTERMINATE:
                     ls_ress = on_PROC_EXTERMINATE(command.pars);                      
                 break;
 
-                case Ccommunicator.enCommands.DIR_MAKE:
+                case RastrSrvShare.Ccommunicator.enCommands.DIR_MAKE:
                     ls_ress = on_DIR_MAKE(command.pars);                      
                 break;
 
-                case Ccommunicator.enCommands.GRAM_START:
+                case RastrSrvShare.Ccommunicator.enCommands.GRAM_START:
                     nRes = on_GRAM_START(command.pars);                      
                 break;
 
-                case Ccommunicator.enCommands.GRAM_STATE:
+                case RastrSrvShare.Ccommunicator.enCommands.GRAM_STATE:
                     nRes = on_GRAM_STATE(command.pars);
                 break;
 
-                case Ccommunicator.enCommands.GRAM_KIT:
+                case RastrSrvShare.Ccommunicator.enCommands.GRAM_KIT:
                     nRes = on_GRAM_KIT(command.pars);
                 break;
 
-                case Ccommunicator.enCommands.GRAM_STOP:
+                case RastrSrvShare.Ccommunicator.enCommands.GRAM_STOP:
                     nRes = on_GRAM_STOP(command.pars);
                 break;
 
-                case Ccommunicator.enCommands.FILE_UPLOAD:
+                case RastrSrvShare.Ccommunicator.enCommands.FILE_UPLOAD:
                     ls_ress = on_FILE_UPLOAD(command.pars);
                 break;
 
-                case Ccommunicator.enCommands.FILE_DOWNLOAD:
+                case RastrSrvShare.Ccommunicator.enCommands.FILE_DOWNLOAD:
                     ls_ress = on_FILE_DOWNLOAD(command.pars);
                 break;
                 
@@ -568,11 +569,11 @@ public class Worker : BackgroundService
                     Log.Error($"unhadled command : {command.en_command.ToString()}!");
                 break;
             }
-            Ccommunicator.Event evnt_finish = new Ccommunicator.Event();
-            evnt_finish.en_event = Ccommunicator.enEvents.FINISH;
-            evnt_finish.command = command.en_command.ToString();
+            RastrSrvShare.Ccommunicator.Event evnt_finish = new RastrSrvShare.Ccommunicator.Event();
+            evnt_finish.en_event        = RastrSrvShare.Ccommunicator.enEvents.FINISH;
+            evnt_finish.command         = command.en_command.ToString();
             evnt_finish.tm_mark_command = command.tm_mark;
-            evnt_finish.results = ls_ress.ToArray();
+            evnt_finish.results         = ls_ress.ToArray();
             m_communicator?.Publish( evnt_finish );
         }
         return 1;
@@ -613,7 +614,7 @@ public class Worker : BackgroundService
             c.SetMsLogger(m_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");
 
-            CParams par = new CParams();
+            RastrSrvShare.CParams par = new RastrSrvShare.CParams();
             par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
             double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms",2000);
             par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
@@ -664,7 +665,7 @@ public class Worker : BackgroundService
                         m_communicator.Dispose();
                         m_communicator = null;
                     }
-                    m_communicator = new Ccommunicator();
+                    m_communicator = new RastrSrvShare.Ccommunicator();
                     Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCommands(par, m_logger, OnCommand); });
                     Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvents(par, m_logger, OnEvent); });
                     await taskConsumeCommands;
@@ -675,7 +676,7 @@ public class Worker : BackgroundService
                     }
                 }
                 catch(Exception ex){
-                    Log.Error($"[{i}] Communicator exception : {ex.Message}. Will be relaunched.");
+                    Log.Error($"[{i}] Communicator exception : {ex.ToString()}. Will be relaunched.");
                 }
                 if(stoppingToken.IsCancellationRequested==true)
                 {
@@ -721,7 +722,7 @@ public class Worker : BackgroundService
         }
         catch( Exception ex)
         {
-            m_logger.LogError($"Program catch exeption: {ex.Message}");
+            m_logger.LogError($"Program catch exeption: {ex.ToString()}");
 
             //https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service 
             // In order for the Windows Service Management system to leverage configured
