@@ -152,6 +152,7 @@ class Program
     {
         try
         {
+            //tst_crypto();
             save_keys();
         }
         catch(CryptographicException e)
