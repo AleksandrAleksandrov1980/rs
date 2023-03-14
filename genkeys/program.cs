@@ -144,10 +144,8 @@ class Program
         save_xml_str( "key_pub.xml", RSAalg.ToXmlString(false));
     }
 
-
     //dotnet publish -r Win-x64 -p:PublishSingleFile=true --self-contained true
     //dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:PublishTrimmed=true
-    
     static void Main(string[] args)
     {
         try

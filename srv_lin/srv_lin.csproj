@@ -22,4 +22,10 @@
     <ProjectReference Include="../shared/shared.csproj" />
     <ProjectReference Include="../RastrSrvShare/RastrSrvShare.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="key_pub.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Diagnostics;
 using srv_lin;
 
+namespace srv_lin;
+
 public class CGramophone
 {
     //public  Ccommunicator Communicator { get; set; } 

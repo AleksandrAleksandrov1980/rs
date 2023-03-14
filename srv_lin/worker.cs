@@ -107,7 +107,7 @@ public class Worker : BackgroundService
         m_configuration = configuration;
     }
  
-    public int OnEvent( RastrSrvShare.Ccommunicator.Event evnt )
+    public int OnEvent( RastrSrvShare.Ccommunicator.Evnt evnt )
     {
         try
         {
@@ -499,7 +499,7 @@ public class Worker : BackgroundService
         try
         {
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime );
-            RastrSrvShare.Ccommunicator.Event evnt_start = new RastrSrvShare.Ccommunicator.Event();
+            RastrSrvShare.Ccommunicator.Evnt evnt_start = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.HEART_BEAT;
             m_communicator?.PublishEvnt( evnt_start );
         }
@@ -516,7 +516,7 @@ public class Worker : BackgroundService
         lock(_obj_sync_command)
         {
             Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(", ",command.pars)}");
-            RastrSrvShare.Ccommunicator.Event evnt_start = new RastrSrvShare.Ccommunicator.Event();
+            RastrSrvShare.Ccommunicator.Evnt evnt_start = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
             evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
             evnt_start.tm_mark_command = command.tm_mark;
@@ -569,7 +569,7 @@ public class Worker : BackgroundService
                     Log.Error($"unhadled command : {command.en_command.ToString()}!");
                 break;
             }
-            RastrSrvShare.Ccommunicator.Event evnt_finish = new RastrSrvShare.Ccommunicator.Event();
+            RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_finish.en_event        = RastrSrvShare.Ccommunicator.enEvents.FINISH;
             evnt_finish.command         = command.en_command.ToString();
             evnt_finish.tm_mark_command = command.tm_mark;

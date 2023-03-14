@@ -1,8 +1,10 @@
+
+namespace srv_lin;
+
 class CInstance
 {
     private static CInstance? m_instance;
     private static object m_obj_sync = new Object();
-
     private ILogger? m_logger;    
   
     public static CInstance GetCurrent()
@@ -23,11 +25,8 @@ class CInstance
         m_logger = logger_in;
     }
 
-    
-
     public void Log(shared.CHlpLog.enErr err, string strMsg )
     {
-        //m_logger.Log();
         lock(m_obj_sync)
         {
             int n_mt_id = Thread.CurrentThread.ManagedThreadId;
@@ -35,6 +34,5 @@ class CInstance
             string str_time = DateTime.Now.ToString( shared.CHlpLog.str_log_time_fmt );
             //m_logger.Log(LogLevel.Information
         }
-
     }
 }

@@ -1,27 +1,18 @@
 ﻿using RabbitMQ.Client.Events;
 using RabbitMQ.Client;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
-
-
-
 using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Runtime.Serialization;
-using System.Net;
-using System.Net.Sockets;
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using System.Threading;
+using static RastrSrvShare.Ccommunicator;
+using Microsoft.Extensions.Options;
 
-namespace RastrSrvShare
-{
-    
+namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
 {
     private string m_str_name     = "noname_yet";
@@ -31,10 +22,13 @@ public class Ccommunicator: IDisposable
     private ConnectionFactory? m_factory;
     private IConnection? m_connection;
     private IModel? m_channel_evnts;
+    private IModel? m_channel_cmnds;
     private string? m_str_exch_evnts;
+    private string? m_str_exch_cmnds = "rs_commands";
     object m_obj_sync_publish_evnt = new Object();
+    object m_obj_sync_publish_cmnd = new Object();
     public delegate int OnCommand( Command command );
-    public delegate int OnEvent( Event evnt );
+    public delegate int OnEvent( Evnt evnt );
 
     public enum enCommands 
     {
@@ -81,11 +75,15 @@ public class Ccommunicator: IDisposable
         public string[]   pars      { get; set; } ={""};
         public string     sign      { get; set; } = "";
 
+        public Command()
+        { 
+        }
+
         public static enCommands StrToCommand(string? str_command)
         {
             if(str_command!=null)
             {
-                foreach( var x in Enum.GetValues(typeof(enCommands)))
+                foreach(var x in Enum.GetValues(typeof(enCommands)))
                 {
                     if(str_command == x.ToString())
                     {
@@ -125,7 +123,7 @@ public class Ccommunicator: IDisposable
         HEART_BEAT       =  4,
     }
 
-    public class Event
+    public class Evnt
     {
         [JsonIgnore]
         public enEvents en_event        { get; set; } = enEvents.ERROR;
@@ -186,53 +184,6 @@ public class Ccommunicator: IDisposable
         }
     }
 
-    private int m_n_publish_evnt_errors = 0;
-
-    private void MakeExchange( ref IModel? exchange, string? str_exch_name )
-    {
-        try
-        {
-            if(str_exch_name==null)
-                throw new Exception("str_exch_name==null");
-            if(exchange!=null)
-            {
-                if(exchange.IsOpen)
-                {
-                    return;
-                }
-                else
-                {
-                    m_n_publish_evnt_errors++;
-                    Log.Warning($"EXCHANGE_ already closed? try dispose and recreate -> [{str_exch_name}]");
-                    exchange.Dispose();
-                }
-            }
-            if(m_connection == null)
-            {
-                Log.Error($"no connection");    
-                return;
-            }
-            exchange = m_connection.CreateModel();
-            Log.Warning($"EXCHANGE_ declare-> [{str_exch_name}]");
-            exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:false );
-            Log.Information($"EXCHANGE_ declared-> [{str_exch_name}]");
-        }
-        catch(Exception ex)
-        {
-            m_n_publish_evnt_errors++;   
-            Log.Error($"when declare exchange {str_exch_name} : {ex.ToString()}");
-        }
-    }
-
-    public int PublishEvnt(Ccommunicator.enEvents en_evnt, string[] results)
-    {
-        Ccommunicator.Event evnt = new Ccommunicator.Event();
-        evnt.en_event = en_evnt;
-        evnt.command  = "";
-        evnt.results  = results;
-        return PublishEvnt(evnt);
-    }
-
     public string GetLocalHostName()
     {
         string nameh = "get_name_error";
@@ -265,7 +216,53 @@ public class Ccommunicator: IDisposable
         return "get_ip_error";
     }
 
-    public int PublishEvnt(Event evnt)
+    private void MakeExchange( ref IModel? exchange, string? str_exch_name )
+    {
+        try
+        {
+            if(str_exch_name==null)
+                throw new Exception("str_exch_name==null");
+            if(exchange!=null)
+            {
+                if(exchange.IsOpen)
+                {
+                    return;
+                }
+                else
+                {
+                    m_n_publish_evnt_errors++;
+                    Log.Warning($"EXCHANGE_ already closed? try dispose and recreate -> [{str_exch_name}]");
+                    exchange.Dispose();
+                }
+            }
+            if(m_connection == null)
+            {
+                Log.Error($"no connection");    
+                return;
+            }
+            exchange = m_connection.CreateModel();
+            Log.Warning($"EXCHANGE_ declare-> [{str_exch_name}]");
+            exchange.ExchangeDeclare( exchange: str_exch_name, type: ExchangeType.Fanout, durable: false, autoDelete:false );
+            Log.Information($"EXCHANGE_ declared-> [{str_exch_name}]");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"when declare exchange {str_exch_name} : {ex}");
+        }
+    }
+
+    public int PublishEvnt(Ccommunicator.enEvents en_evnt, string[] results)
+    {
+        Ccommunicator.Evnt evnt = new Ccommunicator.Evnt();
+        evnt.en_event = en_evnt;
+        evnt.command  = "";
+        evnt.results  = results;
+        return PublishEvnt(evnt);
+    }
+
+    private int m_n_publish_evnt_errors = 0;
+
+    public int PublishEvnt(Evnt evnt)
     {
         lock(m_obj_sync_publish_evnt)
         {
@@ -284,11 +281,62 @@ public class Ccommunicator: IDisposable
             catch(Exception ex)
             {
                 m_n_publish_evnt_errors++;   
-                Log.Error($"exception [{ex.ToString()}]");
+                Log.Error($"PublishEvnt() exception [{ex}]");
             }
         }
         return 1;
     }
+
+    public int PublishCmnd(Ccommunicator.enCommands en_cmnd, string[] str_cmnd)
+    {
+        /*
+        Ccommunicator.Evnt evnt = new Ccommunicator.Evnt();
+        evnt.en_event = en_evnt;
+        evnt.command  = "";
+        evnt.results  = results;
+        */
+        Ccommunicator.Command cmnd = new Ccommunicator.Command();
+        cmnd.en_command = en_cmnd;
+        cmnd.pars = str_cmnd;
+        return PublishCmnd(cmnd);
+    }
+
+    private int m_n_publish_cmnd_errors = 0;
+
+    public int PublishCmnd(Command cmnd)
+    {
+        lock(m_obj_sync_publish_cmnd)
+        {
+            try
+            {
+                cmnd.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
+                cmnd.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                string json_cmnd = JsonSerializer.Serialize(cmnd);
+                Log.Information($"publish to [{m_str_exch_cmnds}] : [{json_cmnd}]");
+                MakeExchange( ref m_channel_cmnds, m_str_exch_cmnds );
+                byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
+                m_channel_cmnds.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
+                /*
+                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
+                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json_evnt = JsonSerializer.Serialize(evnt,options);
+                //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
+                Log.Information($"publish to [{m_str_exch_evnts}] : [{json_evnt}]");
+                MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
+                byte[] body = Encoding.UTF8.GetBytes(json_evnt);
+                m_channel_evnts.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
+                */
+            }
+            catch(Exception ex)
+            {
+                m_n_publish_cmnd_errors++;   
+                Log.Error($"PublishCmnd() exception [{ex}]");
+            }
+        }
+        return 1;
+    }
+
 
     private int m_n_consume_command_errors = 0;
 
@@ -358,7 +406,7 @@ public class Ccommunicator: IDisposable
                 catch(Exception ex)
                 {
                     m_n_consume_command_errors++;
-                    Log.Error($"exception -> [{ex.ToString()}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
+                    Log.Error($"exception -> [{ex}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
                 }
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
@@ -408,10 +456,10 @@ public class Ccommunicator: IDisposable
                 string message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($"EVENTS get message: {message}"); 
                 Log.Information($"EVENTS get message: {message}");
-                Event? evnt = null;
+                Evnt? evnt = null;
                 try
                 {
-                    evnt = JsonSerializer.Deserialize<Event>(message);
+                    evnt = JsonSerializer.Deserialize<Evnt>(message);
                 }
                 catch(Exception ex)
                 {
@@ -420,7 +468,7 @@ public class Ccommunicator: IDisposable
                 }   
                 try
                 {
-                    nRes = on_event(evnt??new Event());
+                    nRes = on_event(evnt??new Evnt());
                 }
                 catch(Exception ex)
                 {
@@ -435,6 +483,6 @@ public class Ccommunicator: IDisposable
         }
         return 1;
     }
-}
+} // class Ccommunicator
 
-}
+
