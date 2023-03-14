@@ -501,7 +501,7 @@ public class Worker : BackgroundService
             //Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime );
             RastrSrvShare.Ccommunicator.Event evnt_start = new RastrSrvShare.Ccommunicator.Event();
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.HEART_BEAT;
-            m_communicator?.Publish( evnt_start );
+            m_communicator?.PublishEvnt( evnt_start );
         }
         catch(Exception ex)
         {
@@ -520,7 +520,7 @@ public class Worker : BackgroundService
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
             evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
             evnt_start.tm_mark_command = command.tm_mark;
-            m_communicator?.Publish( evnt_start );
+            m_communicator?.PublishEvnt( evnt_start );
             List<string> ls_ress = new List<string>();
             switch(command.en_command)
             {
@@ -574,7 +574,7 @@ public class Worker : BackgroundService
             evnt_finish.command         = command.en_command.ToString();
             evnt_finish.tm_mark_command = command.tm_mark;
             evnt_finish.results         = ls_ress.ToArray();
-            m_communicator?.Publish( evnt_finish );
+            m_communicator?.PublishEvnt( evnt_finish );
         }
         return 1;
     }
@@ -690,8 +690,8 @@ public class Worker : BackgroundService
             m_writer.Init( par, m_logger );
             int i = 0;
             for(i=0;i<10;i++){
-                m_writer.Publish($"{i} : hello world!");
-                //Task.Run(()=>{m_writer.Publish($"{i} : hello world!");});
+                m_writer.PublishEvnt($"{i} : hello world!");
+                //Task.Run(()=>{m_writer.PublishEvnt($"{i} : hello world!");});
                 //Thread.Sleep(10);
             }
             //https://github.com/MassTransit/MassTransit

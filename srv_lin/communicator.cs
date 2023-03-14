@@ -214,13 +214,13 @@ public class Ccommunicator: IDisposable
 
     object m_obj_sync_publish = new Object();
 
-    public int Publish(Ccommunicator.enEvents en_evnt, string[] results)
+    public int PublishEvnt(Ccommunicator.enEvents en_evnt, string[] results)
     {
         Ccommunicator.Event evnt = new Ccommunicator.Event();
         evnt.en_event = en_evnt;
         evnt.command  = "";
         evnt.results  = results;
-        return Publish(evnt);
+        return PublishEvnt(evnt);
     }
 
     public string GetLocalHostName()
@@ -255,7 +255,7 @@ public class Ccommunicator: IDisposable
         return "get_ip_error";
     }
 
-    public int Publish(Event evnt)
+    public int PublishEvnt(Event evnt)
     {
         lock(m_obj_sync_publish)
         {

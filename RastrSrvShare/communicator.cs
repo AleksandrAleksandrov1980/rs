@@ -30,8 +30,9 @@ public class Ccommunicator: IDisposable
     public int    m_n_pid = -1;
     private ConnectionFactory? m_factory;
     private IConnection? m_connection;
-    private IModel? m_channel_events;
-    private string? m_str_exch_events;
+    private IModel? m_channel_evnts;
+    private string? m_str_exch_evnts;
+    object m_obj_sync_publish_evnt = new Object();
     public delegate int OnCommand( Command command );
     public delegate int OnEvent( Event evnt );
 
@@ -53,9 +54,9 @@ public class Ccommunicator: IDisposable
     public void Dispose() 
     {
         Log.Information("Writer.Dispose!");
-        m_channel_events?.Abort();
-        m_channel_events?.Dispose();
-        m_channel_events = null;
+        m_channel_evnts?.Abort();
+        m_channel_evnts?.Dispose();
+        m_channel_evnts = null;
         m_connection?.Abort();
         m_connection?.Dispose();
         m_connection = null;
@@ -185,7 +186,7 @@ public class Ccommunicator: IDisposable
         }
     }
 
-    private int m_n_publish_errors = 0;
+    private int m_n_publish_evnt_errors = 0;
 
     private void MakeExchange( ref IModel? exchange, string? str_exch_name )
     {
@@ -201,7 +202,7 @@ public class Ccommunicator: IDisposable
                 }
                 else
                 {
-                    m_n_publish_errors++;
+                    m_n_publish_evnt_errors++;
                     Log.Warning($"EXCHANGE_ already closed? try dispose and recreate -> [{str_exch_name}]");
                     exchange.Dispose();
                 }
@@ -218,20 +219,18 @@ public class Ccommunicator: IDisposable
         }
         catch(Exception ex)
         {
-            m_n_publish_errors++;   
+            m_n_publish_evnt_errors++;   
             Log.Error($"when declare exchange {str_exch_name} : {ex.ToString()}");
         }
     }
 
-    object m_obj_sync_publish = new Object();
-
-    public int Publish(Ccommunicator.enEvents en_evnt, string[] results)
+    public int PublishEvnt(Ccommunicator.enEvents en_evnt, string[] results)
     {
         Ccommunicator.Event evnt = new Ccommunicator.Event();
         evnt.en_event = en_evnt;
         evnt.command  = "";
         evnt.results  = results;
-        return Publish(evnt);
+        return PublishEvnt(evnt);
     }
 
     public string GetLocalHostName()
@@ -266,9 +265,9 @@ public class Ccommunicator: IDisposable
         return "get_ip_error";
     }
 
-    public int Publish(Event evnt)
+    public int PublishEvnt(Event evnt)
     {
-        lock(m_obj_sync_publish)
+        lock(m_obj_sync_publish_evnt)
         {
             try
             {
@@ -277,21 +276,21 @@ public class Ccommunicator: IDisposable
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json_evnt = JsonSerializer.Serialize(evnt,options);
                 //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
-                Log.Information($"publish to [{m_str_exch_events}] : [{json_evnt}]");
-                MakeExchange( ref m_channel_events, m_str_exch_events );
+                Log.Information($"publish to [{m_str_exch_evnts}] : [{json_evnt}]");
+                MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
                 byte[] body = Encoding.UTF8.GetBytes(json_evnt);
-                m_channel_events.BasicPublish( exchange: m_str_exch_events, routingKey: "", basicProperties: null, body: body );
+                m_channel_evnts.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
             }
             catch(Exception ex)
             {
-                m_n_publish_errors++;   
+                m_n_publish_evnt_errors++;   
                 Log.Error($"exception [{ex.ToString()}]");
             }
         }
         return 1;
     }
 
-    private int m_n_consume_errors = 0;
+    private int m_n_consume_command_errors = 0;
 
     public int ConsumeCommands( CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnCommand on_command )
     {
@@ -305,7 +304,7 @@ public class Ccommunicator: IDisposable
         m_str_name      = (par.m_str_name!=null)?par.m_str_name:"name_invalid";
         m_str_host_name = GetLocalHostName();
         m_str_host_ip   = GetIpv4();
-        m_n_consume_errors = 0;
+        m_n_consume_command_errors = 0;
         m_n_pid            = Process.GetCurrentProcess().Id;
         //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
         m_factory = new ConnectionFactory();
@@ -319,10 +318,10 @@ public class Ccommunicator: IDisposable
         MakeConnection( ref m_connection, m_factory );
         //m_connection = m_factory.CreateConnection();
         //m_channel_events = m_connection.CreateModel();
-        m_str_exch_events = par.m_str_exch_events;
+        m_str_exch_evnts = par.m_str_exch_events;
         //Log.Warning($"EXCHANGE_EVENTS-> [{m_str_exch_events}]");
         //m_channel_events.ExchangeDeclare( exchange: m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:true );
-        MakeExchange( ref m_channel_events, m_str_exch_events );
+        MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
         using(IModel channel_commands = m_connection.CreateModel())
         {
             Log.Warning($"EXCHANGE_COMMANDS-> [{par.m_str_exch_commands}]");
@@ -358,8 +357,8 @@ public class Ccommunicator: IDisposable
                 }
                 catch(Exception ex)
                 {
-                    m_n_consume_errors++;
-                    Log.Error($"exception -> [{ex.ToString()}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_errors}");
+                    m_n_consume_command_errors++;
+                    Log.Error($"exception -> [{ex.ToString()}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
                 }
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
@@ -369,6 +368,8 @@ public class Ccommunicator: IDisposable
         }
         return 1;
     }
+
+    private int m_n_consume_evnt_errors = 0;
 
     public int ConsumeEvents( CParams par, Microsoft.Extensions.Logging.ILogger? logger, OnEvent on_event )
     {
@@ -385,6 +386,7 @@ public class Ccommunicator: IDisposable
         factory.VirtualHost = "/";
         factory.UserName    = par.m_str_user; // guest - resctricted to local only
         factory.Password    = par.m_str_pass;
+        m_n_consume_evnt_errors = 0;
         logger?.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} ");
         Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
         IConnection? connection = null;
@@ -422,8 +424,8 @@ public class Ccommunicator: IDisposable
                 }
                 catch(Exception ex)
                 {
-                    m_n_consume_errors++;
-                    Log.Error($"exception -> [{ex.ToString()}] when trying proccess event [{message}] m_n_consume_errors= {m_n_consume_errors}");
+                    m_n_consume_evnt_errors++;
+                    Log.Error($"exception -> [{ex}] when trying proccess event [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
                 }
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
