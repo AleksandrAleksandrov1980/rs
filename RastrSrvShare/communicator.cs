@@ -446,7 +446,7 @@ public class Ccommunicator: IDisposable
                         }
                         else
                         { 
-                            Log.Error($"got command with invalid signature! {command}");
+                            Log.Error($"got command with invalid signature! {message}");
                         }
                     }
                     catch(Exception ex)
