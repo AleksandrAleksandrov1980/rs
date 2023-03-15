@@ -10,16 +10,15 @@ using Microsoft.Win32;
 
 namespace RastrSrvShare
 {
-
-    public class CParams
+    public class CRabbitParams
     {
-        public string? m_str_name = "";
-        public string? m_str_host = "";
-        public int     m_n_port = 0; // default 5672
-        public string? m_str_exch_commands = "";
-        public string? m_str_exch_events = "";
-        public string? m_str_user = "";
-        public string? m_str_pass = "";
+        public string m_str_name = "";
+        public string m_str_host = "";
+        public int    m_n_port = 0; // default 5672
+        public string m_str_exch_cmnds = "";
+        public string m_str_exch_evnts = "";
+        public string m_str_user = "";
+        public string m_str_pass = "";
         public CancellationToken m_cncl_tkn;
     }
 

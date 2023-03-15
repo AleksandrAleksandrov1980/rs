@@ -225,7 +225,7 @@
          
           let command = new CCommand();
           command.command = en_command;
-          command.for = "xz";
+          command.to = "xz";
           command.from = "web_s";
           command.sign = "unsiggned";
           let el = null;
@@ -269,7 +269,7 @@
       class CCommand{
         constructor(){
           this.command = null;
-          this.for = "";
+          this.to = "";
           this.from = "";
           this.tm_mark = GetTmStamp();
           this.pars = [];

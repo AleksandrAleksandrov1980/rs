@@ -11,20 +11,27 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using static RastrSrvShare.Ccommunicator;
 using Microsoft.Extensions.Options;
+using Serilog.Core;
 
 namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
 {
-    private string m_str_name     = "noname_yet";
     public string m_str_host_name = "get_host_name_err";   
     public string m_str_host_ip   = "get_host_ip_err";   
     public int    m_n_pid = -1;
-    private ConnectionFactory? m_factory;
+    public  CRabbitParams m_rabbitParams = new CRabbitParams();
+
+    private int m_n_connection_errors = 0;
+    private int m_n_publish_evnt_errors = 0;
+    private int m_n_publish_cmnd_errors = 0;
+    private int m_n_consume_command_errors = 0;
+    private int m_n_consume_evnt_errors = 0;
+
     private IConnection? m_connection;
     private IModel? m_channel_evnts;
     private IModel? m_channel_cmnds;
-    private string? m_str_exch_evnts;
-    private string? m_str_exch_cmnds = "rs_commands";
+
+
     object m_obj_sync_publish_evnt = new Object();
     object m_obj_sync_publish_cmnd = new Object();
     public delegate int OnCommand( Command command );
@@ -45,17 +52,6 @@ public class Ccommunicator: IDisposable
         FILE_DOWNLOAD    =  11,
     }
 
-    public void Dispose() 
-    {
-        Log.Information("Writer.Dispose!");
-        m_channel_evnts?.Abort();
-        m_channel_evnts?.Dispose();
-        m_channel_evnts = null;
-        m_connection?.Abort();
-        m_connection?.Dispose();
-        m_connection = null;
-    }
-
     public class CommandSerialized
     {
         public string   command { get; set; } = "";
@@ -68,7 +64,11 @@ public class Ccommunicator: IDisposable
 
     public class Command
     {
+        [JsonIgnore]
         public enCommands en_command{ get; set; } = enCommands.ERROR;
+        [JsonPropertyName("command")]
+        public string str_event         { get{return en_command.ToString();} 
+                                          set{en_command = StrToCommand(value);} } 
         public string     to        { get; set; } = "";
         public string     from      { get; set; } = "";
         public string     tm_mark   { get; set; } = ""; //guid on from
@@ -154,34 +154,15 @@ public class Ccommunicator: IDisposable
         }
     }
 
-    private int m_n_connection_errors = 0;
-
-    private void MakeConnection( ref IConnection? connection, ConnectionFactory? factory )
+    public void Dispose() 
     {
-        try
-        {
-            if(factory==null)
-                throw new Exception("factory==null");
-            if(connection!=null)
-            {
-                if(connection.IsOpen)
-                {
-                    return;
-                }
-                else
-                {
-                    m_n_connection_errors++;
-                    Log.Error($"___CONNECTION___ already closed? try dispose and recreate");
-                    connection.Dispose();
-                }
-            }
-            connection = factory.CreateConnection();
-        }
-        catch(Exception ex)
-        {
-            m_n_connection_errors++;
-            Log.Error($"when CreateConnection() : {ex.ToString()}");
-        }
+        Log.Information("Writer.Dispose!");
+        m_channel_evnts?.Abort();
+        m_channel_evnts?.Dispose();
+        m_channel_evnts = null;
+        m_connection?.Abort();
+        m_connection?.Dispose();
+        m_connection = null;
     }
 
     public string GetLocalHostName()
@@ -216,6 +197,64 @@ public class Ccommunicator: IDisposable
         return "get_ip_error";
     }
 
+    
+
+    private void MakeConnection( ref IConnection? connection, ConnectionFactory? factory )
+    {
+        try
+        {
+            if(factory==null)
+                throw new Exception("factory==null");
+            if(connection!=null)
+            {
+                if(connection.IsOpen)
+                {
+                    return;
+                }
+                else
+                {
+                    m_n_connection_errors++;
+                    Log.Error($"___CONNECTION___ already closed? try dispose and recreate");
+                    connection.Dispose();
+                }
+            }
+            connection = factory.CreateConnection();
+        }
+        catch(Exception ex)
+        {
+            m_n_connection_errors++;
+            Log.Error($"when CreateConnection() exception: {ex}");
+        }
+    }
+
+    public void Init( CRabbitParams rabbitParams_in )
+    { 
+        try
+        { 
+            m_str_host_name     = GetLocalHostName();
+            m_str_host_ip       = GetIpv4();
+            m_n_pid             = Process.GetCurrentProcess().Id;
+            ConnectionFactory factory = new ConnectionFactory();
+            m_rabbitParams      = rabbitParams_in;
+            factory.HostName    = m_rabbitParams.m_str_host;
+            factory.Port        = m_rabbitParams.m_n_port;
+            factory.VirtualHost = "/";
+            factory.UserName    = m_rabbitParams.m_str_user; // guest - resctricted to local only
+            factory.Password    = m_rabbitParams.m_str_pass;
+            Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
+            MakeConnection( ref m_connection, factory );
+            if(m_connection == null)
+            { 
+                throw new Exception($"Init no connection.");
+            }
+        } 
+        catch(Exception ex)
+        {
+            throw new Exception($"Init exception [{ex}] ");
+        }
+    }
+
+
     private void MakeExchange( ref IModel? exchange, string? str_exch_name )
     {
         try
@@ -230,7 +269,6 @@ public class Ccommunicator: IDisposable
                 }
                 else
                 {
-                    m_n_publish_evnt_errors++;
                     Log.Warning($"EXCHANGE_ already closed? try dispose and recreate -> [{str_exch_name}]");
                     exchange.Dispose();
                 }
@@ -260,7 +298,7 @@ public class Ccommunicator: IDisposable
         return PublishEvnt(evnt);
     }
 
-    private int m_n_publish_evnt_errors = 0;
+    
 
     public int PublishEvnt(Evnt evnt)
     {
@@ -268,15 +306,15 @@ public class Ccommunicator: IDisposable
         {
             try
             {
-                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
+                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
                 evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json_evnt = JsonSerializer.Serialize(evnt,options);
                 //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
-                Log.Information($"publish to [{m_str_exch_evnts}] : [{json_evnt}]");
-                MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
+                Log.Information($"publish to [{m_rabbitParams.m_str_exch_evnts}] : [{json_evnt}]");
+                MakeExchange( ref m_channel_evnts, m_rabbitParams.m_str_exch_evnts );
                 byte[] body = Encoding.UTF8.GetBytes(json_evnt);
-                m_channel_evnts.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
+                m_channel_evnts.BasicPublish( exchange: m_rabbitParams.m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
             }
             catch(Exception ex)
             {
@@ -289,19 +327,13 @@ public class Ccommunicator: IDisposable
 
     public int PublishCmnd(Ccommunicator.enCommands en_cmnd, string[] str_cmnd)
     {
-        /*
-        Ccommunicator.Evnt evnt = new Ccommunicator.Evnt();
-        evnt.en_event = en_evnt;
-        evnt.command  = "";
-        evnt.results  = results;
-        */
         Ccommunicator.Command cmnd = new Ccommunicator.Command();
         cmnd.en_command = en_cmnd;
         cmnd.pars = str_cmnd;
         return PublishCmnd(cmnd);
     }
 
-    private int m_n_publish_cmnd_errors = 0;
+    
 
     public int PublishCmnd(Command cmnd)
     {
@@ -309,24 +341,13 @@ public class Ccommunicator: IDisposable
         {
             try
             {
-                cmnd.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
+                cmnd.from = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
                 cmnd.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
                 string json_cmnd = JsonSerializer.Serialize(cmnd);
-                Log.Information($"publish to [{m_str_exch_cmnds}] : [{json_cmnd}]");
-                MakeExchange( ref m_channel_cmnds, m_str_exch_cmnds );
+                Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{json_cmnd}]");
+                MakeExchange( ref m_channel_cmnds, m_rabbitParams.m_str_exch_cmnds );
                 byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
-                m_channel_cmnds.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
-                /*
-                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_str_name}({m_n_pid})";
-                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string json_evnt = JsonSerializer.Serialize(evnt,options);
-                //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
-                Log.Information($"publish to [{m_str_exch_evnts}] : [{json_evnt}]");
-                MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
-                byte[] body = Encoding.UTF8.GetBytes(json_evnt);
-                m_channel_evnts.BasicPublish( exchange: m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
-                */
+                m_channel_cmnds.BasicPublish( exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "", basicProperties: null, body: body );
             }
             catch(Exception ex)
             {
@@ -337,117 +358,77 @@ public class Ccommunicator: IDisposable
         return 1;
     }
 
+    
 
-    private int m_n_consume_command_errors = 0;
-
-    public int ConsumeCommands( CParams par, Microsoft.Extensions.Logging.ILogger m_logger, OnCommand on_command )
+    public int ConsumeCmnds( OnCommand on_command )
     {
         int nRes = 0;
-        Log.Information("start Listener!");
-        if(m_connection != null)
+        try
         {
-            Log.Error("m_connection != null, trying to Dispose first!");
-            Dispose();
-        }
-        m_str_name      = (par.m_str_name!=null)?par.m_str_name:"name_invalid";
-        m_str_host_name = GetLocalHostName();
-        m_str_host_ip   = GetIpv4();
-        m_n_consume_command_errors = 0;
-        m_n_pid            = Process.GetCurrentProcess().Id;
-        //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
-        m_factory = new ConnectionFactory();
-        m_factory.HostName    = par.m_str_host;
-        m_factory.Port        = par.m_n_port;
-        m_factory.VirtualHost = "/";
-        m_factory.UserName    = par.m_str_user; // guest - resctricted to local only
-        m_factory.Password    = par.m_str_pass;
-        m_logger.LogWarning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName} ");
-        Log.Warning($"CONNECTING {m_factory.HostName}:{m_factory.Port} = {m_factory.UserName}");
-        MakeConnection( ref m_connection, m_factory );
-        //m_connection = m_factory.CreateConnection();
-        //m_channel_events = m_connection.CreateModel();
-        m_str_exch_evnts = par.m_str_exch_events;
-        //Log.Warning($"EXCHANGE_EVENTS-> [{m_str_exch_events}]");
-        //m_channel_events.ExchangeDeclare( exchange: m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:true );
-        MakeExchange( ref m_channel_evnts, m_str_exch_evnts );
-        using(IModel channel_commands = m_connection.CreateModel())
-        {
-            Log.Warning($"EXCHANGE_COMMANDS-> [{par.m_str_exch_commands}]");
-            channel_commands.ExchangeDeclare( exchange: par.m_str_exch_commands, type: ExchangeType.Fanout, durable: false, autoDelete:false );
-            var queue_name = channel_commands.QueueDeclare().QueueName;
-            channel_commands.QueueBind( queue: queue_name, exchange: par.m_str_exch_commands, routingKey: "" );
-            Log.Information($"Waiting for commands queue [{queue_name}]");
-            var consumer = new EventingBasicConsumer(channel_commands);
-            consumer.Received += ( model, ea ) =>
+            Log.Information("start ConsumeCmnds()!");
+            using(IModel channel_commands = m_connection.CreateModel())
             {
-                //seems like this work in different thread!!
-                //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); 
-                byte[] body = ea.Body.ToArray();
-                string message = Encoding.UTF8.GetString(body);
-                Log.Information($"COMMANDS get message: {message}");
-                CommandSerialized? command_serialized = null;
-                try
+                Log.Warning($"EXCHANGE_COMMANDS-> [{m_rabbitParams.m_str_exch_cmnds}]");
+                channel_commands.ExchangeDeclare( exchange: m_rabbitParams.m_str_exch_cmnds, type: ExchangeType.Fanout, durable: false, autoDelete:false );
+                MakeExchange( ref m_channel_evnts, m_rabbitParams.m_str_exch_cmnds );
+                string queue_name = channel_commands.QueueDeclare().QueueName;
+                channel_commands.QueueBind( queue: queue_name, exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "" );
+                Log.Information($"Waiting for commands queue [{queue_name}]");
+                EventingBasicConsumer consumer = new EventingBasicConsumer(channel_commands);
+                consumer.Received += ( model, ea ) =>
                 {
-                    command_serialized = JsonSerializer.Deserialize<CommandSerialized>(message)!;
-                }
-                catch(Exception ex)
-                {
-                    Log.Error($"exception -> [{ex.ToString()}] when trying deserialize command [{message}]");
-                    command_serialized = null;    
-                }   
-                try
-                {
-                    Command command = new Command(command_serialized);
-                    //Console.WriteLine($"THREAD_Listener1_: {Thread.CurrentThread.ManagedThreadId}");
-                    nRes = on_command(command);
-                    //Console.WriteLine($"THREAD_Listener2_: {Thread.CurrentThread.ManagedThreadId}");
-                    Log.Information($"command ret: {nRes}");
-                }
-                catch(Exception ex)
-                {
-                    m_n_consume_command_errors++;
-                    Log.Error($"exception -> [{ex}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
-                }
-            };
-            //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
-            channel_commands.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
-            par.m_cncl_tkn.WaitHandle.WaitOne();
-            Log.Warning($"listener get cancel signal.");
+                    //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); //seems like this work in different thread!!
+                    byte[] body = ea.Body.ToArray();
+                    string message = Encoding.UTF8.GetString(body);
+                    Log.Information($"COMMANDS get message: {message}");
+                    CommandSerialized? command_serialized = null;
+                    try
+                    {
+                        command_serialized = JsonSerializer.Deserialize<CommandSerialized>(message)!;
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error($"exception -> [{ex.ToString()}] when trying deserialize command [{message}]");
+                        command_serialized = null;    
+                    }   
+                    try
+                    {
+                        Command command = new Command(command_serialized);
+                        nRes = on_command(command);
+                        Log.Information($"command ret: {nRes}");
+                    }
+                    catch(Exception ex)
+                    {
+                        m_n_consume_command_errors++;
+                        Log.Error($"exception -> [{ex}] when trying execute command [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
+                    }
+                };
+                //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
+                channel_commands.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
+                m_rabbitParams.m_cncl_tkn.WaitHandle.WaitOne();
+                Log.Warning($"listener get cancel signal.");
+            }
+        }
+        catch(Exception ex)
+        { 
+            Log.Error($"ConsumeCmnds() exception -> [{ex}] ");
+            return -1;
         }
         return 1;
     }
 
-    private int m_n_consume_evnt_errors = 0;
-
-    public int ConsumeEvents( CParams par, Microsoft.Extensions.Logging.ILogger? logger, OnEvent on_event )
+    public int ConsumeEvnts( OnEvent on_event )
     {
         int nRes = 0;
-        Log.Information("start Listener!");
-        if(m_connection != null)
+        Log.Information("start ConsumeEvnts()!");
+        using(IModel channel_events = m_connection.CreateModel())
         {
-            Log.Error("m_connection != null, trying to Dispose first!");
-            Dispose();
-        }
-        ConnectionFactory factory =  new ConnectionFactory();
-        factory.HostName    = par.m_str_host;
-        factory.Port        = par.m_n_port;
-        factory.VirtualHost = "/";
-        factory.UserName    = par.m_str_user; // guest - resctricted to local only
-        factory.Password    = par.m_str_pass;
-        m_n_consume_evnt_errors = 0;
-        logger?.LogWarning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName} ");
-        Log.Warning($"CONNECTING {factory.HostName}:{factory.Port} = {factory.UserName}");
-        IConnection? connection = null;
-        MakeConnection( ref connection, factory );
-        
-        using(IModel channel_events = connection.CreateModel())
-        {
-            Log.Warning($"EXCHANGE_EVENTS-> [{par.m_str_exch_events}]");
-            channel_events.ExchangeDeclare( exchange: par.m_str_exch_events, type: ExchangeType.Fanout, durable: false, autoDelete:false );
-            var queue_name = channel_events.QueueDeclare().QueueName;
-            channel_events.QueueBind( queue: queue_name, exchange: par.m_str_exch_events, routingKey: "" );
+            Log.Warning($"EXCHANGE_EVENTS-> [{m_rabbitParams.m_str_exch_evnts}]");
+            channel_events.ExchangeDeclare( exchange: m_rabbitParams.m_str_exch_evnts, type: ExchangeType.Fanout, durable: false, autoDelete:false );
+            string queue_name = channel_events.QueueDeclare().QueueName;
+            channel_events.QueueBind( queue: queue_name, exchange: m_rabbitParams.m_str_exch_evnts, routingKey: "" );
             Log.Information($"Waiting for commands queue [{queue_name}]");
-            var consumer = new EventingBasicConsumer(channel_events);
+            EventingBasicConsumer consumer = new EventingBasicConsumer(channel_events);
             consumer.Received += ( model, ea ) =>
             {
                 //seems like this work in different thread!!
@@ -478,7 +459,7 @@ public class Ccommunicator: IDisposable
             };
             //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
             channel_events.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
-            par.m_cncl_tkn.WaitHandle.WaitOne();
+            m_rabbitParams.m_cncl_tkn.WaitHandle.WaitOne();
             Log.Warning($"listener get cancel signal.");
         }
         return 1;

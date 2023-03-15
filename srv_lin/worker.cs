@@ -5,6 +5,7 @@ using FluentFTP;
 using System.Timers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using RastrSrvShare;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -614,13 +615,13 @@ public class Worker : BackgroundService
             c.SetMsLogger(m_logger);
             c.Log(shared.CHlpLog.enErr.INF , "");
 
-            RastrSrvShare.CParams par = new RastrSrvShare.CParams();
+            RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
             par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
             double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms",2000);
             par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
             par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",5672); // default 5672
-            par.m_str_exch_commands = m_configuration.GetValue<string>("r_params:q_exch_commands",""); 
-            par.m_str_exch_events   = m_configuration.GetValue<string>("r_params:q_exch_events",""); 
+            par.m_str_exch_cmnds    = m_configuration.GetValue<string>("r_params:q_exch_commands",""); 
+            par.m_str_exch_evnts    = m_configuration.GetValue<string>("r_params:q_exch_events",""); 
             par.m_str_user          = m_configuration.GetValue<string>("r_params:q_user",""); 
             par.m_str_pass          = m_configuration.GetValue<string>("r_params:q_pass","");
             par.m_cncl_tkn          = stoppingToken;
@@ -640,8 +641,8 @@ public class Worker : BackgroundService
             strTmp += $"--------------------------------------------------------------------\n" ; 
             strTmp += $"q_host        : {par.m_str_host}\n";
             strTmp += $"q_port        : {par.m_n_port}\n"; 
-            strTmp += $"q_exch_cmds   : {par.m_str_exch_commands}\n"; 
-            strTmp += $"q_exch_evts   : {par.m_str_exch_events}\n"; 
+            strTmp += $"q_exch_cmds   : {par.m_str_exch_cmnds}\n"; 
+            strTmp += $"q_exch_evts   : {par.m_str_exch_evnts}\n"; 
             strTmp += $"q_user        : {par.m_str_user}\n"; 
             //m_logger.LogWarning($" : {str_q_log_pass}");
             strTmp += $"--------------------------------------------------------------------\n" ; 
@@ -666,8 +667,9 @@ public class Worker : BackgroundService
                         m_communicator = null;
                     }
                     m_communicator = new RastrSrvShare.Ccommunicator();
-                    Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCommands(par, m_logger, OnCommand); });
-                    Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvents(par, m_logger, OnEvent); });
+                    m_communicator.Init(par);
+                    Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCmnds(OnCommand); });
+                    Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvnts(OnEvent); });
                     await taskConsumeCommands;
                     //m_communicator.Consume(par, m_logger, OnCommand);
                     if(m_communicator!=null){
