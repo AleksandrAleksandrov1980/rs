@@ -24,7 +24,7 @@ public class CSigner
         }
     }
 
-    public bool VerifySignedHash(byte[] DataToVerify, byte[] SignedData) 
+    public bool VerifyData(byte[] DataToVerify, byte[] SignedData) 
     {
         try
         {

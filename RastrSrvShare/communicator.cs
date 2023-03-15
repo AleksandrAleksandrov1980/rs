@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using static RastrSrvShare.Ccommunicator;
 using Microsoft.Extensions.Options;
 using Serilog.Core;
+using System.Linq;
+using System.Security.Cryptography;
 
 namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
@@ -31,11 +33,12 @@ public class Ccommunicator: IDisposable
     private IModel? m_channel_evnts;
     private IModel? m_channel_cmnds;
 
-
     object m_obj_sync_publish_evnt = new Object();
     object m_obj_sync_publish_cmnd = new Object();
     public delegate int OnCommand( Command command );
     public delegate int OnEvent( Evnt evnt );
+
+    CSigner? m_signer = null;
 
     public enum enCommands 
     {
@@ -79,6 +82,44 @@ public class Ccommunicator: IDisposable
         { 
         }
 
+        public byte[] GetBytesForSign()
+        { 
+            string str_for_sign = str_event+";"+to+";"+from+";"+tm_mark+";";
+            foreach (string par in pars)
+            { 
+                str_for_sign += par + ";";
+            }
+            byte[] bytes_for_sign = Encoding.UTF8.GetBytes(str_for_sign);
+            return bytes_for_sign;
+        }
+
+        public string MakeSign(CSigner signer)
+        { 
+            this.sign             = "";
+            byte[] bytes_for_sign = GetBytesForSign();
+            byte[] bytes_sign     = signer.HashAndSignBytes(bytes_for_sign);
+            this.sign             = Convert.ToBase64String(bytes_sign);
+            return this.sign;
+        }
+
+        public bool IsSignValid(CSigner signer)
+        { 
+            try
+            { 
+                byte[] bytes_for_sign    = GetBytesForSign();
+                byte[] bytes_signed_data = Convert.FromBase64String(this.sign);
+                if(signer.VerifyData( bytes_for_sign, bytes_signed_data ) == true)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch
+            { 
+                return false;
+            }
+        }
+
         public static enCommands StrToCommand(string? str_command)
         {
             if(str_command!=null)
@@ -105,6 +146,7 @@ public class Ccommunicator: IDisposable
                     from    = command_serialized.from;
                     tm_mark = command_serialized.tm_mark;
                     pars    = command_serialized.pars;
+                    sign    = command_serialized.sign;
                 }
             }
             else
@@ -197,8 +239,6 @@ public class Ccommunicator: IDisposable
         return "get_ip_error";
     }
 
-    
-
     private void MakeConnection( ref IConnection? connection, ConnectionFactory? factory )
     {
         try
@@ -227,7 +267,7 @@ public class Ccommunicator: IDisposable
         }
     }
 
-    public void Init( CRabbitParams rabbitParams_in )
+    public void Init( CRabbitParams rabbitParams_in, CSigner signer_in )
     { 
         try
         { 
@@ -247,13 +287,13 @@ public class Ccommunicator: IDisposable
             { 
                 throw new Exception($"Init no connection.");
             }
+            m_signer = signer_in;
         } 
         catch(Exception ex)
         {
             throw new Exception($"Init exception [{ex}] ");
         }
     }
-
 
     private void MakeExchange( ref IModel? exchange, string? str_exch_name )
     {
@@ -298,8 +338,6 @@ public class Ccommunicator: IDisposable
         return PublishEvnt(evnt);
     }
 
-    
-
     public int PublishEvnt(Evnt evnt)
     {
         lock(m_obj_sync_publish_evnt)
@@ -333,8 +371,6 @@ public class Ccommunicator: IDisposable
         return PublishCmnd(cmnd);
     }
 
-    
-
     public int PublishCmnd(Command cmnd)
     {
         lock(m_obj_sync_publish_cmnd)
@@ -343,11 +379,21 @@ public class Ccommunicator: IDisposable
             {
                 cmnd.from = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
                 cmnd.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
-                string json_cmnd = JsonSerializer.Serialize(cmnd);
-                Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{json_cmnd}]");
-                MakeExchange( ref m_channel_cmnds, m_rabbitParams.m_str_exch_cmnds );
-                byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
-                m_channel_cmnds.BasicPublish( exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "", basicProperties: null, body: body );
+                if(m_signer!=null)
+                { 
+                    cmnd.MakeSign(m_signer);
+                    Debug.Assert(cmnd.sign.Length > 0);
+                    Debug.Assert(cmnd.IsSignValid(m_signer) == true);
+                    string json_cmnd = JsonSerializer.Serialize(cmnd);
+                    Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{json_cmnd}]");
+                    MakeExchange( ref m_channel_cmnds, m_rabbitParams.m_str_exch_cmnds );
+                    byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
+                    m_channel_cmnds.BasicPublish( exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "", basicProperties: null, body: body );
+                }
+                else
+                { 
+                    Log.Error($"PublishCmnd() no private_key!");
+                }
             }
             catch(Exception ex)
             {
@@ -357,8 +403,6 @@ public class Ccommunicator: IDisposable
         }
         return 1;
     }
-
-    
 
     public int ConsumeCmnds( OnCommand on_command )
     {
@@ -394,8 +438,16 @@ public class Ccommunicator: IDisposable
                     try
                     {
                         Command command = new Command(command_serialized);
-                        nRes = on_command(command);
-                        Log.Information($"command ret: {nRes}");
+
+                        if(command.IsSignValid(m_signer) == true)
+                        { 
+                            nRes = on_command(command);
+                            Log.Information($"command ret: {nRes}");
+                        }
+                        else
+                        { 
+                            Log.Error($"got command with invalid signature! {command}");
+                        }
                     }
                     catch(Exception ex)
                     {

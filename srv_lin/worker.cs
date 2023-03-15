@@ -659,6 +659,9 @@ public class Worker : BackgroundService
             m_timer_heart_beat.AutoReset = true;
             m_timer_heart_beat.Enabled = true;
 
+            RastrSrvShare.CSigner signer_pub = new RastrSrvShare.CSigner();
+            int nRes = signer_pub.ReadKey(RastrSrvShare.CSigner.str_fname_pub_xml);
+
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
                 try{
@@ -667,7 +670,7 @@ public class Worker : BackgroundService
                         m_communicator = null;
                     }
                     m_communicator = new RastrSrvShare.Ccommunicator();
-                    m_communicator.Init(par);
+                    m_communicator.Init(par, signer_pub);
                     Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCmnds(OnCommand); });
                     Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvnts(OnEvent); });
                     await taskConsumeCommands;
