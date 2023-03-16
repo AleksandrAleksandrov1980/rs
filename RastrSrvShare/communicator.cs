@@ -18,27 +18,24 @@ using System.Security.Cryptography;
 namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
 {
-    public string m_str_host_name = "get_host_name_err";   
-    public string m_str_host_ip   = "get_host_ip_err";   
-    public int    m_n_pid = -1;
+    private string m_str_name = "";
+    public  string m_str_host_name = "get_host_name_err";   
+    public  string m_str_host_ip   = "get_host_ip_err";   
+    public  int    m_n_pid = -1;
     public  CRabbitParams m_rabbitParams = new CRabbitParams();
-
     private int m_n_connection_errors = 0;
     private int m_n_publish_evnt_errors = 0;
     private int m_n_publish_cmnd_errors = 0;
     private int m_n_consume_command_errors = 0;
     private int m_n_consume_evnt_errors = 0;
-
     private IConnection? m_connection;
     private IModel? m_channel_evnts;
     private IModel? m_channel_cmnds;
-
-    object m_obj_sync_publish_evnt = new Object();
-    object m_obj_sync_publish_cmnd = new Object();
-    public delegate int OnCommand( Command command );
-    public delegate int OnEvent( Evnt evnt );
-
-    CSigner? m_signer = null;
+    private object m_obj_sync_publish_evnt = new Object();
+    private object m_obj_sync_publish_cmnd = new Object();
+    public  delegate int OnCommand( Command command );
+    public  delegate int OnEvent( Evnt evnt );
+    private CSigner? m_signer = null;
 
     public enum enCommands 
     {
@@ -70,7 +67,7 @@ public class Ccommunicator: IDisposable
         [JsonIgnore]
         public enCommands en_command{ get; set; } = enCommands.ERROR;
         [JsonPropertyName("command")]
-        public string str_event         { get{return en_command.ToString();} 
+        public string     str_event { get{return en_command.ToString();} 
                                           set{en_command = StrToCommand(value);} } 
         public string     to        { get; set; } = "";
         public string     from      { get; set; } = "";
@@ -202,9 +199,17 @@ public class Ccommunicator: IDisposable
         m_channel_evnts?.Abort();
         m_channel_evnts?.Dispose();
         m_channel_evnts = null;
+        m_channel_cmnds?.Abort();
+        m_channel_cmnds?.Dispose();
+        m_channel_cmnds = null;
         m_connection?.Abort();
         m_connection?.Dispose();
         m_connection = null;
+    }
+
+    public string GetTmMark()
+    { 
+        return DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
     }
 
     public string GetLocalHostName()
@@ -237,6 +242,31 @@ public class Ccommunicator: IDisposable
         {
         }
         return "get_ip_error";
+    }
+
+    private void MakeSrvName()
+    { 
+        m_str_name = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams?.m_str_name}({m_n_pid})";
+        if(m_str_host_name.Length<1)
+        { 
+            m_str_name = "ERROR";
+        }
+        if(m_str_host_ip.Length<1)
+        { 
+            m_str_name = "ERROR";
+        }
+        if(m_rabbitParams == null)
+        { 
+            m_str_name = "ERROR";
+        }
+        if(m_rabbitParams?.m_str_name.Length<1)
+        { 
+            m_str_name = "ERROR";
+        }
+        if(m_n_pid<0)
+        { 
+            m_str_name = "ERROR";
+        }
     }
 
     private void MakeConnection( ref IConnection? connection, ConnectionFactory? factory )
@@ -274,8 +304,10 @@ public class Ccommunicator: IDisposable
             m_str_host_name     = GetLocalHostName();
             m_str_host_ip       = GetIpv4();
             m_n_pid             = Process.GetCurrentProcess().Id;
-            ConnectionFactory factory = new ConnectionFactory();
             m_rabbitParams      = rabbitParams_in;
+            MakeSrvName();
+            Log.Information($"My.name [{m_str_name}]");
+            ConnectionFactory factory = new ConnectionFactory();
             factory.HostName    = m_rabbitParams.m_str_host;
             factory.Port        = m_rabbitParams.m_n_port;
             factory.VirtualHost = "/";
@@ -344,11 +376,11 @@ public class Ccommunicator: IDisposable
         {
             try
             {
-                evnt.from = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
-                evnt.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string json_evnt = JsonSerializer.Serialize(evnt,options);
-                //byte[] jsonUtf8Bytes =JsonSerializer.SerializeToUtf8Bytes(weatherForecast);
+                evnt.from    = m_str_name;  // $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
+                evnt.tm_mark = GetTmMark(); // DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+                //string json_evnt = JsonSerializer.Serialize(evnt,options);
+                string json_evnt = JsonSerializer.Serialize(evnt);
                 Log.Information($"publish to [{m_rabbitParams.m_str_exch_evnts}] : [{json_evnt}]");
                 MakeExchange( ref m_channel_evnts, m_rabbitParams.m_str_exch_evnts );
                 byte[] body = Encoding.UTF8.GetBytes(json_evnt);
@@ -363,11 +395,12 @@ public class Ccommunicator: IDisposable
         return 1;
     }
 
-    public int PublishCmnd(Ccommunicator.enCommands en_cmnd, string[] str_cmnd)
+    public int PublishCmnd(Ccommunicator.enCommands en_cmnd, string str_to, string[] str_pars)
     {
         Ccommunicator.Command cmnd = new Ccommunicator.Command();
         cmnd.en_command = en_cmnd;
-        cmnd.pars = str_cmnd;
+        cmnd.to         = str_to;
+        cmnd.pars       = str_pars;
         return PublishCmnd(cmnd);
     }
 
@@ -377,8 +410,8 @@ public class Ccommunicator: IDisposable
         {
             try
             {
-                cmnd.from = $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
-                cmnd.tm_mark = DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                cmnd.from    = m_str_name;  // $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
+                cmnd.tm_mark = GetTmMark(); // DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
                 if(m_signer!=null)
                 { 
                     cmnd.MakeSign(m_signer);
@@ -404,12 +437,18 @@ public class Ccommunicator: IDisposable
         return 1;
     }
 
-    public int ConsumeCmnds( OnCommand on_command )
+    public enum enConsumeCmndsMode
+    { 
+        STRICT,
+        PROMISCUOUS
+    };
+
+    public int ConsumeCmnds( OnCommand on_command, enConsumeCmndsMode ConsumeCmndsMode )
     {
         int nRes = 0;
         try
         {
-            Log.Information("start ConsumeCmnds()!");
+            Log.Information($"start ConsumeCmnds() ConsumeCmndsMode= {ConsumeCmndsMode}!");
             using(IModel channel_commands = m_connection.CreateModel())
             {
                 Log.Warning($"EXCHANGE_COMMANDS-> [{m_rabbitParams.m_str_exch_cmnds}]");
@@ -424,7 +463,7 @@ public class Ccommunicator: IDisposable
                     //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); //seems like this work in different thread!!
                     byte[] body = ea.Body.ToArray();
                     string message = Encoding.UTF8.GetString(body);
-                    Log.Information($"COMMANDS get message: {message}");
+                    Log.Information($"{m_rabbitParams.m_str_exch_cmnds} : {message}");
                     CommandSerialized? command_serialized = null;
                     try
                     {
@@ -438,16 +477,43 @@ public class Ccommunicator: IDisposable
                     try
                     {
                         Command command = new Command(command_serialized);
-
-                        if(command.IsSignValid(m_signer) == true)
+                        nRes = -1000;
+                        if(ConsumeCmndsMode == enConsumeCmndsMode.STRICT)
                         { 
-                            nRes = on_command(command);
-                            Log.Information($"command ret: {nRes}");
+                            if(command.en_command == enCommands.STATE) 
+                            {
+                                nRes = on_command(command); 
+                            }
+                            else 
+                            {
+                                if(command.to == m_str_name)
+                                {
+                                    if(command.IsSignValid(m_signer) == true)
+                                    {
+                                        Log.Information($"signature valid.");
+                                        nRes = on_command(command); 
+                                    }
+                                    else
+                                    { 
+                                        Log.Error($"got command with invalid signature! {message}");
+                                    }
+                                }
+                                else
+                                { 
+                                    Log.Information($"command for different server my.name[{m_str_name}] != [{command.to }]");
+                                }
+                            }
+                        }
+                        else if(ConsumeCmndsMode == enConsumeCmndsMode.PROMISCUOUS)
+                        {
+                            Log.Information($"PROMISCUOUS mode.");
+                            nRes = on_command(command); 
                         }
                         else
                         { 
-                            Log.Error($"got command with invalid signature! {message}");
+                            Log.Error($"Unknown ConsumeCmndsMode= {ConsumeCmndsMode}");
                         }
+                        Log.Information($"command ret: {nRes}");
                     }
                     catch(Exception ex)
                     {

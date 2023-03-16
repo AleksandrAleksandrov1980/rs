@@ -7,9 +7,16 @@ using System.IO;
 using System.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
+using Serilog;
 
 namespace RastrSrvShare
 {
+    public class Consts
+    { 
+        public  const string m_str_error   = "error";
+        public  const string m_str_success = "success";
+    }
+
     public class CRabbitParams
     {
         public string m_str_name = "";
@@ -910,6 +917,49 @@ namespace RastrSrvShare
             }
         };
     }; //class Param
+
+    public class CState
+    {
+        public int    m_n_slots_max  { get; set;} = -1;
+        public int    m_n_slots_busy { get; set;} =  0;
+
+        public class CService
+        {
+            public string       m_str_name                { get; set;} = "NO_NAME";
+            public DateTime     m_dt_last_seen            { get; set;} 
+            public int          m_n_alarm_border_millisec { get; set;} = 15000;
+            public bool         m_bl_alarm_fixed          { get; set;} = false;
+            public List<string> m_lst_errors              { get; set;} = new List<string>();
+        }
+
+        public Dictionary<string, CService> m_services {get;set;} = new Dictionary<string, CService>();
+
+        public void CheckServicesState()
+        {
+            DateTime dtNow = DateTime.Now;
+            foreach(CService service in m_services.Values )
+            {
+                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds > service.m_n_alarm_border_millisec )
+                {
+                    if(service.m_bl_alarm_fixed == false)
+                    {
+                        service.m_bl_alarm_fixed = true;
+                        service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
+                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
+                {
+                    if(service.m_bl_alarm_fixed == true)
+                    {
+                        service.m_bl_alarm_fixed = false;
+                        service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
+                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                    }
+                }
+            }
+        }
+    }
 
     public class CMain
     {

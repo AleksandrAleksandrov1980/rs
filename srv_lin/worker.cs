@@ -10,82 +10,7 @@ using RastrSrvShare;
 namespace srv_lin;
 public class Worker : BackgroundService
 {
-    /*
-     public class CParams
-    {
-        public string? m_str_name = "";
-        public string? m_str_host = "";
-        public int     m_n_port   = 0 ; // default 5672
-        public string? m_str_exch_commands = ""; 
-        public string? m_str_exch_events   = ""; 
-        public string? m_str_user = ""; 
-        public string? m_str_pass = "";
-        public CancellationToken m_cncl_tkn;
-    }
-*/
-    public class CState
-    {
-        public class CService
-        {
-            public string       m_str_name                { get; set;} = "NO_NAME";
-            public DateTime     m_dt_last_seen            { get; set;} 
-            public int          m_n_alarm_border_millisec { get; set;} = 15000;
-            public bool         m_bl_alarm_fixed          { get; set;} = false;
-            public List<string> m_lst_errors              { get; set;} = new List<string>();
-        }
-
-        public Dictionary<string, CService> m_services {get;set;} = new Dictionary<string, CService>();
-
-        public void CheckServicesState()
-        {
-            DateTime dtNow = DateTime.Now;
-            foreach(CService service in m_services.Values )
-            {
-                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds > service.m_n_alarm_border_millisec )
-                {
-                    if(service.m_bl_alarm_fixed == false)
-                    {
-                        service.m_bl_alarm_fixed = true;
-                        service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
-                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
-                    }
-                }
-                if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
-                {
-                    if(service.m_bl_alarm_fixed == true)
-                    {
-                        service.m_bl_alarm_fixed = false;
-                        service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
-                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
-                    }
-                }
-
-
-                /*
-                if(service.m_bl_alarm_fixed == false)
-                {
-                    if( (dtNow - service.m_dt_last_seen).TotalMilliseconds > service.m_n_alarm_border_millisec )
-                    {
-                        service.m_bl_alarm_fixed = true;
-                        service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
-                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
-                    }
-                }
-                else
-                {
-                    if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
-                    {
-                        service.m_bl_alarm_fixed = false;
-                        service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
-                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
-                    }
-                }
-                */
-            }
-        }
-    }
     private CState m_state = new CState();
-
     private readonly ILogger<Worker> m_logger;
     private readonly IConfiguration m_configuration;
     public Task<int>? m_tskThreadGram = null;
@@ -94,8 +19,6 @@ public class Worker : BackgroundService
     private object _obj_sync_command = new Object();
     private object _obj_sync_event = new Object();
     public RastrSrvShare.Ccommunicator? m_communicator;
-    public const string m_str_error   = "error";
-    public const string m_str_success = "success";
     private static System.Timers.Timer? m_timer_heart_beat;
     private string m_str_ftp_host = "";
     private string m_str_ftp_user = "";
@@ -149,13 +72,13 @@ public class Worker : BackgroundService
         {
             m_state.CheckServicesState();
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(m_state,options);
+            string json = JsonSerializer.Serialize<object>(m_state,options);
             ls_ress.Add(json);
-            ls_ress.Add(m_str_success);
+            ls_ress.Add(Consts.m_str_success);
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}:excption { ex.ToString() }");
+            ls_ress.Add($"{Consts.m_str_error}:excption { ex.ToString() }");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         ///State
@@ -184,18 +107,19 @@ public class Worker : BackgroundService
             Process? process = Process.Start(psi);
             if( process == null )
             {
-                ls_ress.Add($"{m_str_error}:can't launch [{psi.FileName} {psi.Arguments}]");
+                ls_ress.Add($"{Consts.m_str_error}:can't launch [{psi.FileName} {psi.Arguments}]");
                 Log.Error(ls_ress[0]);
             }
             else
             {
-                ls_ress.Add($"{m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
+                ls_ress.Add($"{Consts.m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
                 ls_ress.Add($"{process.Id}");
             }
+            m_state.m_n_slots_busy++;
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}:excption { ex.ToString() }");
+            ls_ress.Add($"{Consts.m_str_error}:excption { ex.ToString() }");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         return ls_ress;
@@ -224,18 +148,18 @@ public class Worker : BackgroundService
             bool bl_exit = p2.WaitForExit(1000);
             if(bl_exit == true)
             {
-                ls_ress.Add($"{m_str_success}: proc_kill: {n_pid}");
+                ls_ress.Add($"{Consts.m_str_success}: proc_kill: {n_pid}");
                 Log.Information(ls_ress[ls_ress.Count-1]);
             }
             else
             {
-                ls_ress.Add($"{m_str_error}: proc_kill: {n_pid}");
+                ls_ress.Add($"{Consts.m_str_error}: proc_kill: {n_pid}");
                 Log.Error(ls_ress[ls_ress.Count-1]);
             }
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{m_str_error}: exception: {ex.ToString()}");
+            ls_ress.Add($"{Consts.m_str_error}: exception: {ex.ToString()}");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         return ls_ress;
@@ -251,12 +175,12 @@ public class Worker : BackgroundService
                 string str_path_to_new_dir = m_str_dir_wrk +"/" +str_param;
                 System.IO.Directory.CreateDirectory(str_path_to_new_dir);
                 Log.Information($"on_DIR_MAKE: make:{str_path_to_new_dir}");
-                ls_ress.Add($"{m_str_success}: create dir {str_path_to_new_dir}");
+                ls_ress.Add($"{Consts.m_str_success}: create dir {str_path_to_new_dir}");
             }
             catch(Exception ex ) 
             {
                 Log.Error($"on_DIR_MAKE: Exception: {ex.ToString()}");
-                ls_ress.Add($"{m_str_error}:{ex.Message}");
+                ls_ress.Add($"{Consts.m_str_error}:{ex.Message}");
             }
         }
         return ls_ress;
@@ -442,20 +366,20 @@ public class Worker : BackgroundService
                     throw new Exception($"wrong file size!");
                 }
                 Log.Information($"copyed {str_from} to {str_to}");
-                ls_ress.Add($"{m_str_success}: copyed {str_from} to {str_to}");
+                ls_ress.Add($"{Consts.m_str_success}: copyed {str_from} to {str_to}");
             }
             else // file_copy from dir to ftp
             {
                 ftp_hlp( _enFtpDirection.UPLOAD, str_params[0], str_params[1] );
                 Log.Information($"copyed {str_params[0]} to {str_params[1]}");
-                ls_ress.Add($"{m_str_success}: copyed {str_params[0]} to {str_params[1]}");
+                ls_ress.Add($"{Consts.m_str_success}: copyed {str_params[0]} to {str_params[1]}");
             }
             
         }
         catch(Exception ex)
         {
             Log.Error($"on_FILE_UPLOAD: Exception: {ex.ToString()} ");
-            ls_ress.Add($"{m_str_error}: {ex.ToString()} ");
+            ls_ress.Add($"{Consts.m_str_error}: {ex.ToString()} ");
         }
         return ls_ress;
     }
@@ -478,19 +402,19 @@ public class Worker : BackgroundService
                     throw new Exception($"wrong file size!");
                 }
                 Log.Information($"copyed {str_from} to {str_to}");
-                ls_ress.Add($"{m_str_success}: copyed {str_from} to {str_to}");
+                ls_ress.Add($"{Consts.m_str_success}: copyed {str_from} to {str_to}");
             }
             else
             {
                 ftp_hlp( _enFtpDirection.DOWNLOAD, str_params[0], str_params[1] );
                 Log.Information($"DOWNLOAD {str_params[0]} to {str_params[1]}");
-                ls_ress.Add($"{m_str_success}: DOWNLOAD {str_params[0]} to {str_params[1]}");
+                ls_ress.Add($"{Consts.m_str_success}: DOWNLOAD {str_params[0]} to {str_params[1]}");
             }
         }
         catch(Exception ex)
         {
             Log.Error($"on_FILE_DOWNLOAD: Exception: {ex.ToString()}");
-            ls_ress.Add($"{m_str_error}:{ex.ToString()}");
+            ls_ress.Add($"{Consts.m_str_error}:{ex.ToString()}");
         }
         return ls_ress;
     }
@@ -513,7 +437,7 @@ public class Worker : BackgroundService
     public int OnCommand( RastrSrvShare.Ccommunicator.Command command )
     {
         int nRes = 0;
-        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");   
         lock(_obj_sync_command)
         {
             Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(", ",command.pars)}");
@@ -617,6 +541,7 @@ public class Worker : BackgroundService
 
             RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
             par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
+            m_state.m_n_slots_max   = m_configuration.GetValue<int>   ("r_params:slots_max",7);
             double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms",2000);
             par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
             par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",5672); // default 5672
@@ -671,7 +596,7 @@ public class Worker : BackgroundService
                     }
                     m_communicator = new RastrSrvShare.Ccommunicator();
                     m_communicator.Init(par, signer_pub);
-                    Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCmnds(OnCommand); });
+                    Task taskConsumeCommands = Task.Run( ()=>{ m_communicator.ConsumeCmnds(OnCommand, Ccommunicator.enConsumeCmndsMode.STRICT); });
                     Task taskConsumeEvents   = Task.Run( ()=>{ m_communicator.ConsumeEvnts(OnEvent); });
                     await taskConsumeCommands;
                     //m_communicator.Consume(par, m_logger, OnCommand);
