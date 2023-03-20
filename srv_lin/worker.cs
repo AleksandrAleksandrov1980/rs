@@ -444,7 +444,8 @@ public class Worker : BackgroundService
             RastrSrvShare.Ccommunicator.Evnt evnt_start = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
             evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
-            evnt_start.tm_mark_command = command.tm_mark;
+            evnt_start.command_tm_mark = command.tm_mark;
+            evnt_start.command_guid    = command.guid;
             m_communicator?.PublishEvnt( evnt_start );
             List<string> ls_ress = new List<string>();
             switch(command.en_command)
@@ -497,7 +498,8 @@ public class Worker : BackgroundService
             RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_finish.en_event        = RastrSrvShare.Ccommunicator.enEvents.FINISH;
             evnt_finish.command         = command.en_command.ToString();
-            evnt_finish.tm_mark_command = command.tm_mark;
+            evnt_finish.command_tm_mark = command.tm_mark;
+            evnt_finish.command_guid    = command.guid;
             evnt_finish.results         = ls_ress.ToArray();
             m_communicator?.PublishEvnt( evnt_finish );
         }

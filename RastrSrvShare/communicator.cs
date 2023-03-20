@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Serilog.Core;
 using System.Linq;
 using System.Security.Cryptography;
+using System.ComponentModel.Design;
 
 namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
@@ -57,7 +58,8 @@ public class Ccommunicator: IDisposable
         public string   command { get; set; } = "";
         public string   to      { get; set; } = "";
         public string   from    { get; set; } = "";
-        public string   tm_mark { get; set; } = "";//guid on from
+        public string   tm_mark { get; set; } = "";
+        public string   guid    { get; set; } = "";
         public string[] pars    { get; set; } ={""};
         public string   sign    { get; set; } = "";
     }
@@ -71,7 +73,8 @@ public class Ccommunicator: IDisposable
                                           set{en_command = StrToCommand(value);} } 
         public string     to        { get; set; } = "";
         public string     from      { get; set; } = "";
-        public string     tm_mark   { get; set; } = ""; //guid on from
+        public string     tm_mark   { get; set; } = ""; 
+        public string     guid      { get; set; } = "";
         public string[]   pars      { get; set; } ={""};
         public string     sign      { get; set; } = "";
 
@@ -142,6 +145,7 @@ public class Ccommunicator: IDisposable
                     to      = command_serialized.to;
                     from    = command_serialized.from;
                     tm_mark = command_serialized.tm_mark;
+                    guid    = command_serialized.guid;
                     pars    = command_serialized.pars;
                     sign    = command_serialized.sign;
                 }
@@ -172,8 +176,9 @@ public class Ccommunicator: IDisposable
         public string   to              { get; set; } = "";
         public string   from            { get; set; } = "";
         public string   command         { get; set; } = "";
-        public string   tm_mark_command { get; set; } = "";
-        public string   tm_mark         { get; set; } = "";//guid on from
+        public string   command_tm_mark { get; set; } = "";
+        public string   command_guid    { get; set; } = "";
+        public string   tm_mark         { get; set; } = "";
         public string[] results         { get; set; } ={""};
         public string   sign            { get; set; } = "";
 
@@ -395,7 +400,7 @@ public class Ccommunicator: IDisposable
         return 1;
     }
 
-    public int PublishCmnd(Ccommunicator.enCommands en_cmnd, string str_to, string[] str_pars)
+    public Command PublishCmnd(Ccommunicator.enCommands en_cmnd, string str_to, string[] str_pars)
     {
         Ccommunicator.Command cmnd = new Ccommunicator.Command();
         cmnd.en_command = en_cmnd;
@@ -404,7 +409,7 @@ public class Ccommunicator: IDisposable
         return PublishCmnd(cmnd);
     }
 
-    public int PublishCmnd(Command cmnd)
+    public Command PublishCmnd(Command cmnd)
     {
         lock(m_obj_sync_publish_cmnd)
         {
@@ -412,6 +417,7 @@ public class Ccommunicator: IDisposable
             {
                 cmnd.from    = m_str_name;  // $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
                 cmnd.tm_mark = GetTmMark(); // DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                cmnd.guid    = Guid.NewGuid().ToString();
                 if(m_signer!=null)
                 { 
                     cmnd.MakeSign(m_signer);
@@ -422,6 +428,7 @@ public class Ccommunicator: IDisposable
                     MakeExchange( ref m_channel_cmnds, m_rabbitParams.m_str_exch_cmnds );
                     byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
                     m_channel_cmnds.BasicPublish( exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "", basicProperties: null, body: body );
+                    return cmnd;
                 }
                 else
                 { 
@@ -434,7 +441,7 @@ public class Ccommunicator: IDisposable
                 Log.Error($"PublishCmnd() exception [{ex}]");
             }
         }
-        return 1;
+        return null;
     }
 
     public enum enConsumeCmndsMode
