@@ -88,7 +88,7 @@ public class Worker : BackgroundService
         try
         {
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = str_params[0];
+            psi.FileName = m_str_dir_wrk+"/"+ str_params[0];
             string strArgs = "";
             if(str_params.Length > 1)
             {
@@ -182,6 +182,7 @@ public class Worker : BackgroundService
         }
         return ls_ress;
     }
+
     private int on_GRAM_START(string[] str_params)
     {
         if(m_tskThreadGram!=null)
@@ -197,6 +198,7 @@ public class Worker : BackgroundService
         });
         return 1;
     }
+
     private int on_GRAM_STOP(string[] str_params)
     {
         if(m_tskThreadGram!=null)
