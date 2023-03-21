@@ -51,6 +51,8 @@ public class Ccommunicator: IDisposable
         GRAM_STATE       =  9,
         FILE_UPLOAD      =  10,
         FILE_DOWNLOAD    =  11,
+        DIR_UPLOAD       =  12,
+        DIR_DOWNLOAD     =  13,
     }
 
     public class CommandSerialized

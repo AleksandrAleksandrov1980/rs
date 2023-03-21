@@ -20,10 +20,7 @@ public class Worker : BackgroundService
     private object _obj_sync_event = new Object();
     public RastrSrvShare.Ccommunicator? m_communicator;
     private static System.Timers.Timer? m_timer_heart_beat;
-    private string m_str_ftp_host = "";
-    private string m_str_ftp_user = "";
-    private string m_str_ftp_pass = "";
-    private int    m_n_ftp_port   = -13;
+    RastrSrvShare.ftp_hlp m_ftp_hlp = new RastrSrvShare.ftp_hlp();
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
@@ -179,8 +176,8 @@ public class Worker : BackgroundService
             }
             catch(Exception ex ) 
             {
-                Log.Error($"on_DIR_MAKE: Exception: {ex.ToString()}");
-                ls_ress.Add($"{Consts.m_str_error}:{ex.Message}");
+                Log.Error($"on_DIR_MAKE: Exception: {ex}");
+                ls_ress.Add($"{Consts.m_str_error}:{ex}");
             }
         }
         return ls_ress;
@@ -276,7 +273,7 @@ public class Worker : BackgroundService
             }
         }
     }
-
+    /*
     private enum _enFtpDirection
     {
         UPLOAD,
@@ -347,6 +344,8 @@ public class Worker : BackgroundService
             Log.Warning($"Ok. elapsed time {sw.Elapsed}");
         }
     }
+    */
+
 
     private List<string>  on_FILE_UPLOAD(string[] str_params)
     {
@@ -370,16 +369,15 @@ public class Worker : BackgroundService
             }
             else // file_copy from dir to ftp
             {
-                ftp_hlp( _enFtpDirection.UPLOAD, str_params[0], str_params[1] );
-                Log.Information($"copyed {str_params[0]} to {str_params[1]}");
+                m_ftp_hlp.file( ftp_hlp.enFtpDirection.UPLOAD, str_params[0], str_params[1] );
+                Log.Information($"FILE_UPLOAD {str_params[0]} to {str_params[1]}");
                 ls_ress.Add($"{Consts.m_str_success}: copyed {str_params[0]} to {str_params[1]}");
             }
-            
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_UPLOAD: Exception: {ex.ToString()} ");
-            ls_ress.Add($"{Consts.m_str_error}: {ex.ToString()} ");
+            Log.Error($"on_FILE_UPLOAD: Exception: {ex} ");
+            ls_ress.Add($"{Consts.m_str_error}: {ex} ");
         }
         return ls_ress;
     }
@@ -406,15 +404,51 @@ public class Worker : BackgroundService
             }
             else
             {
-                ftp_hlp( _enFtpDirection.DOWNLOAD, str_params[0], str_params[1] );
-                Log.Information($"DOWNLOAD {str_params[0]} to {str_params[1]}");
+                m_ftp_hlp.file( ftp_hlp.enFtpDirection.DOWNLOAD, str_params[0], str_params[1] );
+                Log.Information($"FILE_DOWNLOAD {str_params[0]} to {str_params[1]}");
                 ls_ress.Add($"{Consts.m_str_success}: DOWNLOAD {str_params[0]} to {str_params[1]}");
             }
         }
         catch(Exception ex)
         {
-            Log.Error($"on_FILE_DOWNLOAD: Exception: {ex.ToString()}");
-            ls_ress.Add($"{Consts.m_str_error}:{ex.ToString()}");
+            Log.Error($"on_FILE_DOWNLOAD: Exception: {ex}");
+            ls_ress.Add($"{Consts.m_str_error}:{ex}");
+        }
+        return ls_ress;
+    }
+
+    private List<string> on_DIR_UPLOAD(string[] str_params)
+    {
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            string str_path_dir_local = m_str_dir_wrk +"/"+str_params[0];
+            m_ftp_hlp.dir(ftp_hlp.enFtpDirection.UPLOAD, str_path_dir_local, str_params[1] );
+            Log.Information($"DIR_UPLOAD {str_path_dir_local} to {str_params[1]}");
+            ls_ress.Add($"{Consts.m_str_success}: copyed {str_path_dir_local} to {str_params[1]}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"on_DIR_UPLOAD: Exception: {ex} ");
+            ls_ress.Add($"{Consts.m_str_error}: {ex} ");
+        }
+        return ls_ress;
+    }
+
+    public List<string> on_DIR_DOWNLOAD(string[] str_params)
+    {
+        List<string> ls_ress = new List<string>();
+        try
+        {
+            string str_path_dir_local = m_str_dir_wrk +"/"+str_params[1];
+            m_ftp_hlp.dir(ftp_hlp.enFtpDirection.DOWNLOAD, str_params[0], str_path_dir_local);
+            Log.Information($"DIR_DOWNLOAD {str_params[0]} to {str_path_dir_local}");
+            ls_ress.Add($"{Consts.m_str_success}: DOWNLOAD {str_params[0]} to {str_path_dir_local}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"on_DIR_DOWNLOAD: Exception: {ex}");
+            ls_ress.Add($"{Consts.m_str_error}:{ex}");
         }
         return ls_ress;
     }
@@ -430,7 +464,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"OntimerEvent : {ex.ToString()}"); 
+            Log.Error($"OntimerEvent : {ex}"); 
         }
     }
 
@@ -489,10 +523,18 @@ public class Worker : BackgroundService
                 case RastrSrvShare.Ccommunicator.enCommands.FILE_DOWNLOAD:
                     ls_ress = on_FILE_DOWNLOAD(command.pars);
                 break;
+
+                case RastrSrvShare.Ccommunicator.enCommands.DIR_UPLOAD:
+                    ls_ress = on_DIR_UPLOAD(command.pars);
+                break;
+
+                case RastrSrvShare.Ccommunicator.enCommands.DIR_DOWNLOAD:
+                    ls_ress = on_DIR_DOWNLOAD(command.pars);
+                break;
                 
                 default:
                     nRes = -1;
-                    Log.Error($"unhadled command : {command.en_command.ToString()}!");
+                    Log.Error($"unhadled command : {command.en_command}!");
                 break;
             }
             RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
@@ -517,10 +559,16 @@ public class Worker : BackgroundService
                 m_logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
                return;
             }
+            /*
             m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
             m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
             m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
             m_n_ftp_port   = m_configuration.GetValue<int?>  ("r_params:ftp:port") ?? -1;
+            */
+            m_ftp_hlp.m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
+            m_ftp_hlp.m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
+            m_ftp_hlp.m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
+            m_ftp_hlp.m_n_ftp_port   = m_configuration.GetValue<int?>  ("r_params:ftp:port") ?? -1;
             m_logger.LogInformation($"create dir:{m_str_dir_wrk} ");
             System.IO.Directory.CreateDirectory(m_str_dir_wrk);
             string str_dir_log = m_str_dir_wrk+"/logs/";
@@ -573,10 +621,16 @@ public class Worker : BackgroundService
             strTmp += $"q_user        : {par.m_str_user}\n"; 
             //m_logger.LogWarning($" : {str_q_log_pass}");
             strTmp += $"--------------------------------------------------------------------\n" ; 
+            /*
             strTmp += $"ftp.host      : {m_str_ftp_host}\n"; 
             strTmp += $"ftp.user      : {m_str_ftp_user}\n";
             //strTmp += $"ftp.pass      : {m_str_ftp_host}\n"; 
             strTmp += $"ftp.port      : {m_n_ftp_port}\n";  
+            */
+            strTmp += $"ftp.host      : {m_ftp_hlp.m_str_ftp_host}\n"; 
+            strTmp += $"ftp.user      : {m_ftp_hlp.m_str_ftp_user}\n";
+            //strTmp += $"ftp.pass      : {m_str_ftp_host}\n"; 
+            strTmp += $"ftp.port      : {m_ftp_hlp.m_n_ftp_port}\n";  
             strTmp += $"--------------------------------------------------------------------\n" ; 
             m_logger.LogWarning(strTmp);
             Log.Warning(strTmp);

@@ -832,6 +832,7 @@ namespace RastrSrvShare
         public int nPntBeg = -13;
         public int nPntEnd = -13;
         private string m_strCalcGuid;
+        public static readonly string FtpDirCalcs = "CALCS";
 
         [XmlIgnore]
         private List<CCalcHost> m_CalcHosts = new List<CCalcHost>();
