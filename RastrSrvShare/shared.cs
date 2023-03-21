@@ -49,7 +49,8 @@ namespace RastrSrvShare
             {
                 try
                 {
-                    /*
+                 //   /*
+                    RegistryKey m_rkHKLM_Software_RastrCalc = null;
                     using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
                     {
                         m_rkHKLM_Software_RastrCalc = hklm.OpenSubKey("Software", false).OpenSubKey(m_strHKLM_Software_RastrCalc, false);
@@ -60,7 +61,7 @@ namespace RastrSrvShare
                         }
                     }
                     return (string)m_rkHKLM_Software_RastrCalc.GetValue(m_strHKLM_Software_RastrCalc, m_strRastrCalc_PathWrkDir_DefVal);
-                    */
+                   // */
                     return "";
                 }
                 catch (Exception ex)
