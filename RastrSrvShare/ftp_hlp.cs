@@ -57,11 +57,11 @@ namespace RastrSrvShare
                 ftp_client.Connect();
                 if(en_ftp_dir == enFtpDirection.UPLOAD)
                 {
-                    ftp_client.UploadDirectory( str_path_from, str_path_to );
+                    ftp_client.UploadDirectory( str_path_from, str_path_to, FtpFolderSyncMode.Update, FtpRemoteExists.Overwrite );
                 }
                 else
                 {
-                    ftp_client.DownloadDirectory( str_path_to, str_path_from );
+                    ftp_client.DownloadDirectory( str_path_to, str_path_from, FtpFolderSyncMode.Update, FtpLocalExists.Overwrite );
                     /*
                     string str_namef           = Path.GetFileName(str_path_from);
                     string str_path_file_local = str_path_to+"/"+str_namef;
@@ -119,7 +119,7 @@ namespace RastrSrvShare
                     string str_namef    = Path.GetFileName(str_path_from);
                     string str_ftp_file = str_path_to + "/"+str_namef;
                     ftp_client.CreateDirectory(str_path_to);
-                    ftp_client.UploadFile(str_path_from,str_ftp_file);
+                    ftp_client.UploadFile(str_path_from,str_ftp_file,FtpRemoteExists.Overwrite);
                     FileInfo fi = new FileInfo(str_path_from); 
                     long size_ftp_file = ftp_client.GetFileSize(str_ftp_file);
                     if(fi.Length != size_ftp_file)
@@ -134,7 +134,7 @@ namespace RastrSrvShare
                     //string str_ftp_file = str_path_ftp_dir+ "/"+str_namef;
                     //ftp_client.CreateDirectory(str_path_ftp_dir);
                     long size_ftp_file = ftp_client.GetFileSize(str_path_from);
-                    ftp_client.DownloadFile(str_path_file_local,str_path_from);
+                    ftp_client.DownloadFile(str_path_file_local,str_path_from,FtpLocalExists.Overwrite);
                     FileInfo fi = new FileInfo(str_path_file_local); 
                     if(fi.Length != size_ftp_file)
                     {

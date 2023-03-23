@@ -89,24 +89,30 @@ public class Worker : BackgroundService
 
     void on_PROC_EXIT(Process process, int nTimeOutMs, RastrSrvShare.Ccommunicator.Command command)
     { 
+        List<string> ls_ress = new List<string>();
         try
         { 
-            process.WaitForExit(nTimeOutMs*100);
+            process.WaitForExit(nTimeOutMs);
             if(process.HasExited==true)
             { 
-                
+                ls_ress.Add($"{Consts.m_str_success}");
+                ls_ress.Add($"{process.ExitCode}");
             }
             else
             {
-                
+                ls_ress.Add($"{Consts.m_str_error}: time_out!");
+                Log.Error(ls_ress[ls_ress.Count-1]);
+                process.Kill();
             }
-            PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, command.ToString() + "  " + process.HasExited.ToString(), command.tm_mark, command.guid, new string[]{""} );
             m_dict_pid_task.Remove(process.Id);
+            m_state.m_n_slots_busy--;
         }
         catch(Exception ex) 
         {
-            Log.Error($"on_PROC_EXIT() process.Id={process.Id} exception: {ex}");
+            ls_ress.Add($"{Consts.m_str_error}: process.Id={process.Id} on_PROC_EXIT() exception [{ex}]");
+            Log.Error(ls_ress[ls_ress.Count-1]);
         }
+        PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, command.ToString() + "  " + process.HasExited.ToString(), command.tm_mark, command.guid, ls_ress.ToArray() );
     }
 
     public List<string> on_PROC_RUN(string[] str_params, RastrSrvShare.Ccommunicator.Command command)
@@ -146,7 +152,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{Consts.m_str_error}:excption { ex.ToString() }");
+            ls_ress.Add($"{Consts.m_str_error}:exception {ex}");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         return ls_ress;
@@ -401,9 +407,10 @@ public class Worker : BackgroundService
             }
             else // file_copy from dir to ftp
             {
-                m_ftp_hlp.file( ftp_hlp.enFtpDirection.UPLOAD, str_params[0], str_params[1] );
-                Log.Information($"FILE_UPLOAD {str_params[0]} to {str_params[1]}");
-                ls_ress.Add($"{Consts.m_str_success}: copyed {str_params[0]} to {str_params[1]}");
+                string str_path_file_local = m_str_dir_wrk +"/"+str_params[0];
+                m_ftp_hlp.file( ftp_hlp.enFtpDirection.UPLOAD, str_path_file_local, str_params[1] );
+                Log.Information($"FILE_UPLOAD {str_path_file_local} to {str_params[1]}");
+                ls_ress.Add($"{Consts.m_str_success}: copyed {str_path_file_local} to {str_params[1]}");
             }
         }
         catch(Exception ex)
@@ -436,9 +443,10 @@ public class Worker : BackgroundService
             }
             else
             {
-                m_ftp_hlp.file( ftp_hlp.enFtpDirection.DOWNLOAD, str_params[0], str_params[1] );
-                Log.Information($"FILE_DOWNLOAD {str_params[0]} to {str_params[1]}");
-                ls_ress.Add($"{Consts.m_str_success}: DOWNLOAD {str_params[0]} to {str_params[1]}");
+                string str_path_file_local = m_str_dir_wrk +"/"+str_params[1];
+                m_ftp_hlp.file( ftp_hlp.enFtpDirection.DOWNLOAD, str_params[0], str_path_file_local );
+                Log.Information($"FILE_DOWNLOAD {str_params[0]} to {str_path_file_local}");
+                ls_ress.Add($"{Consts.m_str_success}: DOWNLOAD {str_params[0]} to {str_path_file_local}");
             }
         }
         catch(Exception ex)
