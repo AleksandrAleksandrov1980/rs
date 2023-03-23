@@ -6,6 +6,9 @@ using System.Timers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using RastrSrvShare;
+using static RastrSrvShare.Ccommunicator;
+using System.Collections.Generic;
+using System;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -75,31 +78,57 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            ls_ress.Add($"{Consts.m_str_error}:excption { ex.ToString() }");
+            ls_ress.Add($"{Consts.m_str_error}:exception [{ ex }]");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
         ///State
         return ls_ress; //new List<string>{ m_str_success };
     }
 
-    public List<string> on_PROC_RUN(string[] str_params)
+    private Dictionary<int,Task> m_dict_pid_task = new Dictionary<int,Task>();
+
+    void on_PROC_EXIT(Process process, int nTimeOutMs, RastrSrvShare.Ccommunicator.Command command)
+    { 
+        try
+        { 
+            process.WaitForExit(nTimeOutMs*100);
+            if(process.HasExited==true)
+            { 
+                
+            }
+            else
+            {
+                
+            }
+            PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, command.ToString() + "  " + process.HasExited.ToString(), command.tm_mark, command.guid, new string[]{""} );
+            m_dict_pid_task.Remove(process.Id);
+        }
+        catch(Exception ex) 
+        {
+            Log.Error($"on_PROC_EXIT() process.Id={process.Id} exception: {ex}");
+        }
+    }
+
+    public List<string> on_PROC_RUN(string[] str_params, RastrSrvShare.Ccommunicator.Command command)
     {
         List<string> ls_ress = new List<string>();
         try
         {
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = m_str_dir_wrk+"/"+ str_params[0];
+            psi.CreateNoWindow = true;
+            int nTimeOutMs = int.Parse(str_params[0]);
+            psi.FileName = m_str_dir_wrk+"/"+str_params[1];
             string strArgs = "";
-            if(str_params.Length > 1)
+            if(str_params.Length > 2)
             {
-                for(int i = 1 ; i<str_params.Length ; i++ )
+                for(int i = 2 ; i<str_params.Length ; i++ )
                 {
                     strArgs += str_params[i];
                     strArgs += " ";
                 }
             }
             psi.Arguments = strArgs;
-            Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            Log.Information($"Start_proc timeout:{nTimeOutMs} ms proc: [{psi.FileName}] [{psi.Arguments}]");
             //Environment.ExpandEnvironmentVariables(@"%SystemRoot%\system32\cmdkey.exe");
             Process? process = Process.Start(psi);
             if( process == null )
@@ -111,8 +140,9 @@ public class Worker : BackgroundService
             {
                 ls_ress.Add($"{Consts.m_str_success}: [{process.Id}] launched [{psi.FileName} {psi.Arguments}]");
                 ls_ress.Add($"{process.Id}");
+                m_state.m_n_slots_busy++;
+                m_dict_pid_task.Add(process.Id, Task.Run( ()=>on_PROC_EXIT( process, nTimeOutMs, command ) ) );
             }
-            m_state.m_n_slots_busy++;
         }
         catch(Exception ex)
         {
@@ -137,7 +167,7 @@ public class Worker : BackgroundService
             bool isNumeric = int.TryParse( str_params[0], out int n_pid );
             if(isNumeric == false)
                 throw new Exception($"can't parse {str_params[0]}");
-            //!!! theris en error in this function! Process p = Process.GetProcessById(n_pid);
+            //!!! there is en error in function! Process p = Process.GetProcessById(n_pid);
             Process? p2 = GetProcByID(n_pid);
             if(p2 == null)
                 throw new Exception($"no such process {str_params[0]}");
@@ -470,20 +500,35 @@ public class Worker : BackgroundService
         }
     }
 
+    public void PublishEvnt(RastrSrvShare.Ccommunicator.enEvents en_event, string str_command, string str_tm_mark, string str_guid, string[] str_results)
+    {
+        RastrSrvShare.Ccommunicator.Evnt evnt = new RastrSrvShare.Ccommunicator.Evnt();
+        evnt.en_event        = en_event;
+        evnt.command         = str_command;
+        evnt.command_tm_mark = str_tm_mark;
+        evnt.command_guid    = str_guid;
+        evnt.results         = str_results;
+        m_communicator?.PublishEvnt( evnt );
+    }
+
     public int OnCommand( RastrSrvShare.Ccommunicator.Command command )
     {
         int nRes = 0;
         Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");   
         lock(_obj_sync_command)
         {
-            Log.Information($"comm : {command.en_command.ToString()} - pars : {String.Join(", ",command.pars)}");
+            Log.Information(command.ToString());
+            PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, command.ToString(), command.tm_mark, command.guid, new string[]{""} );
+            /*
             RastrSrvShare.Ccommunicator.Evnt evnt_start = new RastrSrvShare.Ccommunicator.Evnt();
             evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
             evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
             evnt_start.command_tm_mark = command.tm_mark;
             evnt_start.command_guid    = command.guid;
             m_communicator?.PublishEvnt( evnt_start );
+            */
             List<string> ls_ress = new List<string>();
+            RastrSrvShare.Ccommunicator.enEvents en_event_on_cmnd_exit = enEvents.FINISH;
             switch(command.en_command)
             {
                 case RastrSrvShare.Ccommunicator.enCommands.STATE:
@@ -491,7 +536,8 @@ public class Worker : BackgroundService
                 break;
 
                 case RastrSrvShare.Ccommunicator.enCommands.PROC_RUN:
-                    ls_ress = on_PROC_RUN(command.pars);                      
+                    ls_ress = on_PROC_RUN(command.pars, command);
+                    en_event_on_cmnd_exit = enEvents.NOTIFY;
                 break;
 
                 case RastrSrvShare.Ccommunicator.enCommands.PROC_EXTERMINATE:
@@ -539,13 +585,15 @@ public class Worker : BackgroundService
                     Log.Error($"unhadled command : {command.en_command}!");
                 break;
             }
-            RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
-            evnt_finish.en_event        = RastrSrvShare.Ccommunicator.enEvents.FINISH;
+            PublishEvnt( en_event_on_cmnd_exit, command.ToString(), command.tm_mark, command.guid, ls_ress.ToArray() );
+            /*RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
+            evnt_finish.en_event        = en_event_on_cmnd_exit;
             evnt_finish.command         = command.en_command.ToString();
             evnt_finish.command_tm_mark = command.tm_mark;
             evnt_finish.command_guid    = command.guid;
             evnt_finish.results         = ls_ress.ToArray();
             m_communicator?.PublishEvnt( evnt_finish );
+            */
         }
         return 1;
     }

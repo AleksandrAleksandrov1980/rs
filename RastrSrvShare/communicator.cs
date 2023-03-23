@@ -84,6 +84,11 @@ public class Ccommunicator: IDisposable
         { 
         }
 
+        public override string ToString()
+        {
+            return $"command : {en_command.ToString()} pars : {String.Join(", ",pars)}";
+        }  
+
         public byte[] GetBytesForSign()
         { 
             string str_for_sign = str_event+";"+to+";"+from+";"+tm_mark+";";
