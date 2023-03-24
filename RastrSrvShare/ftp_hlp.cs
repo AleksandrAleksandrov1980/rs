@@ -43,6 +43,7 @@ namespace RastrSrvShare
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
+                ftp_client.Config.LogToConsole = false;
                 ftp_client.Config.FXPDataType = FtpDataType.Binary; 
                 ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
                 ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
@@ -50,7 +51,6 @@ namespace RastrSrvShare
                 ftp_client.Config.ValidateCertificateRevocation = false;
                 System.Security.Cryptography.X509Certificates.X509CertificateCollection x = ftp_client.Config.ClientCertificates;
                 ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
-                ftp_client.Config.LogToConsole = true;
                 ftp_client.ValidateCertificate += (FluentFTP.Client.BaseClient.BaseFtpClient control, FtpSslValidationEventArgs e)=>{ e.Accept = true; };
                 FtpProfile ftp_profile = new FtpProfile();
                 ftp_profile.Encryption = FtpEncryptionMode.None;
@@ -90,7 +90,7 @@ namespace RastrSrvShare
                 }
                 ftp_client.Disconnect();
                 sw.Stop();
-                Log.Warning($"Ok. elapsed time {sw.Elapsed}");
+                Log.Warning($"FTP.dir {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed}");
             }
         }
 
@@ -102,6 +102,7 @@ namespace RastrSrvShare
             {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
+                ftp_client.Config.LogToConsole = false;
                 ftp_client.Config.FXPDataType = FtpDataType.Binary; 
                 ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
                 ftp_client.Config.EncryptionMode = FtpEncryptionMode.None;
@@ -109,7 +110,6 @@ namespace RastrSrvShare
                 ftp_client.Config.ValidateCertificateRevocation = false;
                 System.Security.Cryptography.X509Certificates.X509CertificateCollection x = ftp_client.Config.ClientCertificates;
                 ftp_client.Config.DataConnectionType = FtpDataConnectionType.AutoPassive;
-                ftp_client.Config.LogToConsole = true;
                 ftp_client.ValidateCertificate += (FluentFTP.Client.BaseClient.BaseFtpClient control, FtpSslValidationEventArgs e)=>{ e.Accept = true; };
                 FtpProfile ftp_profile = new FtpProfile();
                 ftp_profile.Encryption = FtpEncryptionMode.None;
@@ -157,7 +157,7 @@ namespace RastrSrvShare
                 }
                 ftp_client.Disconnect();
                 sw.Stop();
-                Log.Warning($"Ok. elapsed time {sw.Elapsed}");
+                Log.Warning($"FTP.file {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed}");
             }
         }
     }

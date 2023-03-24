@@ -511,6 +511,7 @@ public class Worker : BackgroundService
     public void PublishEvnt(RastrSrvShare.Ccommunicator.enEvents en_event, string str_command, string str_tm_mark, string str_guid, string[] str_results)
     {
         RastrSrvShare.Ccommunicator.Evnt evnt = new RastrSrvShare.Ccommunicator.Evnt();
+        //string s = evnt.ToString();
         evnt.en_event        = en_event;
         evnt.command         = str_command;
         evnt.command_tm_mark = str_tm_mark;
@@ -522,7 +523,7 @@ public class Worker : BackgroundService
     public int OnCommand( RastrSrvShare.Ccommunicator.Command command )
     {
         int nRes = 0;
-        Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");   
+        //Console.WriteLine($"THREAD_onComm_: {Thread.CurrentThread.ManagedThreadId}");   
         lock(_obj_sync_command)
         {
             Log.Information(command.ToString());

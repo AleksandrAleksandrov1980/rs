@@ -15,6 +15,7 @@ using Serilog.Core;
 using System.Linq;
 using System.Security.Cryptography;
 using System.ComponentModel.Design;
+using System.ComponentModel;
 
 namespace RastrSrvShare;    
 public class Ccommunicator: IDisposable
@@ -86,12 +87,12 @@ public class Ccommunicator: IDisposable
 
         public override string ToString()
         {
-            return $"command : {en_command.ToString()} pars : {String.Join(", ",pars)}";
+            return $"\n\tfrom: {from} to: {to} \n\tcommand: {en_command.ToString()} pars: {String.Join(", ",pars)}";
         }  
 
         public byte[] GetBytesForSign()
         { 
-            string str_for_sign = str_event+";"+to+";"+from+";"+tm_mark+";";
+            string str_for_sign = str_event+";"+to+";"+from+";"+tm_mark+";"+guid+";";
             foreach (string par in pars)
             { 
                 str_for_sign += par + ";";
@@ -202,6 +203,31 @@ public class Ccommunicator: IDisposable
                 }
             } 
             return enEvents.ERROR;
+        }
+
+        public override string ToString()
+        {
+            string str_out = "\n";
+            foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this))
+            {
+                string name  = descriptor.Name;
+                object value = descriptor.GetValue(this);
+                string str = "";
+                if(descriptor.PropertyType==typeof(string[])) 
+                { 
+                    string[] strings = (string[])value;
+                    str = $"{String.Join(", ",strings)}";
+                }
+                else
+                { 
+                    str = value.ToString();                    
+                }
+                if(str.Length>0)
+                { 
+                    str_out += $"\t{name}:{str}\n";
+                }
+            }
+            return str_out;
         }
     }
 
@@ -393,7 +419,8 @@ public class Ccommunicator: IDisposable
                 JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
                 //string json_evnt = JsonSerializer.Serialize(evnt,options);
                 string json_evnt = JsonSerializer.Serialize(evnt);
-                Log.Information($"publish to [{m_rabbitParams.m_str_exch_evnts}] : [{json_evnt}]");
+                //Log.Information($"publish to [{m_rabbitParams.m_str_exch_evnts}] : [{json_evnt}]");
+                Log.Information($"publish to [{m_rabbitParams.m_str_exch_evnts}] : [{evnt.ToString()}]");
                 MakeExchange( ref m_channel_evnts, m_rabbitParams.m_str_exch_evnts );
                 byte[] body = Encoding.UTF8.GetBytes(json_evnt);
                 m_channel_evnts.BasicPublish( exchange: m_rabbitParams.m_str_exch_evnts, routingKey: "", basicProperties: null, body: body );
@@ -431,7 +458,8 @@ public class Ccommunicator: IDisposable
                     Debug.Assert(cmnd.sign.Length > 0);
                     Debug.Assert(cmnd.IsSignValid(m_signer) == true);
                     string json_cmnd = JsonSerializer.Serialize(cmnd);
-                    Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{json_cmnd}]");
+                    //Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{json_cmnd}]");
+                    Log.Information($"publish to [{m_rabbitParams.m_str_exch_cmnds}] : [{cmnd.ToString()}]");
                     MakeExchange( ref m_channel_cmnds, m_rabbitParams.m_str_exch_cmnds );
                     byte[] body = Encoding.UTF8.GetBytes(json_cmnd);
                     m_channel_cmnds.BasicPublish( exchange: m_rabbitParams.m_str_exch_cmnds, routingKey: "", basicProperties: null, body: body );
@@ -477,7 +505,7 @@ public class Ccommunicator: IDisposable
                     //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); //seems like this work in different thread!!
                     byte[] body = ea.Body.ToArray();
                     string message = Encoding.UTF8.GetString(body);
-                    Log.Information($"{m_rabbitParams.m_str_exch_cmnds} : {message}");
+//                    Log.Information($"{m_rabbitParams.m_str_exch_cmnds} : {message}");
                     CommandSerialized? command_serialized = null;
                     try
                     {
@@ -553,46 +581,54 @@ public class Ccommunicator: IDisposable
     {
         int nRes = 0;
         Log.Information("start ConsumeEvnts()!");
-        using(IModel channel_events = m_connection.CreateModel())
+        try
         {
-            Log.Warning($"EXCHANGE_EVENTS-> [{m_rabbitParams.m_str_exch_evnts}]");
-            channel_events.ExchangeDeclare( exchange: m_rabbitParams.m_str_exch_evnts, type: ExchangeType.Fanout, durable: false, autoDelete:false );
-            string queue_name = channel_events.QueueDeclare().QueueName;
-            channel_events.QueueBind( queue: queue_name, exchange: m_rabbitParams.m_str_exch_evnts, routingKey: "" );
-            Log.Information($"Waiting for commands queue [{queue_name}]");
-            EventingBasicConsumer consumer = new EventingBasicConsumer(channel_events);
-            consumer.Received += ( model, ea ) =>
+            using(IModel channel_events = m_connection.CreateModel())
             {
-                //seems like this work in different thread!!
-                //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); 
-                byte[] body = ea.Body.ToArray();
-                string message = Encoding.UTF8.GetString(body);
-                Console.WriteLine($"EVENTS get message: {message}"); 
-                Log.Information($"EVENTS get message: {message}");
-                Evnt? evnt = null;
-                try
+                Log.Warning($"EXCHANGE_EVENTS-> [{m_rabbitParams.m_str_exch_evnts}]");
+                channel_events.ExchangeDeclare( exchange: m_rabbitParams.m_str_exch_evnts, type: ExchangeType.Fanout, durable: false, autoDelete:false );
+                string queue_name = channel_events.QueueDeclare().QueueName;
+                channel_events.QueueBind( queue: queue_name, exchange: m_rabbitParams.m_str_exch_evnts, routingKey: "" );
+                Log.Information($"Waiting for commands queue [{queue_name}]");
+                EventingBasicConsumer consumer = new EventingBasicConsumer(channel_events);
+                consumer.Received += ( model, ea ) =>
                 {
-                    evnt = JsonSerializer.Deserialize<Evnt>(message);
-                }
-                catch(Exception ex)
-                {
-                    Log.Error($"exception -> [{ex.ToString()}] when trying deserialize event [{message}]");
-                    evnt = null;    
-                }   
-                try
-                {
-                    nRes = on_event(evnt??new Evnt());
-                }
-                catch(Exception ex)
-                {
-                    m_n_consume_evnt_errors++;
-                    Log.Error($"exception -> [{ex}] when trying proccess event [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
-                }
-            };
-            //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
-            channel_events.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
-            m_rabbitParams.m_cncl_tkn.WaitHandle.WaitOne();
-            Log.Warning($"listener get cancel signal.");
+                    //seems like this work in different thread!!
+                    //Console.WriteLine($"THREADs: {Thread.CurrentThread.ManagedThreadId}"); 
+                    byte[] body = ea.Body.ToArray();
+                    string message = Encoding.UTF8.GetString(body);
+                    //Console.WriteLine($"EVENTS get message: {message}"); 
+                    //Log.Information($"EVENTS get message: {message}");
+                    Evnt? evnt = null;
+                    try
+                    {
+                        evnt = JsonSerializer.Deserialize<Evnt>(message);
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error($"exception -> [{ex.ToString()}] when trying deserialize event [{message}]");
+                        evnt = null;    
+                    }   
+                    try
+                    {
+                        nRes = on_event(evnt??new Evnt());
+                    }
+                    catch(Exception ex)
+                    {
+                        m_n_consume_evnt_errors++;
+                        Log.Error($"exception -> [{ex}] when trying proccess event [{message}] m_n_consume_errors= {m_n_consume_command_errors}");
+                    }
+                };
+                //confirmation https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
+                channel_events.BasicConsume( queue: queue_name, autoAck: true, consumer: consumer );
+                m_rabbitParams.m_cncl_tkn.WaitHandle.WaitOne();
+                Log.Warning($"listener get cancel signal.");
+            }
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"ConsumeEvnts() exception -> [{ex}] ");
+            return -1;
         }
         return 1;
     }
