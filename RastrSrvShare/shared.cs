@@ -595,6 +595,17 @@ namespace RastrSrvShare
             {
             }
 
+            public CJobChunk? PopJobChunk()
+            {
+                if(m_lstJobChunks.Count==0)
+                { 
+                    return null;
+                }
+                CJobChunk job_chunk = m_lstJobChunks[0];
+                m_lstJobChunks.Remove(job_chunk);
+                return job_chunk;
+            }
+
             public CJobChunks(CJobChunks cpy)
             {
                 m_lstJobChunks = new List<CJobChunk>(cpy.m_lstJobChunks);
@@ -834,12 +845,14 @@ namespace RastrSrvShare
         private string m_strCalcGuid;
         public static readonly string FtpDirCalcs = "CALCS";
         public static readonly string LocDirCalcs = "CALCS2";
-        public int ProcTimeOutMs { get; set; } = 60000;
+        public int ProcTimeOutMs { get; set; } = 600_000;
 
         [XmlIgnore]
         private List<CCalcHost> m_CalcHosts = new List<CCalcHost>();
 
         CJobChunks m_JobChunks = null;
+
+        public string GetMptSmzName { get{ return System.IO.Path.GetFileName(strPath2MptSmz); } }
 
         public CSettings Settings
         {
@@ -864,6 +877,79 @@ namespace RastrSrvShare
                 m_JobChunks = new CJobChunks(value);
             }
         }
+
+        public CParam.CJobChunks GetJobChunksForProceed 
+        { 
+            get 
+            { 
+                CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
+                //List<CParam.CJobChunk> lstJobChunksForPnt = null;
+                List<int> lstUnProccessedPnts = JobChunks.PntNums2Calc;
+
+                // набивка всех задач по всем точкам в один расчет// внести в m_Param.JobChunks
+                int i = 0;
+                for (i = 0; i < 500; i++)
+                {
+                    int nCurrentPntNum = -1;
+                    if (lstUnProccessedPnts.Count > 0)
+                    {
+                        nCurrentPntNum = lstUnProccessedPnts[0];
+                        lstUnProccessedPnts.RemoveAt(0);
+                        strPntFName = strPath2MptSmz;
+                        List<CParam.CJobChunk> lstJobChunksForPnt = JobChunks.GetCJobChunksForPnt2Calc(nCurrentPntNum);
+                        foreach (var JobChunkForPnt in lstJobChunksForPnt)
+                        {
+                            JobChunkForPnt.strPntFName = strPntFName;
+                        }
+                        JobChunksReadyForProceed.m_lstJobChunks.InsertRange(JobChunksReadyForProceed.m_lstJobChunks.Count, lstJobChunksForPnt);
+                    }//if (lstUnProccessedPnts.Count > 0)
+                    else 
+                    {
+                        break;
+                    }
+                }//for (i = 0; i < 500; i++)
+
+                return JobChunksReadyForProceed; 
+            } 
+        }
+
+        /*
+CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
+                List<CParam.CJobChunk> lstJobChunksForPnt = null;
+
+                try
+                {
+                    AddLog($"Загружаем без шаблона " + m_Param.strPath2MptSmz);
+                    nRes = m_RastrHlp.Load(0, m_Param.strPath2MptSmz, "");
+                    if (nRes < 0)
+                    {
+                        AddLog($"Ошибка загрузки", CLogHlp._enType.ERR);
+                        return -1;
+                    }
+                    lstUnProccessedPnts = m_Param.JobChunks.PntNums2Calc;
+
+                    // набивка всех задач по всем точкам в один расчет// внести в m_Param.JobChunks
+                    for (i = 0; i < 500; i++)
+                    {
+                        nCurrentPntNum = -1;
+                        if (lstUnProccessedPnts.Count > 0)
+                        {
+                            nCurrentPntNum = lstUnProccessedPnts[0];
+                            lstUnProccessedPnts.RemoveAt(0);
+                            strPntFName = m_Param.strPath2MptSmz;
+                            lstJobChunksForPnt = m_Param.JobChunks.GetCJobChunksForPnt2Calc(nCurrentPntNum);
+                            foreach (var JobChunkForPnt in lstJobChunksForPnt)
+                            {
+                                JobChunkForPnt.strPntFName = strPntFName;
+                            }
+                            JobChunksReadyForProceed.m_lstJobChunks.InsertRange(JobChunksReadyForProceed.m_lstJobChunks.Count, lstJobChunksForPnt);
+                        }//if (lstUnProccessedPnts.Count > 0)
+                        else 
+                        {
+                            break;
+                        }
+                    }//for (i = 0; i < 500; i++)
+         */
 
         public string CalcGuid
         {

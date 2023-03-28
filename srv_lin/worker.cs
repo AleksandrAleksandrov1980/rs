@@ -112,7 +112,7 @@ public class Worker : BackgroundService
             ls_ress.Add($"{Consts.m_str_error}: process.Id={process.Id} on_PROC_EXIT() exception [{ex}]");
             Log.Error(ls_ress[ls_ress.Count-1]);
         }
-        PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, command.ToString() + "  " + process.HasExited.ToString(), command.tm_mark, command.guid, ls_ress.ToArray() );
+        PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, command.ToString() + "  " + process.HasExited.ToString(), command.en_command, command.tm_mark, command.guid, ls_ress.ToArray() );
     }
 
     public List<string> on_PROC_RUN(string[] str_params, RastrSrvShare.Ccommunicator.Command command)
@@ -508,12 +508,13 @@ public class Worker : BackgroundService
         }
     }
 
-    public void PublishEvnt(RastrSrvShare.Ccommunicator.enEvents en_event, string str_command, string str_tm_mark, string str_guid, string[] str_results)
+    public void PublishEvnt(RastrSrvShare.Ccommunicator.enEvents en_event, string str_command, RastrSrvShare.Ccommunicator.enCommands en_command , string str_tm_mark, string str_guid, string[] str_results)
     {
         RastrSrvShare.Ccommunicator.Evnt evnt = new RastrSrvShare.Ccommunicator.Evnt();
         //string s = evnt.ToString();
         evnt.en_event        = en_event;
         evnt.command         = str_command;
+        evnt.command_en_command = en_command.ToString();
         evnt.command_tm_mark = str_tm_mark;
         evnt.command_guid    = str_guid;
         evnt.results         = str_results;
@@ -527,15 +528,7 @@ public class Worker : BackgroundService
         lock(_obj_sync_command)
         {
             Log.Information(command.ToString());
-            PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, command.ToString(), command.tm_mark, command.guid, new string[]{""} );
-            /*
-            RastrSrvShare.Ccommunicator.Evnt evnt_start = new RastrSrvShare.Ccommunicator.Evnt();
-            evnt_start.en_event        = RastrSrvShare.Ccommunicator.enEvents.START;
-            evnt_start.command         = command.en_command.ToString() + " : " + String.Join(", ",command.pars);
-            evnt_start.command_tm_mark = command.tm_mark;
-            evnt_start.command_guid    = command.guid;
-            m_communicator?.PublishEvnt( evnt_start );
-            */
+            PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, command.ToString(), command.en_command, command.tm_mark, command.guid, new string[]{""} );
             List<string> ls_ress = new List<string>();
             RastrSrvShare.Ccommunicator.enEvents en_event_on_cmnd_exit = enEvents.FINISH;
             switch(command.en_command)
@@ -594,15 +587,7 @@ public class Worker : BackgroundService
                     Log.Error($"unhadled command : {command.en_command}!");
                 break;
             }
-            PublishEvnt( en_event_on_cmnd_exit, command.ToString(), command.tm_mark, command.guid, ls_ress.ToArray() );
-            /*RastrSrvShare.Ccommunicator.Evnt evnt_finish = new RastrSrvShare.Ccommunicator.Evnt();
-            evnt_finish.en_event        = en_event_on_cmnd_exit;
-            evnt_finish.command         = command.en_command.ToString();
-            evnt_finish.command_tm_mark = command.tm_mark;
-            evnt_finish.command_guid    = command.guid;
-            evnt_finish.results         = ls_ress.ToArray();
-            m_communicator?.PublishEvnt( evnt_finish );
-            */
+            PublishEvnt( en_event_on_cmnd_exit, command.ToString(),command.en_command, command.tm_mark,  command.guid, ls_ress.ToArray() );
         }
         return 1;
     }

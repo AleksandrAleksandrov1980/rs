@@ -62,35 +62,10 @@ namespace RastrSrvShare
                 else
                 {
                     ftp_client.DownloadDirectory( str_path_to, str_path_from, FtpFolderSyncMode.Update, FtpLocalExists.Overwrite );
-                    /*
-                    string str_namef           = Path.GetFileName(str_path_from);
-                    string str_path_file_local = str_path_to+"/"+str_namef;
-                    //string str_ftp_file = str_path_ftp_dir+ "/"+str_namef;
-                    //ftp_client.CreateDirectory(str_path_ftp_dir);
-                    long size_ftp_file = ftp_client.GetFileSize(str_path_from);
-                    ftp_client.DownloadFile(str_path_file_local,str_path_from);
-                    FileInfo fi = new FileInfo(str_path_file_local); 
-                    if(fi.Length != size_ftp_file)
-                    {
-                        throw new Exception("size!!");
-                    }
-                    //ftp_client.UploadFile(@"C:/rs_wrk/compile.tar_1", "/compile.tar_2");
-                    try
-                    {
-                        Stopwatch sw2 = new Stopwatch();
-                        sw2.Start();
-                        string str_hash_fun = "MD5"; //"MD5" "SHA1" "SHA256" "SHA384" "SHA512"
-                        string str_hash_val = GetChecksum( str_hash_fun, str_path_file_local );
-                        sw2.Stop();
-                        Log.Warning($"hash {str_hash_fun} [{str_hash_val}] Ok. time {sw2.Elapsed}");
-                    }
-                    catch(Exception)
-                    {
-                    }*/
                 }
                 ftp_client.Disconnect();
                 sw.Stop();
-                Log.Warning($"FTP.dir {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed}");
+                Log.Information($"FTP.dir {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed:mm\\:ss\\.f}");
             }
         }
 
@@ -157,7 +132,7 @@ namespace RastrSrvShare
                 }
                 ftp_client.Disconnect();
                 sw.Stop();
-                Log.Warning($"FTP.file {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed}");
+                Log.Information($"FTP.file {str_path_from} -> {str_path_to} elapsed time {sw.Elapsed:mm\\:ss\\.f}");
             }
         }
     }

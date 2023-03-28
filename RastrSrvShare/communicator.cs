@@ -177,18 +177,19 @@ public class Ccommunicator: IDisposable
     public class Evnt
     {
         [JsonIgnore]
-        public enEvents en_event        { get; set; } = enEvents.ERROR;
+        public enEvents en_event           { get; set; } = enEvents.ERROR;
         [JsonPropertyName("event")]
-        public string str_event         { get{return en_event.ToString();} 
-                                          set{en_event = StrToEvent(value);} } 
-        public string   to              { get; set; } = "";
-        public string   from            { get; set; } = "";
-        public string   command         { get; set; } = "";
-        public string   command_tm_mark { get; set; } = "";
-        public string   command_guid    { get; set; } = "";
-        public string   tm_mark         { get; set; } = "";
-        public string[] results         { get; set; } ={""};
-        public string   sign            { get; set; } = "";
+        public string str_event            { get{return en_event.ToString();} 
+                                             set{en_event = StrToEvent(value);} } 
+        public string   to                 { get; set; } = "";
+        public string   from               { get; set; } = "";
+        public string   command            { get; set; } = "";
+        public string   command_en_command { get; set; } = "";
+        public string   command_tm_mark    { get; set; } = "";
+        public string   command_guid       { get; set; } = "";
+        public string   tm_mark            { get; set; } = "";
+        public string[] results            { get; set; } ={""};
+        public string   sign               { get; set; } = "";
 
         public static enEvents StrToEvent(string? str_event)
         {
