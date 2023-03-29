@@ -631,7 +631,7 @@ public class Worker : BackgroundService
             
             CInstance c=CInstance.GetCurrent();
             c.SetMsLogger(m_logger);
-            c.Log(shared.CHlpLog.enErr.INF , "");
+            //c.Log(shared.CHlpLog.enErr.INF , "");
 
             RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
             par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");

@@ -25,13 +25,14 @@ class CInstance
         m_logger = logger_in;
     }
 
-    public void Log(shared.CHlpLog.enErr err, string strMsg )
+    //public void Log(shared.CHlpLog.enErr err, string strMsg )
+    public void Log(int n, string strMsg )
     {
         lock(m_obj_sync)
         {
             int n_mt_id = Thread.CurrentThread.ManagedThreadId;
             //logEntry.strTime = DateTime.Now.ToString("yyyy:MM:dd-HH:mm:ss");
-            string str_time = DateTime.Now.ToString( shared.CHlpLog.str_log_time_fmt );
+//            string str_time = DateTime.Now.ToString( shared.CHlpLog.str_log_time_fmt );
             //m_logger.Log(LogLevel.Information
         }
     }
