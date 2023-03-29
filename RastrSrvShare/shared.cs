@@ -524,10 +524,43 @@ namespace RastrSrvShare
 
     }
 
+            public class CLogHlp
+        {
+
+            public enum _enType
+            {
+                NO = -1,
+                INF = 1,
+                WRN = 2,
+                ERR = 3,
+                VIP = 4,
+                XML = 5
+            };
+
+            public class CLogEntry
+            {
+                public _enType m_enType = _enType.NO;
+                public string m_strLog = "";
+
+                public string StrLog { get { return m_strLog; } set { m_strLog = value; } }
+
+                public CLogEntry()
+                {
+                }
+
+                public CLogEntry(string strLog, _enType enType = _enType.INF)
+                {
+                    m_enType = enType;
+                    m_strLog = strLog;
+                }
+            }
+
+        }//
+
     public class CParam
     {
-        //[XmlIgnore]
-        //public IProgress<CLogHlp.CLogEntry> m_IProgressLog = null;
+        [XmlIgnore]
+        public IProgress<CLogHlp.CLogEntry> m_IProgressLog = null;
 
         [XmlIgnore]
         public CancellationTokenSource m_CancellationTokeSource = null;
