@@ -1035,7 +1035,7 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
                     {
                         service.m_bl_alarm_fixed = true;
                         service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
-                        Log.Error($"disappeared service [{service}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                        Log.Error($"disappeared service [{service.m_str_name}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
                     }
                 }
                 if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
@@ -1044,7 +1044,7 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
                     {
                         service.m_bl_alarm_fixed = false;
                         service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
-                        Log.Error($"appeared service [{service}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                        Log.Error($"appeared service [{service.m_str_name}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
                     }
                 }
             }
