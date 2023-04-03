@@ -524,38 +524,55 @@ namespace RastrSrvShare
 
     }
 
-            public class CLogHlp
+    public class CLogHlp
+    {
+
+        public enum _enType
         {
+            NO = -1,
+            INF = 1,
+            WRN = 2,
+            ERR = 3,
+            VIP = 4,
+            XML = 5
+        };
 
-            public enum _enType
+        public class CLogEntry
+        {
+            public _enType m_enType = _enType.NO;
+            public string m_strLog = "";
+
+            public string StrLog { get { return m_strLog; } set { m_strLog = value; } }
+
+            public CLogEntry()
             {
-                NO = -1,
-                INF = 1,
-                WRN = 2,
-                ERR = 3,
-                VIP = 4,
-                XML = 5
-            };
-
-            public class CLogEntry
-            {
-                public _enType m_enType = _enType.NO;
-                public string m_strLog = "";
-
-                public string StrLog { get { return m_strLog; } set { m_strLog = value; } }
-
-                public CLogEntry()
-                {
-                }
-
-                public CLogEntry(string strLog, _enType enType = _enType.INF)
-                {
-                    m_enType = enType;
-                    m_strLog = strLog;
-                }
             }
 
-        }//
+            public CLogEntry(string strLog, _enType enType = _enType.INF)
+            {
+                m_enType = enType;
+                m_strLog = strLog;
+            }
+        }
+
+    }// class CLogHlp
+
+    public static class Helpers
+    {
+        public static double ParseToDouble(string value)
+        {
+            double result = Double.NaN;
+            value = value.Trim();
+            if (!double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.GetCultureInfo("ru-RU"), out result))
+            {
+                if (!double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.GetCultureInfo("en-US"), out result))
+                {
+                    return Double.NaN;
+                }
+            }
+            return result;
+        }
+    }
 
     public class CParam
     {
