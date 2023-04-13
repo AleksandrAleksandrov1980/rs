@@ -52,7 +52,7 @@ public class Worker : BackgroundService
                         service.m_str_name = evnt.from;
                         service.m_lst_errors.Add($"first time detected service at [{service.m_dt_last_seen}]");
                         m_state.m_services.Add(service.m_str_name, service);
-                        Log.Error($"first time detected service [{service.m_str_name}] ");
+                        Log.Information($"first time detected service [{service.m_str_name}] ");
                     }
                     m_state.CheckServicesState();
                 }
@@ -60,7 +60,7 @@ public class Worker : BackgroundService
         }
         catch(Exception ex)
         {
-            Log.Error($"OnEvent  exception: [{ex.ToString()}]");
+            Log.Error($"OnEvent  exception: [{ex}]");
         }
         return 1;
     }
@@ -706,7 +706,7 @@ public class Worker : BackgroundService
                     }
                 }
                 catch(Exception ex){
-                    Log.Error($"[{i}] Communicator exception : {ex.ToString()}. Will be relaunched.");
+                    Log.Error($"[{i}] Communicator exception : {ex}. Will be relaunched.");
                 }
                 if(stoppingToken.IsCancellationRequested==true)
                 {
@@ -752,7 +752,7 @@ public class Worker : BackgroundService
         }
         catch( Exception ex)
         {
-            m_logger.LogError($"Program catch exeption: {ex.ToString()}");
+            m_logger.LogError($"Program catch exeption: {ex}");
 
             //https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service 
             // In order for the Windows Service Management system to leverage configured

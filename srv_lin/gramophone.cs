@@ -69,7 +69,7 @@ public class CGramophone
         }
         catch (Exception ex)
         {
-            Log.Error($"Exception : {ex.ToString()}");
+            Log.Error($"Exception : {ex}");
             return -1;
         }
         return 1;
@@ -122,7 +122,7 @@ public class CGramophone
         catch(Exception ex)
         {
             //Console.Write($"Error {ex.Message}\n");
-            Log.Error($"\tPlay.Exception {ex.ToString()}");
+            Log.Error($"\tPlay.Exception {ex}");
             Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
             //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
             return -1;
@@ -146,7 +146,7 @@ public class CGramophone
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"can't read, message-> {ex.ToString()}");
+                    Log.Error($"can't read, message-> {ex}");
                 }               
                 if(record != null)
                 {
@@ -171,15 +171,15 @@ public class CGramophone
         }
         catch(System.AggregateException sae)
         {
-            Log.Warning($"canceled in wait-> {sae.ToString()}");
+            Log.Warning($"canceled in wait-> {sae}");
         }
         catch(System.OperationCanceledException oce)
         {
-            Log.Warning($"canceled-> {oce.ToString()}");
+            Log.Warning($"canceled-> {oce}");
         }
         catch(Exception ex)
         {
-            Log.Error($"Exception-> {ex.ToString()}");
+            Log.Error($"Exception-> {ex}");
         }
         return 1;
     }
