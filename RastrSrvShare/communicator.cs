@@ -607,7 +607,7 @@ public class Ccommunicator: IDisposable
                     }
                     catch(Exception ex)
                     {
-                        Log.Error($"exception -> [{ex.ToString()}] when trying deserialize event [{message}]");
+                        Log.Error($"exception -> [{ex}] when trying deserialize event [{message}]");
                         evnt = null;    
                     }   
                     try

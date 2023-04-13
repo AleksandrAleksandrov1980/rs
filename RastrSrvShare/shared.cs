@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using Serilog;
+using Serilog.Configuration;
+using Serilog.Core;
+using Serilog.Events;
+
 
 namespace RastrSrvShare
 {
@@ -49,7 +54,6 @@ namespace RastrSrvShare
             {
                 try
                 {
-                 //   /*
                     RegistryKey m_rkHKLM_Software_RastrCalc = null;
                     using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
                     {
@@ -61,18 +65,12 @@ namespace RastrSrvShare
                         }
                     }
                     return (string)m_rkHKLM_Software_RastrCalc.GetValue(m_strHKLM_Software_RastrCalc, m_strRastrCalc_PathWrkDir_DefVal);
-                   // */
-                    return "";
                 }
                 catch (Exception ex)
                 {
                     return m_strRastrCalc_PathWrkDir_DefVal;
                 }
             }
-            //set
-            //{
-            //m_rkRastrSrv.SetValue(m_Reg_RastrSrv_Path, value);
-            //}
         }
 
         public string PathPropsXml
@@ -524,6 +522,51 @@ namespace RastrSrvShare
 
     }
 
+    /*
+                DataTable dataTable = new DataTable("ServerStates");
+                dataTable.Columns.Add("Act");
+                dataTable.Columns.Add("Bind");
+                dataTable.Columns.Add("MaxProc");
+                dataTable.Columns.Add("CurProc");
+                dataTable.Columns.Add("NumFiles");
+                dataTable.Columns.Add("NumJobChunkProcs");
+                DataTable dataTableSrvErrs = new DataTable("ServerErrs");
+                dataTableSrvErrs.Columns.Add("Bind");
+                dataTableSrvErrs.Columns.Add("Err");
+                foreach (var item in m_Param.Settings.ModelProps.ListServerBinds)
+                {
+                    bool blFind = false;
+                    foreach (var calcNode in m_CalcNodes)
+                    {
+                        if (calcNode.ServerBind.Equals(item))
+                        {
+                            blFind = true;
+                            dataTable.Rows.Add("", item.strServerBind, calcNode.MaxWrkProc, calcNode.NumWrkPrcs, calcNode.m_dctPntFNames.Count, calcNode.JobChunkProcs.Count);
+                            foreach (var jc in calcNode.JobChunkProcs)
+                            {
+                                foreach (var FileFailedDownload in jc.FilesFailedDownload)
+                                {
+                                    dataTableSrvErrs.Rows.Add(item.strServerBind, $"ошибка чтения: {FileFailedDownload}");
+                                }
+                                foreach (var FileFailedCopy in jc.FilesFailedCopy)
+                                {
+                                    dataTableSrvErrs.Rows.Add(item.strServerBind, $"ошибка чтения: {FileFailedCopy}");
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    if (blFind == false)
+                    {
+                        dataTable.Rows.Add("откл.", item.strServerBind, item.MaxProc, 0, 0, 0);
+                    };
+                }
+                //JobChunkProcs
+                DataSet dataSet = new DataSet("State");
+                dataSet.Tables.Add(dataTable);
+                dataSet.Tables.Add(dataTableSrvErrs);
+     */
+
     public class CLogHlp
     {
 
@@ -555,7 +598,83 @@ namespace RastrSrvShare
             }
         }
 
+        public static System.Data.DataSet GetStructSrvInf()
+        { 
+            DataTable dataTable = new DataTable("ServerStates");
+            dataTable.Columns.Add("Act");
+            dataTable.Columns.Add("Bind");
+            dataTable.Columns.Add("MaxProc");
+            dataTable.Columns.Add("CurProc");
+            dataTable.Columns.Add("NumFiles");
+            dataTable.Columns.Add("NumJobChunkProcs");
+            DataTable dataTableSrvErrs = new DataTable("ServerErrs");
+            dataTableSrvErrs.Columns.Add("Bind");
+            dataTableSrvErrs.Columns.Add("Err");
+            DataSet dataSet = new DataSet("State");
+            dataSet.Tables.Add(dataTable);
+            dataSet.Tables.Add(dataTableSrvErrs);
+            return dataSet;
+        }
+
+
     }// class CLogHlp
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
+
+    public class MySink : ILogEventSink
+    {
+        private readonly IFormatProvider m_formatProvider;
+        public IProgress<CLogHlp.CLogEntry> m_progress_log = null;
+
+        public MySink(IFormatProvider formatProvider, IProgress<CLogHlp.CLogEntry> progress_log )
+        {
+            m_formatProvider = formatProvider;
+            m_progress_log   = progress_log;
+        }
+
+        CLogHlp._enType GetLogHlpType(LogEventLevel logEventLevel )
+        { 
+            switch (logEventLevel) 
+            {
+                case LogEventLevel.Information: return CLogHlp._enType.INF;
+                case LogEventLevel.Warning:     return CLogHlp._enType.WRN;
+                case LogEventLevel.Error:       return CLogHlp._enType.ERR;
+                case LogEventLevel.Fatal:       return CLogHlp._enType.VIP;
+                case LogEventLevel.Debug:       return CLogHlp._enType.NO;
+                case LogEventLevel.Verbose:     return CLogHlp._enType.NO;
+                default:                        return CLogHlp._enType.ERR;
+            }
+        }
+
+        public void Emit(LogEvent logEvent)
+        {
+            if(m_progress_log!=null)
+            { 
+                var message = logEvent.RenderMessage(m_formatProvider);
+                CLogHlp.CLogEntry logEntry = new CLogHlp.CLogEntry();
+                logEntry.m_enType = GetLogHlpType(logEvent.Level);
+                logEntry.m_strLog = message;
+                m_progress_log.Report(logEntry);
+            }
+        }
+
+    }//class MySink 
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class MySinkExtensions
+    {
+        public static LoggerConfiguration MySink(
+                  this LoggerSinkConfiguration loggerConfiguration, 
+                  IFormatProvider formatProvider, 
+                  IProgress<CLogHlp.CLogEntry> progress_log )
+        {
+            return loggerConfiguration.Sink(new MySink(formatProvider, progress_log));
+        }
+
+    }//static class MySinkExtensions
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
 
     public static class Helpers
     {
@@ -574,6 +693,8 @@ namespace RastrSrvShare
         }
     }
 
+    //----------------------------------------------------------------------------------------------------------------------------------------
+
     public class CParam
     {
         [XmlIgnore]
@@ -581,6 +702,8 @@ namespace RastrSrvShare
 
         [XmlIgnore]
         public CancellationTokenSource m_CancellationTokeSource = null;
+
+        //----------------------------------------------------------------------------------------------------------------------------------------
 
         public class CJobChunk
         {
@@ -635,6 +758,8 @@ namespace RastrSrvShare
             }
 
         }
+
+        //----------------------------------------------------------------------------------------------------------------------------------------
 
         public class CJobChunks
         {
@@ -883,7 +1008,9 @@ namespace RastrSrvShare
                     return nMinPntNum;
                 }
             }
-        }
+        }//class CJobChunks
+
+        //----------------------------------------------------------------------------------------------------------------------------------------
 
         private CSettings m_Settings = null;
         public string strPath2MptSmz = "";
@@ -1058,6 +1185,8 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
         };
     }; //class Param
 
+    //----------------------------------------------------------------------------------------------------------------------------------------
+
     public class CState
     {
         public int    m_n_slots_max  { get; set;} = -1;
@@ -1076,6 +1205,7 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
 
         public void CheckServicesState()
         {
+            /*
             DateTime dtNow = DateTime.Now;
             foreach(CService service in m_services.Values )
             {
@@ -1085,7 +1215,7 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
                     {
                         service.m_bl_alarm_fixed = true;
                         service.m_lst_errors.Add($"disappearence fixed at [{dtNow}]");
-                        Log.Error($"disappeared service [{service.m_str_name}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                        Log.Information($"disappeared service [{service.m_str_name}] for the [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
                     }
                 }
                 if( (dtNow - service.m_dt_last_seen).TotalMilliseconds < service.m_n_alarm_border_millisec )
@@ -1094,12 +1224,15 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
                     {
                         service.m_bl_alarm_fixed = false;
                         service.m_lst_errors.Add($"appearance fixed at [{dtNow}]");
-                        Log.Error($"appeared service [{service.m_str_name}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
+                        Log.Information($"appeared service [{service.m_str_name}] after [{(dtNow - service.m_dt_last_seen).TotalMilliseconds}] sec");
                     }
                 }
             }
+            */
         }
-    }
+    } //class CState
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
 
     public class CMain
     {
@@ -1108,4 +1241,6 @@ CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
             Console.WriteLine("hello");
         }
     }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
 }
