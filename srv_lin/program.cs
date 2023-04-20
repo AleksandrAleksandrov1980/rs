@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {
-        options.ServiceName = "SRV_LIN";
+        options.ServiceName = "srv_lin";
     })
     .UseSystemd()
     .ConfigureServices(services =>

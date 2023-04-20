@@ -316,51 +316,6 @@ namespace RastrSrvShare
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
 
-            public CServerBind GetServerBind(string strServerBind)
-            {
-                CServerBind serverBind = null;
-                /*
-                                try
-                                {
-                                    int nIndx = m_ListServerBinds.FindIndex(a => a.strServerBind.Equals(strServerBind));
-                                    if (nIndx > -1)
-                                    {
-                                        serverBind = m_ListServerBinds[nIndx];
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    System.Windows.MessageBox.Show($"Перехвачена необработанная исключительная ситуация {ex.Message}", "Ошибка", System.Windows.MessageBoxButton.OK);
-                                }
-                */
-                return serverBind;
-            }
-
-            public int CheckBindStr(string strBindStr)
-            {
-                try
-                {/*
-                    int nRes = 0;
-                    CRastrServHlp RastrServHlp = new CRastrServHlp();
-                    nRes = RastrServHlp.Init(new Uri(strBindStr));
-                    if (nRes < 0)
-                    {
-                        //                            System.Windows.MessageBoxResult mbr =
-                        //                            System.Windows.MessageBox.Show($"Сервер не отвечает [{strBindStr}] Ошибка [{RastrServHlp.m_strError}]", "Ошибка", System.Windows.MessageBoxButton.OK);
-                        return -1;
-                    }
-                    */
-                }
-                catch (Exception ex)
-                {
-                    //System.Windows.MessageBoxResult mbr =
-                    //System.Windows.MessageBox.Show($"Сервер вызвал [{strBindStr}] Исключение [{ex.Message}] ", "Ошибка", System.Windows.MessageBoxButton.OK);
-
-                    return -2;
-                }
-                return 1;
-            }
-
             public int AddNewBind(CServerBind ServerBindNew)
             {
                 try
@@ -370,23 +325,18 @@ namespace RastrSrvShare
                         return -1;
                     }
                     //int h = m_ListServerBinds.Where(a => a.strServerBind.Equals(ServerBindNew.strServerBind));
-                   // CServerBind serverBind = m_ListServerBinds.Where(a => a.strServerBind.Equals(ServerBindNew.strServerBind)).FirstOrDefault();
-                    //if (serverBind == null)
-                    if(false)
-                    {
-                        /*
-                        int nRes = 0;
-                        nRes = CheckBindStr(ServerBindNew.strServerBind);
-                        if (nRes < 0)
-                        {
-                            System.Windows.MessageBoxResult mbr =
-                            System.Windows.MessageBox.Show($"Сервер не отвечает [{ServerBindNew.strServerBind}] все равно добавить?", "Вопрос", System.Windows.MessageBoxButton.YesNo);
-                            if (mbr == MessageBoxResult.No)
-                            {
-                                return -2;
-                            }
+                    //CServerBind serverBind = m_ListServerBinds.Where(a => a.strServerBind.Equals(ServerBindNew.strServerBind)).FirstOrDefault();
+                    CServerBind? serverBind = null;
+                    foreach(CServerBind sb in  m_ListServerBinds)
+                    { 
+                        if(sb.strServerBind.Equals(ServerBindNew.strServerBind))
+                        { 
+                            serverBind = sb;
                         }
-                        */
+                    }
+                    if (serverBind == null)
+                    {
+                        
                         m_ListServerBinds.Add(ServerBindNew);
                         return 1;
                     }
@@ -422,29 +372,11 @@ namespace RastrSrvShare
                                               }
                       */
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    //                       System.Windows.MessageBox.Show($"Перехвачена необработанная исключительная ситуация {ex.Message}", "Ошибка", System.Windows.MessageBoxButton.OK);
+                    //System.Windows.MessageBox.Show($"Перехвачена необработанная исключительная ситуация {ex.Message}", "Ошибка", System.Windows.MessageBoxButton.OK);
                 }
-                return -1;
-            }
-
-            public int ExterminateBind(CServerBind ServerBindKill)
-            {
-                /*
-                                    int nIndx = m_ListServerBinds.FindIndex(a => a.strServerBind.Equals(ServerBindKill.strServerBind));
-                                    if (nIndx < 0)
-                                    {
-                                        MessageBox.Show($"Привязка не найдена[{ServerBindKill.strServerBind}] ", "Ошибка", System.Windows.MessageBoxButton.OK);
-                                        return -1;
-                                    }
-                                    MessageBoxResult mbr = MessageBox.Show($"Удалить привязку[{ServerBindKill.strServerBind}] ?", "Вопрос", MessageBoxButton.YesNo);
-                                    if (mbr == MessageBoxResult.Yes)
-                                    {
-                                        m_ListServerBinds.RemoveAt(nIndx);
-                                    }
-                */
-                return 1;
+                return -10;
             }
 
         }// class CModelProps
@@ -453,7 +385,6 @@ namespace RastrSrvShare
         {
             try
             {
-                //strPath2XmlFile = @"D:\RastrCalc22\RastrCalc.xml";
                 string strRoot = $"{m_SettingsXmlFile_ROOT}_{Environment.MachineName}";
                 XmlSerializer serializer = new XmlSerializer(typeof(CModelProps),
                     new XmlRootAttribute()
@@ -466,7 +397,7 @@ namespace RastrSrvShare
                     writer.Close();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return -1;
             }
@@ -478,11 +409,9 @@ namespace RastrSrvShare
             try
             {
                 string strRoot = $"{m_SettingsXmlFile_ROOT}_{Environment.MachineName}";
-                //ElementName = m_SettingsXmlFile_ROOT
                 XmlSerializer serializer = new XmlSerializer(typeof(CModelProps),
                     new XmlRootAttribute()
                     {
-
                         ElementName = strRoot
                     });
                 using (Stream writer = new FileStream(strPath2XmlFile, FileMode.Create))
@@ -491,7 +420,7 @@ namespace RastrSrvShare
                     writer.Close();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return -1;
             }
@@ -503,7 +432,6 @@ namespace RastrSrvShare
             get
             {
                 return new CModelProps(m_ModelProps);
-                //return m_ModelProps;
             }
             set
             {
@@ -521,51 +449,6 @@ namespace RastrSrvShare
         }
 
     }
-
-    /*
-                DataTable dataTable = new DataTable("ServerStates");
-                dataTable.Columns.Add("Act");
-                dataTable.Columns.Add("Bind");
-                dataTable.Columns.Add("MaxProc");
-                dataTable.Columns.Add("CurProc");
-                dataTable.Columns.Add("NumFiles");
-                dataTable.Columns.Add("NumJobChunkProcs");
-                DataTable dataTableSrvErrs = new DataTable("ServerErrs");
-                dataTableSrvErrs.Columns.Add("Bind");
-                dataTableSrvErrs.Columns.Add("Err");
-                foreach (var item in m_Param.Settings.ModelProps.ListServerBinds)
-                {
-                    bool blFind = false;
-                    foreach (var calcNode in m_CalcNodes)
-                    {
-                        if (calcNode.ServerBind.Equals(item))
-                        {
-                            blFind = true;
-                            dataTable.Rows.Add("", item.strServerBind, calcNode.MaxWrkProc, calcNode.NumWrkPrcs, calcNode.m_dctPntFNames.Count, calcNode.JobChunkProcs.Count);
-                            foreach (var jc in calcNode.JobChunkProcs)
-                            {
-                                foreach (var FileFailedDownload in jc.FilesFailedDownload)
-                                {
-                                    dataTableSrvErrs.Rows.Add(item.strServerBind, $"ошибка чтения: {FileFailedDownload}");
-                                }
-                                foreach (var FileFailedCopy in jc.FilesFailedCopy)
-                                {
-                                    dataTableSrvErrs.Rows.Add(item.strServerBind, $"ошибка чтения: {FileFailedCopy}");
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    if (blFind == false)
-                    {
-                        dataTable.Rows.Add("откл.", item.strServerBind, item.MaxProc, 0, 0, 0);
-                    };
-                }
-                //JobChunkProcs
-                DataSet dataSet = new DataSet("State");
-                dataSet.Tables.Add(dataTable);
-                dataSet.Tables.Add(dataTableSrvErrs);
-     */
 
     public class CLogHlp
     {
@@ -615,7 +498,6 @@ namespace RastrSrvShare
             dataSet.Tables.Add(dataTableSrvErrs);
             return dataSet;
         }
-
 
     }// class CLogHlp
 
@@ -826,7 +708,7 @@ namespace RastrSrvShare
                         writer.Close();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return -1;
                 }
@@ -1089,44 +971,6 @@ namespace RastrSrvShare
                 return JobChunksReadyForProceed; 
             } 
         }
-
-        /*
-CParam.CJobChunks JobChunksReadyForProceed = new CParam.CJobChunks();
-                List<CParam.CJobChunk> lstJobChunksForPnt = null;
-
-                try
-                {
-                    AddLog($"Загружаем без шаблона " + m_Param.strPath2MptSmz);
-                    nRes = m_RastrHlp.Load(0, m_Param.strPath2MptSmz, "");
-                    if (nRes < 0)
-                    {
-                        AddLog($"Ошибка загрузки", CLogHlp._enType.ERR);
-                        return -1;
-                    }
-                    lstUnProccessedPnts = m_Param.JobChunks.PntNums2Calc;
-
-                    // набивка всех задач по всем точкам в один расчет// внести в m_Param.JobChunks
-                    for (i = 0; i < 500; i++)
-                    {
-                        nCurrentPntNum = -1;
-                        if (lstUnProccessedPnts.Count > 0)
-                        {
-                            nCurrentPntNum = lstUnProccessedPnts[0];
-                            lstUnProccessedPnts.RemoveAt(0);
-                            strPntFName = m_Param.strPath2MptSmz;
-                            lstJobChunksForPnt = m_Param.JobChunks.GetCJobChunksForPnt2Calc(nCurrentPntNum);
-                            foreach (var JobChunkForPnt in lstJobChunksForPnt)
-                            {
-                                JobChunkForPnt.strPntFName = strPntFName;
-                            }
-                            JobChunksReadyForProceed.m_lstJobChunks.InsertRange(JobChunksReadyForProceed.m_lstJobChunks.Count, lstJobChunksForPnt);
-                        }//if (lstUnProccessedPnts.Count > 0)
-                        else 
-                        {
-                            break;
-                        }
-                    }//for (i = 0; i < 500; i++)
-         */
 
         public string CalcGuid
         {

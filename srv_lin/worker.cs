@@ -685,8 +685,16 @@ public class Worker : BackgroundService
             m_timer_heart_beat.Enabled = true;
 
             RastrSrvShare.CSigner signer_pub = new RastrSrvShare.CSigner();
-            int nRes = signer_pub.ReadKey(RastrSrvShare.CSigner.str_fname_pub_xml);
-
+            string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
+            string str_path_pub_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_pub_xml;
+            Log.Information($"читаю публичный ключ находящийся [{str_path_pub_key}]");
+            int nRes = signer_pub.ReadKey(str_path_pub_key);
+            if(nRes<0)
+            { 
+                Log.Error($"публичный ключ не прочитан.");
+                return;
+            }
+            //int nRes = signer_pub.ReadKey(RastrSrvShare.CSigner.str_fname_pub_xml);
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
                 try{

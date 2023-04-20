@@ -7,6 +7,12 @@ namespace RastrSrvShare
 {
     public class file_dir_hlp
     {
+        public static string GetPathExeDir()
+        { 
+            string str_path_exe_dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            return str_path_exe_dir;
+        }
+
         public static void CopyFilesRecursively( string sourcePath, string targetPath )
         {
             System.IO.Directory.CreateDirectory(targetPath);
