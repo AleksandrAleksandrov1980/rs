@@ -50,7 +50,14 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /d /y &quot;$(ProjectDir)\notes\*.bat&quot; &quot;$(ProjectDir)$(OutDir)&quot;" />
+  <Target Name="CopyBats" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <BatFiles Include="$(ProjectDir)\notes\*.bat" />
+    </ItemGroup>
+    <Copy 
+      SourceFiles="@(BatFiles)" 
+      DestinationFolder="$(ProjectDir)$(OutDir)%(RecursiveDir)" 
+      SkipUnchangedFiles="true" />
   </Target>
+
 </Project>
