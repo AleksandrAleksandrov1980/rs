@@ -1,6 +1,11 @@
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer(); // webapi
+builder.Services.AddSwaggerGen();           // webapi
+
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if(!app.Environment.IsDevelopment())
@@ -12,6 +17,8 @@ if(!app.Environment.IsDevelopment())
 else
 {
     app.UseDeveloperExceptionPage(); // ustas enlarge exception description
+    app.UseSwagger();   // webapi
+    app.UseSwaggerUI(); // webapi
 }
 app.UseStatusCodePages(); //errs1
 app.UseStatusCodePagesWithReExecute("/{0}"); //errs2
@@ -22,7 +29,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 app.Run();
 
 //dotnet watch run
