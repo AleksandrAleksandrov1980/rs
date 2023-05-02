@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using RastrSrvShare;
 using Serilog;
+using static RastrSrvShare.Ccommunicator;
 
 namespace publish
 {
@@ -47,6 +48,28 @@ namespace publish
             string str_dir_ftp_calc = $"{CParam.FtpDirCalcs}/{str_dir_se}/{str_calc_guid}";
             //ftp_.dir(ftp_hlp.enFtpDirection.UPLOAD, path_to_file_se, str_dir_ftp_calc);
             ftp_.file(ftp_hlp.enFtpDirection.UPLOAD, path_to_file_se, str_dir_ftp_calc);
+
+            RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
+               
+            par.m_str_name = "calc2"; //m_configuration.GetValue<string>("r_params:name","");
+            //  par.m_cncl_tkn = m_param.m_CancellationTokeSource.Token;
+            RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
+            string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
+            string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
+            Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
+            int nRes = signer_prv.ReadKey(str_path_prv_key);
+            if(nRes<0)
+            { 
+                Log.Error($"приватный ключ не прочитан.");
+                return -5;
+            }
+            m_communicator.Init(par, signer_prv); 
+             
+            //PublishCmnd( RastrSrvShare.Ccommunicator.enCommands.STATE, "", new string[]{""}, null,null );
+            string str_to = "";
+            string [] str_pars = { ""};
+            RastrSrvShare.Ccommunicator.Command cmnd = m_communicator.
+                PublishCmnd( RastrSrvShare.Ccommunicator.enCommands.STATE, str_to, str_pars );
             
             return 1;
         }
