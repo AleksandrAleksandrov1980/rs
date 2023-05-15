@@ -10,11 +10,13 @@ try
     { 
         Console.WriteLine($"Hello, {arg}!");
     }
-    if(args_exe.Count()>2)
+    if(args_exe.Count()>4)
     { 
-        CSendSe send_se = new CSendSe();
-        send_se.cmnd            = args_exe[1];
-        send_se.path_to_file_se = args_exe[2];
+        CSend send_se = new CSend();
+        send_se.m_path_to_file = args_exe[1];
+        send_se.m_ftp_dir         = args_exe[2];
+        send_se.m_str_cmnd            = args_exe[3];
+        send_se.m_role            = args_exe[4];
         send_se.Run();
     }
     else
