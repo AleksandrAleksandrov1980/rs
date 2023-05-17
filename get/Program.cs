@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using RastrSrvShare;
-using Serilog;
-using static RastrSrvShare.Ccommunicator;
 
-namespace publish
+namespace get
 {
-    internal class CSend
+    internal class Program
+    {
+            internal class CSend
     {
         public string m_path_to_file    { set; get; } = "";
         public string m_ftp_dir         { set; get; } = "";
@@ -42,7 +37,7 @@ namespace publish
             }
             catch(Exception ex)
             { 
-                Log.Error($"Can't read 'appsettings.json' in current directory exception[{ex}]");
+                //Log.Error($"Can't read 'appsettings.json' in current directory exception[{ex}]");
                 return -4;
             }
             string str_calc_guid    = Ccommunicator.GetTmMark();
@@ -54,11 +49,11 @@ namespace publish
             RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
             string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
             string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
-            Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
+           // Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
             int nRes = signer_prv.ReadKey(str_path_prv_key);
             if(nRes<0)
             { 
-                Log.Error($"приватный ключ не прочитан.");
+                //Log.Error($"приватный ключ не прочитан.");
                 return -5;
             }
             m_communicator.Init(par, signer_prv); 
@@ -72,6 +67,14 @@ namespace publish
                 PublishCmnd( en_command, str_to, m_str_role, str_pars );
             
             return 1;
+        }
+    }
+
+        static void Main(string[] args)
+        {
+            CSend send = new CSend();
+            send.Run();
+            Console.WriteLine("Hello, World!");
         }
     }
 }

@@ -55,7 +55,7 @@ public class Ccommunicator: IDisposable
         DIR_UPLOAD       =  12,
         DIR_DOWNLOAD     =  13,
     }
-
+/*
     public class CommandSerialized
     {
         public string   command { get; set; } = "";
@@ -66,16 +66,16 @@ public class Ccommunicator: IDisposable
         public string[] pars    { get; set; } ={""};
         public string   sign    { get; set; } = "";
     }
-
+*/
     public class Command
     {
         [JsonIgnore]
         public enCommands en_command{ get; set; } = enCommands.ERROR;
         [JsonPropertyName("command")]
-        public string     str_event { get{return en_command.ToString();} 
-                                          set{en_command = StrToCommand(value);} } 
+        public string     str_event { get{return en_command.ToString();} set{en_command = StrToCommand(value);} } 
         public string     to        { get; set; } = "";
         public string     from      { get; set; } = "";
+        public string     role      { get; set; } = ""; 
         public string     tm_mark   { get; set; } = ""; 
         public string     guid      { get; set; } = "";
         public string[]   pars      { get; set; } ={""};
@@ -92,7 +92,7 @@ public class Ccommunicator: IDisposable
 
         public byte[] GetBytesForSign()
         { 
-            string str_for_sign = str_event+";"+to+";"+from+";"+tm_mark+";"+guid+";";
+            string str_for_sign = str_event+";"+to+";"+from+";"+role+";"+tm_mark+";"+guid+";";
             foreach (string par in pars)
             { 
                 str_for_sign += par + ";";
@@ -142,7 +142,7 @@ public class Ccommunicator: IDisposable
             } 
             return enCommands.ERROR;
         }
-
+        /*
         public Command(CommandSerialized? command_serialized)
         {
             if(command_serialized != null)
@@ -163,6 +163,7 @@ public class Ccommunicator: IDisposable
                 en_command = enCommands.ERROR;
             }
         }
+        */
     }
 
     public enum enEvents 
@@ -183,6 +184,7 @@ public class Ccommunicator: IDisposable
                                              set{en_event = StrToEvent(value);} } 
         public string   to                 { get; set; } = "";
         public string   from               { get; set; } = "";
+        public string   from_role          { get; set; } = "";
         public string   command            { get; set; } = "";
         public string   command_en_command { get; set; } = "";
         public string   command_tm_mark    { get; set; } = "";
@@ -246,7 +248,7 @@ public class Ccommunicator: IDisposable
         m_connection = null;
     }
 
-    public string GetTmMark()
+    public static string GetTmMark()
     { 
         return DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
     }
@@ -415,8 +417,9 @@ public class Ccommunicator: IDisposable
         {
             try
             {
-                evnt.from    = m_str_name;  // $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
-                evnt.tm_mark = GetTmMark(); // DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
+                evnt.from      = m_str_name;  // $"{m_str_host_name}({m_str_host_ip})={m_rabbitParams.m_str_name}({m_n_pid})";
+                evnt.from_role = m_rabbitParams.m_str_role;
+                evnt.tm_mark   = GetTmMark(); // DateTime.Now.ToString("yyyy_MM_dd___HH_mm_ss_fffff");
                 JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
                 //string json_evnt = JsonSerializer.Serialize(evnt,options);
                 string json_evnt = JsonSerializer.Serialize(evnt);
@@ -435,11 +438,12 @@ public class Ccommunicator: IDisposable
         return 1;
     }
 
-    public Command PublishCmnd(Ccommunicator.enCommands en_cmnd, string str_to, string[] str_pars)
+    public Command PublishCmnd(Ccommunicator.enCommands en_cmnd, string str_to, string str_role, string[] str_pars)
     {
         Ccommunicator.Command cmnd = new Ccommunicator.Command();
         cmnd.en_command = en_cmnd;
         cmnd.to         = str_to;
+        cmnd.role       = str_role;
         cmnd.pars       = str_pars;
         return PublishCmnd(cmnd);
     }
@@ -507,19 +511,26 @@ public class Ccommunicator: IDisposable
                     byte[] body = ea.Body.ToArray();
                     string message = Encoding.UTF8.GetString(body);
 //                    Log.Information($"{m_rabbitParams.m_str_exch_cmnds} : {message}");
-                    CommandSerialized? command_serialized = null;
+                    Command? command = null;
                     try
                     {
-                        command_serialized = JsonSerializer.Deserialize<CommandSerialized>(message)!;
+                        command = JsonSerializer.Deserialize<Command>(message)!;
                     }
                     catch(Exception ex)
                     {
-                        Log.Error($"exception -> [{ex.ToString()}] when trying deserialize command [{message}]");
-                        command_serialized = null;    
+                        Log.Error($"exception -> [{ex}] when trying deserialize command [{message}]");
+                        command = null;    
                     }   
                     try
                     {
-                        Command command = new Command(command_serialized);
+                        if(command == null)
+                        { 
+                            throw new Exception("Can't deserialize command");
+                        }
+                        if(command.en_command == enCommands.ERROR)
+                        { 
+                            throw new Exception("Command with error");
+                        }
                         nRes = -1000;
                         if(ConsumeCmndsMode == enConsumeCmndsMode.STRICT)
                         { 
@@ -529,7 +540,10 @@ public class Ccommunicator: IDisposable
                             }
                             else 
                             {
-                                if(command.to == m_str_name)
+                                if(  (command.to == m_str_name) ||
+                                    ((command.to.Length == 0) && (m_rabbitParams.m_str_role.Equals(command.role)))
+                                )
+                                //if(m_rabbitParams.m_str_name.StartsWith(command.to))
                                 {
                                     if(command.IsSignValid(m_signer) == true)
                                     {

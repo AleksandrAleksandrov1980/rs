@@ -2,7 +2,7 @@
   "profiles": {
     "publish": {
       "commandName": "Project",
-      "commandLineArgs": "\"D:\\CFRAS\\CY  CLE\\roc_debug_after_OC\" \"SE\" \"GRAM_START\" \"SECH\" "
+      "commandLineArgs": "\"D:\\CFRAS\\CY  CLE\\roc_debug_after_OC\" \"se\" \"GRAM_START\" \"sech\" "
     }
   }
 }

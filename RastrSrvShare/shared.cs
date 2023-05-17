@@ -25,8 +25,9 @@ namespace RastrSrvShare
     public class CRabbitParams
     {
         public string m_str_name = "";
+        public string m_str_role = "";
         public string m_str_host = "";
-        public int    m_n_port = 0; // default 5672
+        public int    m_n_port   = 0; // default 5672
         public string m_str_exch_cmnds = "";
         public string m_str_exch_evnts = "";
         public string m_str_user = "";
@@ -1039,8 +1040,9 @@ namespace RastrSrvShare
         public class CService
         {
             public string       m_str_name                { get; set;} = "NO_NAME";
+            public string       m_str_role                { get; set;} = "NO_ROLE";
             public DateTime     m_dt_last_seen            { get; set;} 
-            public int          m_n_alarm_border_millisec { get; set;} = 15000;
+            public int          m_n_alarm_border_millisec { get; set;} = 15_000;
             public bool         m_bl_alarm_fixed          { get; set;} = false;
             public List<string> m_lst_errors              { get; set;} = new List<string>();
         }

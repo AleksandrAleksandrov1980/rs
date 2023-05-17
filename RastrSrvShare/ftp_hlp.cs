@@ -11,10 +11,10 @@ namespace RastrSrvShare
 {
     public class ftp_hlp
     {
-        public string m_str_ftp_host= "";
-        public string m_str_ftp_user= "";
-        public string m_str_ftp_pass= "";
-        public int m_n_ftp_port = 21;
+        public string m_str_ftp_host = "";
+        public string m_str_ftp_user = "";
+        public string m_str_ftp_pass = "";
+        public int    m_n_ftp_port   = 21;
 
         static string GetChecksum(string str_hash, string filename)
         {

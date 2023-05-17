@@ -13,17 +13,17 @@ using System;
 namespace srv_lin;
 public class Worker : BackgroundService
 {
+    public string? m_str_dir_wrk;
+    RastrSrvShare.ftp_hlp m_ftp_hlp = new RastrSrvShare.ftp_hlp();
     private CState m_state = new CState();
     private readonly ILogger<Worker> m_logger;
     private readonly IConfiguration m_configuration;
     public Task<int>? m_tskThreadGram = null;
     private CancellationTokenSource m_cnc_tkn_src = new CancellationTokenSource();
-    public string? m_str_dir_wrk;
     private object _obj_sync_command = new Object();
     private object _obj_sync_event = new Object();
     public RastrSrvShare.Ccommunicator? m_communicator;
     private static System.Timers.Timer? m_timer_heart_beat;
-    RastrSrvShare.ftp_hlp m_ftp_hlp = new RastrSrvShare.ftp_hlp();
 
     public Worker( ILogger<Worker> logger, IConfiguration configuration )
     {
@@ -295,6 +295,14 @@ public class Worker : BackgroundService
 
     public int on_GRAM_KIT(string[] str_params)
     {
+        if(m_tskThreadGram!=null)
+        {
+            Log.Warning("Gramaphone already runing, will be stoped by KIT!");
+            on_GRAM_STOP(new string[]{""});
+        }
+        m_cnc_tkn_src.Dispose();
+        m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
+
         return -100500;
     }
 
@@ -581,7 +589,7 @@ public class Worker : BackgroundService
                 case RastrSrvShare.Ccommunicator.enCommands.DIR_DOWNLOAD:
                     ls_ress = on_DIR_DOWNLOAD(command.pars);
                 break;
-                
+               
                 default:
                     nRes = -1;
                     Log.Error($"unhadled command : {command.en_command}!");
@@ -603,12 +611,6 @@ public class Worker : BackgroundService
                 m_logger.LogError("appsettings.[platform].json не задана рабочая директория 'platform:dir_wrk' сервис остановлен.");
                return;
             }
-            /*
-            m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
-            m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
-            m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
-            m_n_ftp_port   = m_configuration.GetValue<int?>  ("r_params:ftp:port") ?? -1;
-            */
             m_ftp_hlp.m_str_ftp_host = m_configuration.GetValue<string>("r_params:ftp:host") ?? "error";
             m_ftp_hlp.m_str_ftp_user = m_configuration.GetValue<string>("r_params:ftp:user") ?? "error";
             m_ftp_hlp.m_str_ftp_pass = m_configuration.GetValue<string>("r_params:ftp:pass") ?? "error";
@@ -627,26 +629,23 @@ public class Worker : BackgroundService
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
-            string str_cal_guid = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_fff");
-            
-            CInstance c=CInstance.GetCurrent();
+
+            CInstance c = CInstance.GetCurrent();
             c.SetMsLogger(m_logger);
-            //c.Log(shared.CHlpLog.enErr.INF , "");
 
             RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
-            par.m_str_name          = m_configuration.GetValue<string>("r_params:name","");
-            m_state.m_n_slots_max   = m_configuration.GetValue<int>   ("r_params:slots_max",7);
-            double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms",2000);
-            par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host","");
-            par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port",5672); // default 5672
-            par.m_str_exch_cmnds    = m_configuration.GetValue<string>("r_params:q_exch_commands",""); 
-            par.m_str_exch_evnts    = m_configuration.GetValue<string>("r_params:q_exch_events",""); 
-            par.m_str_user          = m_configuration.GetValue<string>("r_params:q_user",""); 
-            par.m_str_pass          = m_configuration.GetValue<string>("r_params:q_pass","");
+            par.m_str_name          = m_configuration.GetValue<string>("r_params:name", "") ?? "";
+            par.m_str_role          = m_configuration.GetValue<string>("r_params:role", "") ?? "";
+            m_state.m_n_slots_max   = m_configuration.GetValue<int>   ("r_params:slots_max", 7);
+            double d_timer_ms       = m_configuration.GetValue<double>("r_params:heart_beat_ms" ,2000);
+            par.m_str_host          = m_configuration.GetValue<string>("r_params:q_host", "") ?? "";
+            par.m_n_port            = m_configuration.GetValue<int>   ("r_params:q_port", 5672); // default 5672
+            par.m_str_exch_cmnds    = m_configuration.GetValue<string>("r_params:q_exch_commands", "") ?? ""; 
+            par.m_str_exch_evnts    = m_configuration.GetValue<string>("r_params:q_exch_events", "") ?? ""; 
+            par.m_str_user          = m_configuration.GetValue<string>("r_params:q_user", "") ?? ""; 
+            par.m_str_pass          = m_configuration.GetValue<string>("r_params:q_pass", "") ?? "";
             par.m_cncl_tkn          = stoppingToken;
 
-            var  proc = Process.GetCurrentProcess();
-           
             string strTmp = "";
             strTmp += $"\n\n"; 
             strTmp += $"-----------------------------------------------------------------------------------------\n";
@@ -656,6 +655,7 @@ public class Worker : BackgroundService
             strTmp += $"path to exe: {Process.GetCurrentProcess()?.MainModule?.FileName}\n";
             strTmp += $"--------------------------------------------------------------------\n" ; 
             strTmp += $"name          : {par.m_str_name}\n";
+            strTmp += $"role          : {par.m_str_role}\n";
             strTmp += $"heart_beat_ms : {d_timer_ms}\n";
             strTmp += $"--------------------------------------------------------------------\n" ; 
             strTmp += $"q_host        : {par.m_str_host}\n";
@@ -665,12 +665,6 @@ public class Worker : BackgroundService
             strTmp += $"q_user        : {par.m_str_user}\n"; 
             //m_logger.LogWarning($" : {str_q_log_pass}");
             strTmp += $"--------------------------------------------------------------------\n" ; 
-            /*
-            strTmp += $"ftp.host      : {m_str_ftp_host}\n"; 
-            strTmp += $"ftp.user      : {m_str_ftp_user}\n";
-            //strTmp += $"ftp.pass      : {m_str_ftp_host}\n"; 
-            strTmp += $"ftp.port      : {m_n_ftp_port}\n";  
-            */
             strTmp += $"ftp.host      : {m_ftp_hlp.m_str_ftp_host}\n"; 
             strTmp += $"ftp.user      : {m_ftp_hlp.m_str_ftp_user}\n";
             //strTmp += $"ftp.pass      : {m_str_ftp_host}\n"; 
@@ -694,7 +688,7 @@ public class Worker : BackgroundService
                 Log.Error($"публичный ключ не прочитан.");
                 return;
             }
-            //int nRes = signer_pub.ReadKey(RastrSrvShare.CSigner.str_fname_pub_xml);
+
             int i = 0 ;
             for(i= 0; i < 10 ; i++){
                 try{
