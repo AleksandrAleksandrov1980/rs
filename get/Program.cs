@@ -42,6 +42,7 @@ namespace get
         { 
             using (StreamWriter writer = new StreamWriter($"{str_dir}/{System.AppDomain.CurrentDomain.FriendlyName}.log", bl_append))
             {
+                Console.WriteLine(str_msg);
                 writer.WriteLine(str_msg);
             }
         }

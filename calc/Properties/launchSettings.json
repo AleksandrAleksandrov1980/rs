@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "calc": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:/rs_wrk/\" \"C:/rs_wrk/mdp_debug_1_30\" \"/SE/2023_05_18___13_18_47_59013/roc_debug_after_OC\""
+    }
+  }
+}
