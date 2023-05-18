@@ -1,80 +1,80 @@
 ﻿using Microsoft.Extensions.Configuration;
 using RastrSrvShare;
+using Serilog;
 
 namespace get
 {
     internal class Program
     {
-            internal class CSend
-    {
-        public string m_path_to_file    { set; get; } = "";
-        public string m_ftp_dir         { set; get; } = "";
-        public string m_str_cmnd        { set; get; } = "";
-        public string m_str_role        { set; get; } = "";
-
-        public int Run()
+        internal class CGet
         {
-            RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
-            RastrSrvShare.ftp_hlp ftp_ = new ftp_hlp();
-            try
-            { 
+            public string m_ftp_path_to_file { set; get; } = "";
+            public string m_path_to_out_dir  { set; get; } = "";
+            public void Run()
+            {
+                RastrSrvShare.ftp_hlp ftp_ = new ftp_hlp();
+                string str_path_current_dir = System.IO.Directory.GetCurrentDirectory();
                 IConfiguration config = new ConfigurationBuilder()
-                    .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+                    .SetBasePath(str_path_current_dir)
                     .AddJsonFile("appsettings.json")
                     .Build();                    
                 IConfigurationSection con_sec_params = config.GetSection("r_params");
-                par.m_str_host          = con_sec_params.GetRequiredSection("q_host").Value;
-                par.m_n_port            = int.Parse(con_sec_params.GetRequiredSection("q_port").Value);
-                par.m_str_exch_cmnds    = con_sec_params.GetRequiredSection("q_exch_commands").Value;
-                par.m_str_exch_evnts    = con_sec_params.GetRequiredSection("q_exch_events").Value;
-                par.m_str_user          = con_sec_params.GetRequiredSection("q_user").Value;
-                par.m_str_pass          = con_sec_params.GetRequiredSection("q_pass").Value;
-                IConfigurationSection con_sec_ftp = con_sec_params.GetSection("ftp");
-                ftp_.m_str_ftp_host     = con_sec_ftp.GetRequiredSection("host").Value;
-                ftp_.m_str_ftp_user     = con_sec_ftp.GetRequiredSection("user").Value;
-                ftp_.m_str_ftp_pass     = con_sec_ftp.GetRequiredSection("pass").Value;
-                ftp_.m_n_ftp_port       = int.Parse(con_sec_ftp.GetRequiredSection("port").Value);
+                IConfigurationSection con_sec_ftp    = con_sec_params.GetSection("ftp");
+                ftp_.m_str_ftp_host     = con_sec_ftp.GetRequiredSection("host").Value ?? "error";
+                ftp_.m_str_ftp_user     = con_sec_ftp.GetRequiredSection("user").Value ?? "error";
+                ftp_.m_str_ftp_pass     = con_sec_ftp.GetRequiredSection("pass").Value ?? "error";
+                ftp_.m_n_ftp_port       = int.Parse(con_sec_ftp.GetRequiredSection("port").Value ?? "21");
+                string str_ftp_path_to_file_download = $"{CParam.FtpDirCalcs}/{m_ftp_path_to_file}";
+                string str_path_to_downloaded_file   = NormalizePath( $"{m_path_to_out_dir}/{Path.GetDirectoryName(m_ftp_path_to_file)}/");
+                Log( m_path_to_out_dir, $"download file from ftp [{str_ftp_path_to_file_download }] to local file [{str_path_to_downloaded_file}]");
+                ftp_.file(ftp_hlp.enFtpDirection.DOWNLOAD, str_ftp_path_to_file_download, str_path_to_downloaded_file);
+            }
+        }
+
+        public static string NormalizePath(string path)
+        {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                       .ToUpperInvariant();
+        }
+
+        public static void Log(string str_dir, string str_msg, bool bl_append = false)
+        { 
+            using (StreamWriter writer = new StreamWriter($"{str_dir}/{System.AppDomain.CurrentDomain.FriendlyName}.log", bl_append))
+            {
+                writer.WriteLine(str_msg);
+            }
+        }
+
+        static int Main(string[] args)
+        {
+            try
+            { 
+                CGet getter = new CGet();
+                if(args.Length<2)
+                { 
+                    throw new Exception($"not enough arguments, get [{args.Length}]");
+                }
+                else 
+                { 
+                    getter.m_ftp_path_to_file = args[0];
+                    getter.m_path_to_out_dir  = args[1];
+                    getter.Run();
+                }
             }
             catch(Exception ex)
             { 
-                //Log.Error($"Can't read 'appsettings.json' in current directory exception[{ex}]");
-                return -4;
+                if(args.Length<2)
+                { 
+                    Log( "c:/tmp/", $"exception [{ex}]" );
+                }
+                else
+                { 
+                    Log( args[1], $"exception [{ex}]" );
+                }
+                return 100;
             }
-            string str_calc_guid    = Ccommunicator.GetTmMark();
-            string str_dir_ftp = $"{m_ftp_dir}/{str_calc_guid}";
-            string str_dir_ftp_calc = $"{CParam.FtpDirCalcs}/{str_dir_ftp}";
-            ftp_.file(ftp_hlp.enFtpDirection.UPLOAD, m_path_to_file, str_dir_ftp_calc);
-            RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
-            par.m_str_name = "sender"; //m_configuration.GetValue<string>("r_params:name","");
-            RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
-            string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
-            string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
-           // Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
-            int nRes = signer_prv.ReadKey(str_path_prv_key);
-            if(nRes<0)
-            { 
-                //Log.Error($"приватный ключ не прочитан.");
-                return -5;
-            }
-            m_communicator.Init(par, signer_prv); 
-
-            RastrSrvShare.Ccommunicator.enCommands en_command;
-            en_command = RastrSrvShare.Ccommunicator.Command.StrToCommand(m_str_cmnd);
-             
-            string str_to = "";
-            string [] str_pars = { $"{str_dir_ftp}/{Path.GetFileName(m_path_to_file)}"};
-            RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator.
-                PublishCmnd( en_command, str_to, m_str_role, str_pars );
-            
             return 1;
-        }
-    }
-
-        static void Main(string[] args)
-        {
-            CSend send = new CSend();
-            send.Run();
-            Console.WriteLine("Hello, World!");
         }
     }
 }

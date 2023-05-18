@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "get": {
+      "commandName": "Project",
+      "commandLineArgs": "\"SE/2023_05_17___18_01_52_28583/roc_debug_after_oc\" \"C:/rs_wrk/CALCS2\""
+    }
+  }
+}

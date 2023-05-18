@@ -69,6 +69,13 @@ namespace RastrSrvShare
             }
         }
 
+        public static string NormalizePath(string path)
+        {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                       .ToUpperInvariant();
+        }
+
 
         public void file( enFtpDirection en_ftp_dir, string str_path_from, string str_path_to )
         {
@@ -106,6 +113,8 @@ namespace RastrSrvShare
                 {
                     string str_namef           = Path.GetFileName(str_path_from);
                     string str_path_file_local = str_path_to+"/"+str_namef;
+                    //string str_path_file_local =NormalizePath( str_path_to+"/"+str_namef);
+                    
                     //string str_ftp_file = str_path_ftp_dir+ "/"+str_namef;
                     //ftp_client.CreateDirectory(str_path_ftp_dir);
                     long size_ftp_file = ftp_client.GetFileSize(str_path_from);
