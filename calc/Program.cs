@@ -50,9 +50,11 @@ namespace calc
 
                 ASTRALib.table table_ut_vir_common             = rastr.Tables.Item("ut_vir_common");
                 ASTRALib.col   ut_vir_common_Col_log_path2file = table_ut_vir_common.Cols.Item("log_path2file");
-                string str_path_log_file = $"{str_path_wrk_dir}/{RastrSrvShare.CParam.LocDirCalcs}/{Path.GetDirectoryName(str_ftp_path_file_rg2)}/{Path.GetFileName(str_path_mdp_file)}.log";
+                //string str_path_log_file = $"{str_path_wrk_dir}/{RastrSrvShare.CParam.LocDirCalcs}/{Path.GetDirectoryName(str_ftp_path_file_rg2)}/{Path.GetFileName(str_path_mdp_file)}.log";
+                string str_path_log_file = $"{str_path_wrk_dir}/{Path.GetFileName(str_path_mdp_file)}.log";
                 ut_vir_common_Col_log_path2file.Z[0] = str_path_log_file;
-                string str_path_mdp_debug_calc2 = $"{str_path_wrk_dir}/{RastrSrvShare.CParam.LocDirCalcs}/{Path.GetDirectoryName(str_ftp_path_file_rg2)}/{Path.GetFileName(str_path_mdp_file)}__2__";
+                //string str_path_mdp_debug_calc2 = $"{str_path_wrk_dir}/{RastrSrvShare.CParam.LocDirCalcs}/{Path.GetDirectoryName(str_ftp_path_file_rg2)}/{Path.GetFileName(str_path_mdp_file)}__2__";
+                string str_path_mdp_debug_calc2 = $"{str_path_wrk_dir}/{Path.GetFileName(str_path_mdp_file)}__2__";
                 //rastr.Save(@"C:\rs_wrk\tst.os","");
                 object obj = null;
                 int nRes = rastr.Emergencies(ref obj);
