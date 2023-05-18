@@ -25,7 +25,7 @@ namespace get
                 ftp_.m_str_ftp_pass     = con_sec_ftp.GetRequiredSection("pass").Value ?? "error";
                 ftp_.m_n_ftp_port       = int.Parse(con_sec_ftp.GetRequiredSection("port").Value ?? "21");
                 string str_ftp_path_to_file_download = $"{CParam.FtpDirCalcs}/{m_ftp_path_to_file}";
-                string str_path_to_downloaded_file   = NormalizePath( $"{m_path_to_out_dir}/{Path.GetDirectoryName(m_ftp_path_to_file)}/");
+                string str_path_to_downloaded_file   = NormalizePath( $"{m_path_to_out_dir}/{CParam.LocDirCalcs}/{Path.GetDirectoryName(m_ftp_path_to_file)}/");
                 Log( m_path_to_out_dir, $"download file from ftp [{str_ftp_path_to_file_download }] to local file [{str_path_to_downloaded_file}]");
                 ftp_.file(ftp_hlp.enFtpDirection.DOWNLOAD, str_ftp_path_to_file_download, str_path_to_downloaded_file);
             }

@@ -31,7 +31,7 @@ catch(Exception ex)
 finally
 { 
     Console.WriteLine("Bye!");
-    Console.ReadLine();
+    //Console.ReadLine();
 }
 
 
