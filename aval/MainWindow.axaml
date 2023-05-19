@@ -4,6 +4,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="aval.MainWindow"
+		Width="700" Height="500"
         Title="aval">
-    Welcome to Avalonia!
+<!--<Button Name="btn_send" Click="on_btn_click_send" Width="160" > send </Button>-->
+	<Grid Grid.Row="1" Margin="50">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<TextBox x:Name="TheTextBox" Width="500" Height="27" HorizontalAlignment="Left" Grid.Row="0"/>
+		<TextBlock Text="{Binding Path=Text, ElementName=TheTextBox}"     Height="17" Grid.Row="1"/>
+		<Button Name="btn_send" Click="on_btn_click_send" Width="160" Height="50" Grid.Row="2"> SEND </Button>
+		<TextBox x:Name="Log1" Width="500" Height="270" HorizontalAlignment="Left" Grid.Row="3"/>
+	</Grid>
+
 </Window>
