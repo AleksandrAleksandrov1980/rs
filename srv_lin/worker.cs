@@ -227,10 +227,16 @@ public class Worker : BackgroundService
             on_GRAM_STOP(new string[]{""});
         }
         m_cnc_tkn_src.Dispose();
+        CGramophone.CRecordParams recordParams = new CGramophone.CRecordParams();
+        recordParams.str_path_srv_wrk_dir = m_str_dir_wrk;
+        for(int i = 0 ; i < str_params.Length; i++)
+        { 
+            recordParams.m_str_pars.Add(str_params[i]);
+        }
         m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
         m_tskThreadGram = Task.Run(()=>
         {
-            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_communicator );
+            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", recordParams, m_communicator );
         });
         return 1;
     }

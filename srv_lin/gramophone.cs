@@ -7,15 +7,23 @@ namespace srv_lin;
 
 public class CGramophone
 {
-    //public  Ccommunicator Communicator { get; set; } 
     public RastrSrvShare.Ccommunicator? Communicator { get; set; } 
+    public CRecordParams m_record_params { get; set; } = new CRecordParams();
+
+    public class CRecordParams
+    {
+        public string str_path_srv_wrk_dir { get; set; } = "";
+        public List<string> m_str_pars = new List<string>();
+    }
 
     public class CRecord
     {
-        public bool Act { get; set; } = true;
-        public string Name { get; set; } = "no";
+        public bool   Act    { get; set; } = true;
+        public string Name   { get; set; } = "no";
         public string strPub { get; set; } = "no";
         public string strSub { get; set; } = "no";
+        public string role   { get; set; } = "no";
+        
         public List<CTask> lstJTasks { get; set; } = new List<CTask>();
 
         public CRecord()
@@ -35,12 +43,12 @@ public class CGramophone
 
         public class CTask
         {
-            public bool Act { get; set; } = true;
-            public string Name { get; set; } = "";
-            public string FileName { get; set; } = "";
-            public string Arguments { get; set; } = "";
-            public List<int> lstOk { get; set; } = new List<int>();
-            public int TimeOutSecs { get; set; } = 1000;
+            public bool      Act { get; set; } = true;
+            public string    Name      { get; set; } = "";
+            public string    FileName  { get; set; } = "";
+            public string    Arguments { get; set; } = "";
+            public List<int> lstOk  { get; set; } = new List<int>();
+            public int       TimeOutSecs  { get; set; } = 1000;
 
             public CTask()
             {
@@ -81,50 +89,43 @@ public class CGramophone
         {
             if (task.Act == false)
             {
-                //LogAdd(dllcom.CHlpLog.enErr.INF, $"Task is off [{task.Name}]");
                 Log.Information($"Task is off [{task.Name}]");
                 return 1;
             }
             ProcessStartInfo psi = new ProcessStartInfo();
-            //bool lblEx = System.IO.File.Exists("C:\\Program Files (x86)\\RastrWin3\\master.exe");
-            //psi.FileName = System.IO.Path.GetFileName(fullPath);
             psi.FileName = task.FileName;
             psi.Arguments = task.Arguments;
-            //Console.Write($"Start [{psi.FileName}] with arguments [{psi.Arguments}]\n");
-            //LogAdd(dllcom.CHlpLog.enErr.INF, $"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
+            
+            psi.Arguments = psi.Arguments.Replace($"#srv_wrk_dir",m_record_params.str_path_srv_wrk_dir);
+            for( int i = 0 ; i < m_record_params.m_str_pars.Count ; i++ )
+            { 
+                psi.Arguments = psi.Arguments.Replace($"#par{i}",m_record_params.m_str_pars[i]);
+            }
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-            //Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-            Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
+            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
             Process? process = Process.Start(psi);
             if(process == null)
             {
-                Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
+                Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
                 Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}]");
                 return -2;
             }
-            //LogSendStartedProcccessId(process.Id);
-            //process.Id;
             bool blRes = process.WaitForExit(task.TimeOutSecs * 1000);
-            //LogSendFinishedProcccessId(process.Id);
             if (blRes != true)
             {
-                //LogAdd(dllcom.CHlpLog.enErr.ERR, $"TimeOut Pid {process.Id}");
-                Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"TimeOut Pid {process.Id}" } );
+                Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"TimeOut Pid {process.Id}" } );
                 Log.Error($"TimeOut Pid {process.Id}");
                 return -3;// timeout
             }
             int nExitCode = process.ExitCode;
-            //LogAdd(dllcom.CHlpLog.enErr.INF, $"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
-            Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
+            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
             return nExitCode;
         }
         catch(Exception ex)
         {
-            //Console.Write($"Error {ex.Message}\n");
             Log.Error($"\tPlay.Exception {ex}");
-            Communicator.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
-            //LogAdd(dllcom.CHlpLog.enErr.ERR, $"Start excp-> {ex.Message}");
+            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
             return -1;
         }
     }
@@ -146,7 +147,7 @@ public class CGramophone
                 }
                 catch(Exception ex)
                 {
-                    Log.Error($"can't read, message-> {ex}");
+                    Log.Error($"can't read json file [{str_path_record}], message-> {ex}");
                 }               
                 if(record != null)
                 {
@@ -165,7 +166,10 @@ public class CGramophone
                         }
                     }
                 }
-                //Thread.Sleep(1000);
+                if(record.role.Equals("once",StringComparison.OrdinalIgnoreCase))
+                { 
+                    break;
+                }
                 Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
             }
         }
@@ -184,7 +188,7 @@ public class CGramophone
         return 1;
     }
 
-    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record,  RastrSrvShare.Ccommunicator? communicator )
+    public static int ThreadPlay( CancellationToken cncl_tkn, string str_path_record, CRecordParams recordParams, RastrSrvShare.Ccommunicator? communicator )
     {
         if(communicator==null)
         {
@@ -193,6 +197,7 @@ public class CGramophone
         }
         CGramophone gramophone = new CGramophone();
         gramophone.Communicator = communicator;
+        gramophone.m_record_params = recordParams;
         return gramophone.Play( cncl_tkn,  str_path_record );
     }
 }
