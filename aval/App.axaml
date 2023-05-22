@@ -5,7 +5,7 @@
              >
 
   <Application.Resources>
-    <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Purple" SecondaryColor="Lime"/> 
+    <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Green" SecondaryColor="Lime"/> 
   </Application.Resources>
 
     <Application.Styles>
