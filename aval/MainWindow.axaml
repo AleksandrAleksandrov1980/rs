@@ -28,7 +28,7 @@
 				</DataTemplate>
 			</ComboBox.ItemTemplate>
 		</ComboBox>
-		<TextBox x:Name="tbPars"  Text="parametes delimited by CRLF" BorderThickness="1" BorderBrush="Green" AcceptsReturn="True" Width="500" Height="80" HorizontalAlignment="Left" Grid.Row="1"/>
+		<TextBox x:Name="tbPars"  Text="parameters delimited by CRLF" BorderThickness="1" BorderBrush="Green" AcceptsReturn="True" Width="500" Height="80" HorizontalAlignment="Left" Grid.Row="1"/>
 		<TextBox x:Name="tbFrom"  Text="from_admin"  Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="2" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="tbTo"    Text="to" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="3" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="tbRole"  Text="role" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="4" BorderThickness="1" BorderBrush="Green" />
