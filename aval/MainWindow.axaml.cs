@@ -3,24 +3,43 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Microsoft.Extensions.Configuration;
 using System;
-
 using Microsoft.Extensions.Configuration;
 using RastrSrvShare;
 using Serilog;
 using static RastrSrvShare.Ccommunicator;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace aval;
-
 public partial class MainWindow : Window
 {
-    private List<Note> m_Notes = new List<Note>();
-    TextBox m_tb_Log; 
+    private List<CmndStr> m_lstCmndStr = new List<CmndStr>();
+    ComboBox m_cb_Cmnds;
+    TextBox m_tb_Pars;
+    TextBox m_tb_From;
+    TextBox m_tb_To;
+    TextBox m_tb_Role;
+    TextBox m_tb_Log;
+    RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
 
-    public class Note
+    public class CmndStr
     {
-        public string Name { get; set; } = "1";
-        public string NoteText { get; set; } = "2";
+        public string Name { get; set; } = "";
+        public enCommands Cmnd{ get; set; } = enCommands.ERROR;
+    }
+
+    public int OnEvent( Ccommunicator.Evnt evnt )
+    {
+        try
+        {
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"evnt:{evnt}"); }));
+        }   
+        catch (Exception ex)
+        { 
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"[exception {ex}]"); }));
+        }
+        return 1;
     }
 
     public MainWindow()
@@ -29,42 +48,26 @@ public partial class MainWindow : Window
 #if DEBUG
         this.AttachDevTools();
 #endif
+        m_tb_Pars = this.FindControl<TextBox>("tbPars");
+        m_tb_From = this.FindControl<TextBox>("tbFrom");
+        m_tb_To = this.FindControl<TextBox>("tbTo");
+        m_tb_Role = this.FindControl<TextBox>("tbRole");
         m_tb_Log = this.FindControl<TextBox>("Log1");
-
-        ComboBox cbCmnds = this.Find<ComboBox>("cbCmnds");
-        foreach(var x in Enum.GetValues(typeof(enCommands)))
+        m_cb_Cmnds = this.Find<ComboBox>("cbCmnds");
+        var commands = Enum.GetValues(typeof(enCommands));
+        foreach(var x in commands )
         {
-            Note note = new Note();
+            CmndStr note = new CmndStr();
             note.Name = x.ToString();
-            note.NoteText = x.ToString();
-            m_Notes.Add(note);
+            note.Cmnd = (enCommands)x;
+            m_lstCmndStr.Add(note);
         }
-        cbCmnds.Items = m_Notes;
-        cbCmnds.SelectedIndex = 0;
-
-    }
-
-    public void OnClickCommand1()
-    {
-	    Console.WriteLine(""); 
-    }
-
-    public void Log(string str_msg)
-    { 
-        if(m_tb_Log!=null)
-        { 
-            m_tb_Log.Text += str_msg + "\r\n";
-        }
-    }
-
-    public void on_btn_click_send(object sender, RoutedEventArgs e)
-    {
-	    Console.WriteLine(""); 
+        m_cb_Cmnds.Items = m_lstCmndStr;
+        m_cb_Cmnds.SelectedIndex = 0;
 
         try
         { 
             RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
-            Log("hello");
             try
             { 
                 IConfiguration config = new ConfigurationBuilder()
@@ -89,78 +92,55 @@ public partial class MainWindow : Window
                 Log($"Can't read 'appsettings.json' in current directory exception[{ex}]");
                 return;
             }
-            RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
             par.m_str_name = "sender"; //m_configuration.GetValue<string>("r_params:name","");
             RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
-
-             string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
+            string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
             string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
-            Log($"читаю приватный ключ находящийся [{str_path_prv_key}]");
-
+            //Log($"читаю приватный ключ находящийся [{str_path_prv_key}]");
             int nRes = signer_prv.ReadKey(str_path_prv_key);
             if(nRes<0)
             { 
-                Log($"приватный ключ не прочитан.");
+                Log($"приватный ключ не прочитан. Путь[{str_path_prv_key}]");
                 return ;
             }
             m_communicator.Init(par, signer_prv); 
-
-            RastrSrvShare.Ccommunicator.enCommands en_command;
-            //en_command = RastrSrvShare.Ccommunicator.Command.StrToCommand(m_str_cmnd);
-             
-            string str_to = "";
-            //string [] str_pars = { $"{str_dir_ftp}/{Path.GetFileName(m_path_to_file)}"};
-            //RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator. PublishCmnd( en_command, str_to, m_str_role, str_pars );
-
-            Log("ok");
-
-/*
-            int nRes = signer_prv.ReadKey(str_path_prv_key);
-            if(nRes<0)
-            { 
-                Log.Error($"приватный ключ не прочитан.");
-                return ;
-            }
-            m_communicator.Init(par, signer_prv); 
-
-            RastrSrvShare.Ccommunicator.enCommands en_command;
-            en_command = RastrSrvShare.Ccommunicator.Command.StrToCommand(m_str_cmnd);
-             
-            string str_to = "";
-            string [] str_pars = { $"{str_dir_ftp}/{Path.GetFileName(m_path_to_file)}"};
-            RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator.
-                PublishCmnd( en_command, str_to, m_str_role, str_pars );
-
-            /*
-            /*
-            //Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
-/*
-            int nRes = signer_prv.ReadKey(str_path_prv_key);
-            if(nRes<0)
-            { 
-                Log.Error($"приватный ключ не прочитан.");
-                return ;
-            }
-            m_communicator.Init(par, signer_prv); 
-
-            RastrSrvShare.Ccommunicator.enCommands en_command;
-            en_command = RastrSrvShare.Ccommunicator.Command.StrToCommand(m_str_cmnd);
-             
-            string str_to = "";
-            string [] str_pars = { $"{str_dir_ftp}/{Path.GetFileName(m_path_to_file)}"};
-            RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator.
-                PublishCmnd( en_command, str_to, m_str_role, str_pars );
-*/
+            Task taskConsumeEvents = Task.Run( ()=>{ m_communicator.ConsumeEvnts(OnEvent); });
         }
-        catch (Exception ex) 
-        {
-            }
+        catch(Exception ex)
+        { 
+            Log($"MainWindow() exception: {ex}");
+        }
     }
 
-    public void on_btn_click_send2(object sender, RoutedEventArgs e)
+    public void OnClickCommand1()
     {
 	    Console.WriteLine(""); 
     }
 
-    
+    public void Log(string str_msg)
+    { 
+        if(m_tb_Log!=null)
+        { 
+            m_tb_Log.Text += str_msg + "\r\n";
+        }
+    }
+
+    public void on_btn_click_send(object sender, RoutedEventArgs e)
+    {
+        try
+        { 
+            //string str_cmnd     = m_lstCmndStr[m_cb_Cmnds.SelectedIndex].Name;
+            RastrSrvShare.Ccommunicator.enCommands en_command = m_lstCmndStr[m_cb_Cmnds.SelectedIndex].Cmnd;
+            string str_to     = m_tb_To.Text;
+            string str_from   = m_tb_From.Text;
+            string str_role   = m_tb_Role.Text;
+            string[] str_pars = m_tb_Pars.Text.Split(new string[] { Environment.NewLine },  StringSplitOptions.None);
+            RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator. PublishCmnd( en_command, str_to, str_role, str_pars );
+            Log($"send_command : {cmnd_pub}\n");
+        }
+        catch (Exception ex) 
+        {
+            Log($"send exception: {ex}");
+        }
+    }
 }
