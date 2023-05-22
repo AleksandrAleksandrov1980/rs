@@ -8,12 +8,20 @@ using Microsoft.Extensions.Configuration;
 using RastrSrvShare;
 using Serilog;
 using static RastrSrvShare.Ccommunicator;
+using System.Collections.Generic;
 
 namespace aval;
 
 public partial class MainWindow : Window
 {
+    private List<Note> m_Notes = new List<Note>();
     TextBox m_tb_Log; 
+
+    public class Note
+    {
+        public string Name { get; set; } = "1";
+        public string NoteText { get; set; } = "2";
+    }
 
     public MainWindow()
     {
@@ -22,6 +30,17 @@ public partial class MainWindow : Window
         this.AttachDevTools();
 #endif
         m_tb_Log = this.FindControl<TextBox>("Log1");
+
+        ComboBox cbCmnds = this.Find<ComboBox>("cbCmnds");
+        foreach(var x in Enum.GetValues(typeof(enCommands)))
+        {
+            Note note = new Note();
+            note.Name = x.ToString();
+            note.NoteText = x.ToString();
+            m_Notes.Add(note);
+        }
+        cbCmnds.Items = m_Notes;
+        cbCmnds.SelectedIndex = 0;
 
     }
 
