@@ -1,8 +1,16 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="aval.App">
+             x:Class="aval.App"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             >
+
+  <Application.Resources>
+    <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Purple" SecondaryColor="Lime"/> 
+  </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme Mode="Light"/>
+        <!-- <FluentTheme Mode="Light"/> -->
+         <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" /> 
     </Application.Styles>
+
 </Application>
