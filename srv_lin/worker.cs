@@ -37,6 +37,7 @@ public class Worker : BackgroundService
         {
             lock(_obj_sync_event)
             {
+/*
                 if(evnt.en_event == RastrSrvShare.Ccommunicator.enEvents.HEART_BEAT)
                 {
                     CState.CService? service = null;
@@ -50,12 +51,14 @@ public class Worker : BackgroundService
                         service =  new CState.CService();
                         service.m_dt_last_seen = DateTime.Now;
                         service.m_str_name = evnt.from;
+                        service.m_str_role = evnt.from_role;
                         service.m_lst_errors.Add($"first time detected service at [{service.m_dt_last_seen}]");
                         m_state.m_services.Add(service.m_str_name, service);
                         Log.Information($"first time detected service [{service.m_str_name}] ");
                     }
                     m_state.CheckServicesState();
                 }
+*/
             }
         }
         catch(Exception ex)
