@@ -95,19 +95,20 @@ public class CGramophone
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = task.FileName;
             psi.Arguments = task.Arguments;
-            
             psi.Arguments = psi.Arguments.Replace($"#srv_wrk_dir",m_record_params.str_path_srv_wrk_dir);
             for( int i = 0 ; i < m_record_params.m_str_pars.Count ; i++ )
             { 
                 psi.Arguments = psi.Arguments.Replace($"#par{i}",m_record_params.m_str_pars[i]);
             }
+            psi.WorkingDirectory = Path.GetDirectoryName(task.FileName);
             Log.Information($"Start [{psi.FileName}] with arguments [{psi.Arguments}]");
-            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments} );
+            Log.Information($"wrk_dir [{psi.WorkingDirectory}]");
+            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.START, new string[]{psi.FileName,psi.Arguments,psi.WorkingDirectory} );
             Process? process = Process.Start(psi);
             if(process == null)
             {
                 Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{"can't start process"} );
-                Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}]");
+                Log.Error($"cant start [{psi.FileName}] with arguments [{psi.Arguments}] in directory [{psi.WorkingDirectory}]");
                 return -2;
             }
             bool blRes = process.WaitForExit(task.TimeOutSecs * 1000);
