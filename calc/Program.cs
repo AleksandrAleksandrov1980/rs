@@ -1,15 +1,24 @@
 ﻿
 using ASTRALib;
 using Microsoft.Win32;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ObjectiveC;
+using System.Text;
 
 namespace calc
 {
     internal class Program
     {
+        [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+        public static extern IntPtr GetModuleHandle([MarshalAs(UnmanagedType.LPWStr)] string lpModuleName);
+
+        [DllImport("kernel32.dll", SetLastError=true)]
+        [PreserveSig]
+        public static extern uint GetModuleFileName( [In] IntPtr hModule, [Out] StringBuilder lpFilename,  [In]  [MarshalAs(UnmanagedType.U4)]  int nSize );
+
         public static void Log(string str_dir, string str_msg, bool bl_append = false)
         { 
             using (StreamWriter writer = new StreamWriter($"{str_dir}/{System.AppDomain.CurrentDomain.FriendlyName}.log", bl_append))
@@ -40,10 +49,32 @@ namespace calc
                 string str_path_shbl_rg2 = "";
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\RastrWin3"))
                 {
-                    str_path_shbl_rg2 = key.GetValue("InstallPath") as string; 
-                    str_path_shbl_rg2 = $"{str_path_shbl_rg2}\\RastrWin3\\SHABLON\\режим.rg2";
+                    if(key!=null) // most time service not installed by CURRENT_USER!!
+                    { 
+                        str_path_shbl_rg2 = key.GetValue("InstallPath") as string; 
+                    }
+                    else
+                    {
+                        try
+                        { 
+                            System.IntPtr pnHandlRastrDll = GetModuleHandle("astra.dll");
+                            StringBuilder str_bldr = new StringBuilder(512);
+                            GetModuleFileName(pnHandlRastrDll,str_bldr,str_bldr.Capacity);
+                        }
+                        catch(Exception ex)
+                        {
+                            Log(  str_path_wrk_dir, $"get shablon [{ex}]");
+                        }
+                    }
                 }
+                if( str_path_shbl_rg2==null || str_path_shbl_rg2?.Length<1)
+                { 
+                    str_path_shbl_rg2 = "C:\\Program Files (x86)\\RastrWin3";
+                    Log(  str_path_wrk_dir, $"last chance get shablon from diresctory [{str_path_shbl_rg2}]");
+                }
+                str_path_shbl_rg2 = $"{str_path_shbl_rg2}\\RastrWin3\\SHABLON\\режим.rg2";
                 Rastr rastr = new ASTRALib.Rastr();
+
                 rastr.Load( RG_KOD.RG_REPL, str_path_mdp_file, "" );
                 string str_path_file_rg2 = $"{str_path_wrk_dir}/{RastrSrvShare.CParam.LocDirCalcs}/{str_ftp_path_file_rg2}";
                 rastr.Load( RG_KOD.RG_KEY, str_path_file_rg2, str_path_shbl_rg2 );

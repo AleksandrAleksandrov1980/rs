@@ -19,8 +19,8 @@
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-
-  <ItemGroup>
+	
+	<ItemGroup>
     <ProjectReference Include="..\RastrSrvShare\RastrSrvShare.csproj" />
   </ItemGroup>
 
