@@ -2,12 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1000"
+        mc:Ignorable="d" d:DesignWidth="1300" d:DesignHeight="1000"
         x:Class="aval.MainWindow"
-		Width="800" Height="1050"
-        Title="admin">
+		Width="1300" Height="1050"
+        Title="admin" >
 	
-	<Grid Grid.Column="0" Grid.Row="1" Margin="10" ShowGridLines="False">
+	<Grid Grid.Column="0" Grid.Row="1" Margin="10" ShowGridLines="True">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
@@ -33,8 +33,11 @@
 		<TextBox x:Name="tbTo"    Text="to" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="3" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="tbRole"  Text="role" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="4" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="Log1" ScrollViewer.HorizontalScrollBarVisibility="Visible"  IsReadOnly="True"  Width="700" Height="700" HorizontalAlignment="Left" Grid.Row="5" BorderThickness="1" BorderBrush="Green" />
-		<Button Name="btn_send" Click="on_btn_click_send" Width="80" Height="30" Grid.Row="1" Grid.Column="2"
-				> SEND </Button>
+		<Button Name="btn_send" Click="on_btn_click_send" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="1" 
+				> SEND_COMMAND </Button>
+		<Button Name="btn_clear" Click="on_btn_click_clear" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="2">
+			CLEAR_LOG
+		</Button>
+		<TextBox x:Name="tbSrvs" Text="click STATE to view all servers" IsReadOnly="True" BorderThickness="1" BorderBrush="Green"  Width="500" Height="700" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="5"/>
 	</Grid>
-	
 </Window>

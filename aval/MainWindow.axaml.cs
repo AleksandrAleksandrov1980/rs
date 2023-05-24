@@ -10,17 +10,21 @@ using static RastrSrvShare.Ccommunicator;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using System.Linq;
+using System.Collections;
 
 namespace aval;
 public partial class MainWindow : Window
 {
     private List<CmndStr> m_lstCmndStr = new List<CmndStr>();
+    private Dictionary<string, ServerData> m_dct_Name_ServerData = new Dictionary<string, ServerData>();
     ComboBox m_cb_Cmnds;
     TextBox m_tb_Pars;
     TextBox m_tb_From;
     TextBox m_tb_To;
     TextBox m_tb_Role;
     TextBox m_tb_Log;
+    TextBox m_tbSrvs;
     RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
 
     public class CmndStr
@@ -29,11 +33,29 @@ public partial class MainWindow : Window
         public enCommands Cmnd{ get; set; } = enCommands.ERROR;
     }
 
+    public class ServerData
+    { 
+        public string Name { get; set; } = "";
+        public string Role { get; set; } = "";
+        public override string ToString()
+        {
+            return $"{Name} : {Role}";
+        }  
+    }
+
     public int OnEvent( Ccommunicator.Evnt evnt )
     {
         try
         {
             Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"evnt:{evnt}"); }));
+            if( m_dct_Name_ServerData.ContainsKey(evnt.from)== false)
+            { 
+                ServerData server_data = new ServerData();
+                server_data.Name = evnt.from;
+                server_data.Role = evnt.from_role;
+                m_dct_Name_ServerData.Add(evnt.from, server_data);
+                Dispatcher.UIThread.InvokeAsync(new Action(() => { PopulateServers(); }));
+            }
         }   
         catch (Exception ex)
         { 
@@ -54,6 +76,7 @@ public partial class MainWindow : Window
         m_tb_Role = this.FindControl<TextBox>("tbRole");
         m_tb_Log = this.FindControl<TextBox>("Log1");
         m_cb_Cmnds = this.Find<ComboBox>("cbCmnds");
+        m_tbSrvs = this.FindControl<TextBox>("tbSrvs");
         var commands = Enum.GetValues(typeof(enCommands));
         foreach(var x in commands )
         {
@@ -117,12 +140,23 @@ public partial class MainWindow : Window
 	    Console.WriteLine(""); 
     }
 
+    public void PopulateServers()
+    { 
+        var asString = string.Join(Environment.NewLine, m_dct_Name_ServerData.Values);
+        m_tbSrvs.Text= asString;
+    }
+
     public void Log(string str_msg)
     { 
         if(m_tb_Log!=null)
         { 
             m_tb_Log.Text += str_msg + "\r\n";
         }
+    }
+
+    public void on_btn_click_clear(object sender, RoutedEventArgs e)
+    { 
+        m_tb_Log.Text = "";
     }
 
     public void on_btn_click_send(object sender, RoutedEventArgs e)
@@ -143,4 +177,5 @@ public partial class MainWindow : Window
             Log($"send exception: {ex}");
         }
     }
+
 }
