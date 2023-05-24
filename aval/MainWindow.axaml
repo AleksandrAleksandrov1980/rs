@@ -7,7 +7,7 @@
 		Width="1300" Height="1050"
         Title="admin" >
 	
-	<Grid Grid.Column="0" Grid.Row="1" Margin="10" ShowGridLines="True">
+	<Grid Grid.Column="0" Grid.Row="1" Margin="10" ShowGridLines="False">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
