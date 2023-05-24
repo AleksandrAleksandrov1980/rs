@@ -9,6 +9,8 @@ using RastrSrvShare;
 using static RastrSrvShare.Ccommunicator;
 using System.Collections.Generic;
 using System;
+using static srv_lin.CGramophone;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace srv_lin;
 public class Worker : BackgroundService
@@ -222,24 +224,38 @@ public class Worker : BackgroundService
         return ls_ress;
     }
 
+    private CGramophone.CRecordParams m_recordParams = new CGramophone.CRecordParams();
+
     private int on_GRAM_START(string[] str_params)
     {
         if(m_tskThreadGram!=null)
         {
-            Log.Error("Gramaphone already runing, will be relaunched");
+            //Log.Error("Gramaphone already runing, will be relaunched");
+            if(m_tskThreadGram.Status==TaskStatus.Running)
+            { 
+                Log.Warning($"Gramaphone already runing, remember this params [{string.Join(" ", str_params)}]");
+                CGramophone.CGramStartParams gram_start_params_previos = new CGramophone.CGramStartParams();
+                gram_start_params_previos.str_args = (string[]) str_params.Clone();
+                m_recordParams.m_cs_gram_start_params.Clear();
+                m_recordParams.m_cs_gram_start_params.Push(gram_start_params_previos);
+                return 2;
+            }
+            Log.Error("Gramaphone  not run, will be relaunched");
             on_GRAM_STOP(new string[]{""});
         }
-        m_cnc_tkn_src.Dispose();
-        CGramophone.CRecordParams recordParams = new CGramophone.CRecordParams();
-        recordParams.str_path_srv_wrk_dir = m_str_dir_wrk;
+        //CGramophone.CRecordParams recordParams = new CGramophone.CRecordParams();
+        m_recordParams.str_path_srv_wrk_dir = m_str_dir_wrk;
         for(int i = 0 ; i < str_params.Length; i++)
         { 
-            recordParams.m_str_pars.Add(str_params[i]);
+            //recordParams.m_str_pars.Add(str_params[i]);
+            m_recordParams.m_str_pars.Add(str_params[i]);
         }
+        m_cnc_tkn_src.Dispose();
         m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
         m_tskThreadGram = Task.Run(()=>
         {
-            return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", recordParams, m_communicator );
+            //return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", recordParams, m_communicator );
+              return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_recordParams, m_communicator );
         });
         return 1;
     }

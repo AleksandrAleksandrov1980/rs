@@ -2,6 +2,8 @@ using Serilog;
 using System.Text.Json;
 using System.Diagnostics;
 using srv_lin;
+using System.Collections.Concurrent;
+using static srv_lin.CGramophone;
 
 namespace srv_lin;
 
@@ -14,6 +16,12 @@ public class CGramophone
     {
         public string str_path_srv_wrk_dir { get; set; } = "";
         public List<string> m_str_pars = new List<string>();
+        public ConcurrentStack<CGramStartParams> m_cs_gram_start_params = new ConcurrentStack<CGramStartParams>();
+    }
+
+    public class CGramStartParams
+    { 
+        public string[] str_args = {"no"};
     }
 
     public class CRecord
@@ -121,21 +129,27 @@ public class CGramophone
             int nExitCode = process.ExitCode;
             Log.Information($"ExitCode Pid {process.Id} : nExitCode {nExitCode}");
             Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.FINISH, new string[]{ $"ExitCode Pid {process.Id} : nExitCode {nExitCode}" } );
-            return nExitCode;
+            if(task.lstOk.IndexOf(nExitCode)==-1) // no val
+            { 
+                return -1;
+            }
         }
         catch(Exception ex)
         {
             Log.Error($"\tPlay.Exception {ex}");
-            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex.Message}" } );
-            return -1;
+            Communicator?.PublishEvnt( RastrSrvShare.Ccommunicator.enEvents.ERROR, new string[]{ $"Exception {ex}" } );
+            return -11;
         }
+        return 1;
     }
 
     int Play(CancellationToken cncl_tkn, string str_path_record)
     {
         int nCounter = 0 ;
+        
         try
         {
+            bool blExit = false;
             for(;;nCounter++)
             {
                 Log.Information($"cycle [{nCounter}]----------------------------------------------");
@@ -164,12 +178,37 @@ public class CGramophone
                         if(nRes < 0)
                         {
                             Log.Warning($"finished task [{task.Name}]  with error {nRes}");
+                            break;
                         }
                     }
                 }
-                if(record.role.Equals("once",StringComparison.OrdinalIgnoreCase))
+                if(cncl_tkn.IsCancellationRequested == true)
                 { 
                     break;
+                }
+                if(record.role.Equals("once",StringComparison.OrdinalIgnoreCase))
+                {
+                    if(blExit==true)
+                    {
+                        Log.Warning("second cycle!");
+                        break;
+                    }
+                    CGramStartParams gram_start_params_previos;
+                    if(m_record_params.m_cs_gram_start_params.TryPop(out gram_start_params_previos) == true)
+                    { 
+                        Log.Warning($"extract previos params [{gram_start_params_previos?.str_args}]");
+                        m_record_params.m_str_pars.Clear();
+                        for(int i = 0 ; i < gram_start_params_previos?.str_args.Length; i++)
+                        {
+                            m_record_params.m_str_pars.Add((string)gram_start_params_previos?.str_args[i].Clone());
+                        }
+                        blExit = true;
+                    }
+                    else
+                    { 
+                        Log.Error($"can't extract previos params, stack locked.");
+                        break;
+                    }
                 }
                 Task.Delay(1000, cncl_tkn).Wait();// throws System.AggregateException when canceled
             }
