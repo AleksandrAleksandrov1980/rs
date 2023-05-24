@@ -1,2 +1,0 @@
-# rs
-rabbit talks listner
