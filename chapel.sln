@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aval", "aval\aval.csproj", "{C754BBC4-5B99-4A13-97AF-76EFA019EA56}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "calc", "calc\calc.csproj", "{31DC5FFC-9A4C-4053-B8FD-A2F731A6C5A3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "srv_lin", "srv_lin\srv_lin.csproj", "{1EDE150F-5D1D-4BDF-95E6-0B6FDEA6B000}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "publish", "get_tm\publish.csproj", "{BBCE336E-E4FD-4220-8D93-F20FCAB106C5}"
@@ -25,10 +23,6 @@ Global
 		{C754BBC4-5B99-4A13-97AF-76EFA019EA56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C754BBC4-5B99-4A13-97AF-76EFA019EA56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C754BBC4-5B99-4A13-97AF-76EFA019EA56}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31DC5FFC-9A4C-4053-B8FD-A2F731A6C5A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31DC5FFC-9A4C-4053-B8FD-A2F731A6C5A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31DC5FFC-9A4C-4053-B8FD-A2F731A6C5A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31DC5FFC-9A4C-4053-B8FD-A2F731A6C5A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1EDE150F-5D1D-4BDF-95E6-0B6FDEA6B000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1EDE150F-5D1D-4BDF-95E6-0B6FDEA6B000}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EDE150F-5D1D-4BDF-95E6-0B6FDEA6B000}.Release|Any CPU.ActiveCfg = Release|Any CPU
