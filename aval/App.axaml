@@ -3,14 +3,14 @@
              x:Class="aval.App"
              xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
              >
-
-  <Application.Resources>
-    <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Green" SecondaryColor="Lime"/> 
-  </Application.Resources>
+	
+    <Application.Resources>
+        <themes:BundledTheme BaseTheme="Dark" PrimaryColor="Green" SecondaryColor="Lime"/> 
+    </Application.Resources>
 
     <Application.Styles>
         <!-- <FluentTheme Mode="Light"/> -->
-         <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" /> 
+        <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" /> 
     </Application.Styles>
 
 </Application>
