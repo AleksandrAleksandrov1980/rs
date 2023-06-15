@@ -1,0 +1,275 @@
+﻿@model IEnumerable<wmvc.Models.ComOpf>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Centr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tipr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ItMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Plos)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Potr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LpMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LqMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LdpgMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LpsMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LiMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LvMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LdqMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LktMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LpDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LqDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LdpgDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LpsDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LiDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LvDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LdqDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LktDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OutLevel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LioMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LioDta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TFunc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TgFunc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tarif)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartMethod)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MainMethod)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Criteria1)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Formula1)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RIt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartSigma)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MainSigma)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RRo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RSigma)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RPdad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RPdadAf)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MinMu2)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MinMu)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Centr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tipr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Plos)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Potr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LpMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LqMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LdpgMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LpsMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LiMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LvMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LdqMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LktMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LpDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LqDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LdpgDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LpsDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LiDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LvDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LdqDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LktDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OutLevel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LioMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LioDta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TFunc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TgFunc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tarif)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartMethod)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MainMethod)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Criteria1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Formula1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RIt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartSigma)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MainSigma)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RRo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RSigma)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RPdad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RPdadAf)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MinMu2)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MinMu)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Num">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Num">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Num">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

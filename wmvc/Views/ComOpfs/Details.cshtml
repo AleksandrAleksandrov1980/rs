@@ -1,0 +1,264 @@
+﻿@model wmvc.Models.ComOpf
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>ComOpf</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Centr)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Centr)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Tipr)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Tipr)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ItMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ItMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Plos)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Plos)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Potr)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Potr)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LpMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LpMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LqMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LqMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LdpgMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LdpgMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LpsMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LpsMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LiMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LiMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LvMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LvMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LdqMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LdqMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LktMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LktMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LpDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LpDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LqDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LqDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LdpgDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LdpgDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LpsDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LpsDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LiDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LiDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LvDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LvDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LdqDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LdqDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LktDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LktDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OutLevel)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OutLevel)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LioMax)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LioMax)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LioDta)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LioDta)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TFunc)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TFunc)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TgFunc)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TgFunc)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Tarif)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Tarif)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartMethod)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartMethod)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MainMethod)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MainMethod)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Criteria1)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Criteria1)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Formula1)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Formula1)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RIt)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RIt)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartSigma)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartSigma)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MainSigma)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MainSigma)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RRo)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RRo)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RSigma)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RSigma)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RPdad)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RPdad)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RPdadAf)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RPdadAf)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MinMu2)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MinMu2)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MinMu)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MinMu)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Num">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

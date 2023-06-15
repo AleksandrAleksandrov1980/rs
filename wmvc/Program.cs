@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using wmvc.Models;
+using wmvc.Controllers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,18 @@ else
 }
 app.UseStatusCodePages(); //errs1
 app.UseStatusCodePagesWithReExecute("/{0}"); //errs2
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+};
+/*
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+};*/
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -35,10 +48,14 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapGeneratorEndpoints(); // add SWAGGER!
+
+app.MapAreaEndpoints();
 app.Run();
 
 //from onion
 //https://medium.com/@ankushjain358/entity-framework-core-with-postgresql-database-first-ab03bf1079c4
 //PackageManagerConsole
-//Scaffold-DbContext “Host=192.168.1.84;Database=rastrwin;Username=postgres;Password=pgadmin” Npgsql.EntityFrameworkCore.PostgreSQL -OutputDir Models
+//Scaffold-DbContext ï¿½Host=192.168.1.84;Database=rastrwin;Username=postgres;Password=pgadminï¿½ Npgsql.EntityFrameworkCore.PostgreSQL -OutputDir Models
 //dotnet watch run
