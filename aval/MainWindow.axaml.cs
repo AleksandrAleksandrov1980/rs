@@ -119,11 +119,11 @@ public partial class MainWindow : Window
             RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
             string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
             string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
-            //Log($"читаю приватный ключ находящийся [{str_path_prv_key}]");
+            //Log($"пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ [{str_path_prv_key}]");
             int nRes = signer_prv.ReadKey(str_path_prv_key);
             if(nRes<0)
             { 
-                Log($"приватный ключ не прочитан. Путь[{str_path_prv_key}]");
+                Log($"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ[{str_path_prv_key}]");
                 return ;
             }
             m_communicator.Init(par, signer_prv); 
@@ -176,6 +176,23 @@ public partial class MainWindow : Window
         {
             Log($"send exception: {ex}");
         }
+    }
+
+    public void on_btn_click_tst_astra(object sender, RoutedEventArgs e)
+    {
+         try
+        { 
+            //c++ /home/ustas/projects/c2
+            Log($"tst_astra_beg\n");
+            CRwrapper rw = new CRwrapper();
+            int nRes = rw.call_test();
+            Log($"tst_astra_end. get[{nRes}]\n");
+        }
+        catch (Exception ex) 
+        {
+            Log($"catch exception: {ex}");
+        }
+
     }
 
 }

@@ -33,10 +33,13 @@
 		<TextBox x:Name="tbTo"    Text="to" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="3" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="tbRole"  Text="role" Width="500" Height="40" HorizontalAlignment="Left" Grid.Row="4" BorderThickness="1" BorderBrush="Green" />
 		<TextBox x:Name="Log1" ScrollViewer.HorizontalScrollBarVisibility="Visible"  IsReadOnly="True"  Width="700" Height="700" HorizontalAlignment="Left" Grid.Row="5" BorderThickness="1" BorderBrush="Green" />
-		<Button Name="btn_send" Click="on_btn_click_send" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="1" 
-				> SEND_COMMAND </Button>
+		<Button Name="btn_send" Click="on_btn_click_send" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="1"> 
+			SEND_COMMAND </Button>
 		<Button Name="btn_clear" Click="on_btn_click_clear" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="2">
 			CLEAR_LOG
+		</Button>
+		<Button Name="btn_tst_astra" Click="on_btn_click_tst_astra" Width="150" Height="30" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="3">
+			TST_ASTR
 		</Button>
 		<TextBox x:Name="tbSrvs" Text="click STATE to view all servers" IsReadOnly="True" BorderThickness="1" BorderBrush="Green"  Width="500" Height="700" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="5"/>
 	</Grid>
