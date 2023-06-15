@@ -1,0 +1,719 @@
+﻿@model IEnumerable<wmvc.Models.Node>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Na)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Npa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nsx)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tip)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Uhom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Pg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Pn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Gsh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bsh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vzd)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qmax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qmin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Umax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Umin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vras)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Delta)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Otv)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Kct)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PgMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PgMin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PgNom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nrk)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Brk)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Grk)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bshr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Gshr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Psh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qsh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StaR)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Pnr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qnr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Pgr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qgr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nebal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NebalQ)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nga)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dpg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dpn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dqn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ContrV)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RegQ)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Lp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Lq)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NaName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NaPop)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Epn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Epg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Esh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ekn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ysh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Uc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ssh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Qmima)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Umima)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Najact)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NaNo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nadjgen)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Numgen)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Snr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sgr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nf)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Muskod)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dqmin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dqmax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PnMin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PnMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sn1)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tsn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TgPhi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QnMin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QnMax)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExistLoad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ExistGen)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BasePriority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BaseArea)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NablP)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NablQ)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NablPFrag)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NablQFrag)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PnIzm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.QnIzm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UIzm)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiPn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiQn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiPg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiQg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiSn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiSg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiVras)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiPnDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiQnDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiPgDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiQgDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiVrasDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiBalP)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiBalQ)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiBalPq)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiSnDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiSgDiff)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NySubst)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Supernode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rang)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiOcSn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiOcSg)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TiOcVras)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Numload)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nadjload)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NablPGen)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Na)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Npa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nsx)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tip)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Uhom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Gsh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bsh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vzd)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qmax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qmin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Umax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Umin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vras)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Delta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Otv)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Kct)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PgMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PgMin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PgNom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nrk)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Brk)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Grk)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Bshr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Gshr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Psh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qsh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StaR)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pnr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qnr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pgr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qgr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nebal)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NebalQ)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nga)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dpg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dpn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dqn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ContrV)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegQ)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Lp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Lq)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NaName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NaPop)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Epn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Epg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Esh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ekn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ysh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Uc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ssh)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Qmima)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Umima)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Najact)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NaNo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nadjgen)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Numgen)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Snr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sgr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nf)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Muskod)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dqmin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dqmax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PnMin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PnMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sn1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tsn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TgPhi)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QnMin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QnMax)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExistLoad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExistGen)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BasePriority)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BaseArea)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NablP)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NablQ)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NablPFrag)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NablQFrag)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PnIzm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QnIzm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UIzm)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiPn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiQn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiPg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiQg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiSn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiSg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiVras)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiPnDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiQnDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiPgDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiQgDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiVrasDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiBalP)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiBalQ)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiBalPq)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiSnDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiSgDiff)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NySubst)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Supernode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rang)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiOcSn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiOcSg)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TiOcVras)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Numload)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nadjload)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NablPGen)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Ny">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Ny">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Ny">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

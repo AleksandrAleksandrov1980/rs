@@ -1,6 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using wmvc.Models;
+
+
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<RastrwinContext>(options =>options.UseNpgsql(builder.Configuration.GetConnectionString("RastrDbContext")));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer(); // webapi
@@ -31,4 +37,8 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.Run();
 
+//from onion
+//https://medium.com/@ankushjain358/entity-framework-core-with-postgresql-database-first-ab03bf1079c4
+//PackageManagerConsole
+//Scaffold-DbContext “Host=192.168.1.84;Database=rastrwin;Username=postgres;Password=pgadmin” Npgsql.EntityFrameworkCore.PostgreSQL -OutputDir Models
 //dotnet watch run
