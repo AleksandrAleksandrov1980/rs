@@ -32,6 +32,12 @@ else
 }
 app.UseStatusCodePages(); //errs1
 app.UseStatusCodePagesWithReExecute("/{0}"); //errs2
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+};
 /*
 if (app.Environment.IsDevelopment())
 {
@@ -56,6 +62,10 @@ app.MapControllerRoute(
 app.MapGeneratorEndpoints(); // add SWAGGER!
 
 app.MapAreaEndpoints();
+
+app.MapVetvEndpoints();
+
+app.MapNodeEndpoints();
 app.Run();
 
 //from onion

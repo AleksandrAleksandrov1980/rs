@@ -15,7 +15,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        this.ViewBag.Greeting = "greeting xz";
+        this.ViewBag.Greeting = "Hello Astra!";
         return View();
     }
 
