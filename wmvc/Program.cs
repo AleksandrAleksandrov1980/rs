@@ -20,6 +20,9 @@ if(!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+
+    app.UseSwagger();  // for presentation! 
+    app.UseSwaggerUI();// for presentation! 
 }
 else
 {
@@ -29,12 +32,13 @@ else
 }
 app.UseStatusCodePages(); //errs1
 app.UseStatusCodePagesWithReExecute("/{0}"); //errs2
-
+/*
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 };
+*/
 /*
 if (app.Environment.IsDevelopment())
 {
