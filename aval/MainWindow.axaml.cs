@@ -47,7 +47,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"evnt:{evnt}"); }));
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"get evnt:{evnt}"); }));
             if( m_dct_Name_ServerData.ContainsKey(evnt.from)== false)
             { 
                 ServerData server_data = new ServerData();
@@ -59,7 +59,20 @@ public partial class MainWindow : Window
         }   
         catch (Exception ex)
         { 
-            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"[exception {ex}]"); }));
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"[OnEvent.exception {ex}]"); }));
+        }
+        return 1;
+    }
+
+    public int OnCommand( RastrSrvShare.Ccommunicator.Command command )
+    { 
+        try
+        {
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"get cmnd:{command}"); }));
+        }   
+        catch (Exception ex)
+        { 
+            Dispatcher.UIThread.InvokeAsync(new Action(() => { Log($"[OnCommand.exception {ex}]"); }));
         }
         return 1;
     }
@@ -119,15 +132,15 @@ public partial class MainWindow : Window
             RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
             string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
             string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
-            //Log($"����� ��������� ���� ����������� [{str_path_prv_key}]");
             int nRes = signer_prv.ReadKey(str_path_prv_key);
             if(nRes<0)
             { 
-                Log($"��������� ���� �� ��������. ����[{str_path_prv_key}]");
+                Log($"не могу прочесть приватный ключ[{str_path_prv_key}]");
                 return ;
             }
             m_communicator.Init(par, signer_prv); 
             Task taskConsumeEvents = Task.Run( ()=>{ m_communicator.ConsumeEvnts(OnEvent); });
+            Task taskConsumeCmnds = Task.Run( ()=>{ m_communicator.ConsumeCmnds(OnCommand, Ccommunicator.enConsumeCmndsMode.PROMISCUOUS); }); 
         }
         catch(Exception ex)
         { 
@@ -149,7 +162,8 @@ public partial class MainWindow : Window
     public void Log(string str_msg)
     { 
         if(m_tb_Log!=null)
-        { 
+        {
+            str_msg = str_msg.Insert(0, DateTime.Now.ToString("HH.mm.ss: "));
             m_tb_Log.Text += str_msg + "\r\n";
         }
     }
