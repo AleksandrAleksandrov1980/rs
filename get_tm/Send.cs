@@ -21,10 +21,13 @@ namespace publish
         {
             RastrSrvShare.CRabbitParams par = new RastrSrvShare.CRabbitParams();
             RastrSrvShare.ftp_hlp ftp_ = new ftp_hlp();
+            string str_path_exe_dir = "";
             try
             { 
+                str_path_exe_dir = file_dir_hlp.GetPathExeDir();
                 IConfiguration config = new ConfigurationBuilder()
-                    .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+                    //.SetBasePath(System.IO.Directory.GetCurrentDirectory())
+                    .SetBasePath(str_path_exe_dir)
                     .AddJsonFile("appsettings.json")
                     .Build();                    
                 IConfigurationSection con_sec_params = config.GetSection("r_params");
@@ -42,27 +45,29 @@ namespace publish
             }
             catch(Exception ex)
             { 
-                Log.Error($"Can't read 'appsettings.json' in current directory exception[{ex}]");
+                Log.Error($"Can't read 'appsettings.json' in current directory [{str_path_exe_dir}] exception[{ex}]");
                 return -4;
             }
             string str_calc_guid    = Ccommunicator.GetTmMark();
             string str_dir_ftp = $"{m_ftp_dir}/{str_calc_guid}";
             string str_dir_ftp_calc = $"{CParam.FtpDirCalcs}/{str_dir_ftp}";
+            Console.WriteLine($"ftp:UPLOAD:{m_path_to_file}:{str_dir_ftp_calc}");
             ftp_.file(ftp_hlp.enFtpDirection.UPLOAD, m_path_to_file, str_dir_ftp_calc);
             RastrSrvShare.Ccommunicator m_communicator = new RastrSrvShare.Ccommunicator();
             par.m_str_name = "sender"; //m_configuration.GetValue<string>("r_params:name","");
             RastrSrvShare.CSigner signer_prv = new RastrSrvShare.CSigner();
-            string str_path_exe_dir = file_dir_hlp.GetPathExeDir();
+            
             string str_path_prv_key = str_path_exe_dir+"/"+RastrSrvShare.CSigner.str_fname_prv_xml;
             Log.Information($"читаю приватный ключ находящийся [{str_path_prv_key}]");
+            Console.WriteLine($"читаю приватный ключ находящийся [{str_path_prv_key}]");
             int nRes = signer_prv.ReadKey(str_path_prv_key);
             if(nRes<0)
             { 
                 Log.Error($"приватный ключ не прочитан.");
                 return -5;
             }
-            m_communicator.Init(par, signer_prv); 
-
+            m_communicator.Init(par, signer_prv);
+            Console.WriteLine("communicator.init");
             RastrSrvShare.Ccommunicator.enCommands en_command;
             en_command = RastrSrvShare.Ccommunicator.Command.StrToCommand(m_str_cmnd);
              
@@ -70,7 +75,7 @@ namespace publish
             string [] str_pars = { $"{str_dir_ftp}/{Path.GetFileName(m_path_to_file)}"};
             RastrSrvShare.Ccommunicator.Command cmnd_pub = m_communicator.
                 PublishCmnd( en_command, str_to, m_str_role, str_pars );
-            
+            Console.WriteLine("communicator.ok");
             return 1;
         }
     }
