@@ -230,7 +230,6 @@ public class Worker : BackgroundService
     {
         if(m_tskThreadGram!=null)
         {
-            //Log.Error("Gramaphone already runing, will be relaunched");
             if(m_tskThreadGram.Status==TaskStatus.Running)
             { 
                 Log.Warning($"Gramaphone already runing, remember this params [{string.Join(" ", str_params)}]");
@@ -243,18 +242,16 @@ public class Worker : BackgroundService
             Log.Error("Gramaphone  not run, will be relaunched");
             on_GRAM_STOP(new string[]{""});
         }
-        //CGramophone.CRecordParams recordParams = new CGramophone.CRecordParams();
         m_recordParams.str_path_srv_wrk_dir = m_str_dir_wrk;
+        m_recordParams.m_str_pars.Clear();
         for(int i = 0 ; i < str_params.Length; i++)
         { 
-            //recordParams.m_str_pars.Add(str_params[i]);
             m_recordParams.m_str_pars.Add(str_params[i]);
         }
         m_cnc_tkn_src.Dispose();
         m_cnc_tkn_src = new CancellationTokenSource(); // "Reset" the cancellation token source...
         m_tskThreadGram = Task.Run(()=>
         {
-            //return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", recordParams, m_communicator );
               return CGramophone.ThreadPlay( m_cnc_tkn_src.Token, m_str_dir_wrk+"/gram.json", m_recordParams, m_communicator );
         });
         return 1;

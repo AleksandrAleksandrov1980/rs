@@ -194,6 +194,7 @@ public class CGramophone
                         break;
                     }
                     CGramStartParams gram_start_params_previos;
+                    
                     if(m_record_params.m_cs_gram_start_params.TryPop(out gram_start_params_previos) == true)
                     { 
                         Log.Warning($"extract previos params [{gram_start_params_previos?.str_args}]");
@@ -206,7 +207,14 @@ public class CGramophone
                     }
                     else
                     { 
-                        Log.Error($"can't extract previos params, stack locked.");
+                        if(m_record_params.m_cs_gram_start_params.Count==0)
+                        { 
+                            Log.Information($"can't extract previos params, stack emptys.");
+                        }
+                        else
+                        {
+                            Log.Error($"can't extract previos params, stack locked.");
+                        }
                         break;
                     }
                 }
