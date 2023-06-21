@@ -1,4 +1,5 @@
 
+
       const g_enCOMMDANDS = Object.freeze({
         STATE            : "STATE",
         PROC_RUN         : "PROC_RUN",
@@ -108,6 +109,18 @@
               obj_msg.num = this._nCounterMsgs;
               this._arr_objs.push(obj_msg);
               this.table_populate();
+
+              try{
+                  let d = $("#ti100500");
+                  d.text(this._nCounterMsgs);
+
+                  //let ggg = d3.select("g");
+                  //let ss = ggg.select("#ti100500");
+                  //ss.text(this._nCounterMsgs);
+              }catch(err){
+                CStompHlp.log('catched exception1!: ' + err);
+              }
+
             } else {
               CStompHlp.log('got empty message');
             }
