@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "calc": {
+      "commandName": "Project",
+      "commandLineArgs": "\"O:/wrk_sb_se_proc/CALCS2/SE\" "
+    }
+  }
+}
