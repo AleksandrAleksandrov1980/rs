@@ -199,7 +199,7 @@ public partial class MainWindow : Window
             //c++ /home/ustas/projects/c2
             Log($"tst_astra_beg\n");
             CRwrapper rw = new CRwrapper();
-            int nRes = rw.call_test();
+            long nRes = rw.call_test();
             Log($"tst_astra_end. get[{nRes}]\n");
         }
         catch (Exception ex) 
