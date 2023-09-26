@@ -19,14 +19,10 @@ sokjs-->
 	  <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet"> <!-- стрелочки сортировки в таблице -->
 
-
 <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
      <script src="vendor/d3js/d3.v4.js"></script> 
 <!-- <script src="vendor/d3js/d3.v7.js"></script> -->
 <!-- <script src="vendor/d3js/d3.v7.js"></script> -->
-	  
-
-
 
   </head>
   
@@ -132,7 +128,7 @@ sokjs-->
 
     <!-- End of Content Wrapper --> </div>
 	  
-	  <!--  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
+	<!--  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  -->
     <!-- End of Page Wrapper -->
     <!-- Scroll to Top Button--> 
 	<a class="scroll-to-top rounded" href="#page-top"> </a>
@@ -145,16 +141,12 @@ sokjs-->
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 
-
-
-
     
     <script>
-      
-      function initZoom() {
+    /*  function initZoom() {
         d3.select('svg')
           .call(zoom);
-      }
+      }*/
 
       function handleZoom(e) {
         let sss = d3.select('svg g');
@@ -206,129 +198,24 @@ sokjs-->
      }
 
      function changeText() {
-		 d3.selectAll("svg text").text( Math.floor(Math.random() * 100000000));
-		 //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 1000)); // WORKED!!!
+		 //d3.selectAll("svg text").text( Math.floor(Math.random() * 100000000));
+		 d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
       }
 
       function tst_d3(){
-        //d3.xml("http://upload.wikimedia.org/wikipedia/commons/b/b0/NewTux.svg").mimeType("image/svg+xml").get(function(error, xml) {
+          //d3.xml("http://upload.wikimedia.org/wikipedia/commons/b/b0/NewTux.svg").mimeType("image/svg+xml").get(function(error, xml) {
           //d3.xml("http://alexandrov-7k/front/img/NewTux.svg").mimeType("image/svg+xml").get(function(error, xml) {
-          //d3.xml("http://alexandrov-7k/front/img/grf_195.svg").mimeType("image/svg+xml").get(function(error, xml) {
-          //d3.xml("http://alexandrov-7k/front/img/cx195_priv_ink.svg").mimeType("image/svg+xml").get(function(error, xml) { // norm
-		  //d3.xml("http://alexandrov-7k/front/img/cx195_priv_ink.svg", function(error,xml) { // norm
-		  d3.xml("http://alexandrov-7k/front/img/sz_2300_.svg").mimeType("image/svg+xml").get(function(error, xml) { // norm
-            
-		  //d3.xml("http://alexandrov-7k/front/img/grf_sz.svg").mimeType("image/svg+xml").get(function(error, xml) {// InkSkape - fuckup
-		  
-		  
-          //d3.xml("http://alexandrov-7k/front/img/grf_195.svg").get(function(error, xml) {
-          if (error) throw error;
-          let sssvg = d3.select("#svgEmbed").node().appendChild(xml.documentElement);
-          //sssvg.appendChild("text");
-          //let xz = sssvg.select("#path125");
-		  
-          let xxx = d3.select("g");/*
-          let ss = xxx.append("text");
-            ss.attr("y",  500)//magic number here
-              .attr("x", 650)
-              .attr("id","dfdfdf100500")
-              .attr('text-anchor', 'middle')
-              .attr("class", "myLabel")//easy to style with CSS
-              .style("font-size", 50)
-              .text("I'm a label2");*/
-
-			//let ss2 = xxx.select("node_1690_vras");
-        //      ss2.text("node_1690_vrasnode_1690_vrasnode_1690_vrasnode_1690_vrasnode_1690_vrasnode_1690_vras");
-           //setInterval(changeText, 1000);
+		  d3.xml("http://alexandrov-7k/front/img/cx195_priv_ink.svg", function(error,xml) { // norm
+		  //d3.xml("http://alexandrov-7k/front/img/sz_2300_.svg").mimeType("image/svg+xml").get(function(error, xml) { // norm
+	          if (error) 
+				  throw error;
+	          const sssvg = d3.select("#svgEmbed").node().appendChild(xml.documentElement); // add SVG to document
 			  setInterval(changeText, 1);
-
-				//node_1690_vras
-          
-              //var zoom = d3.zoom().on('zoom', handleZoom);
-              //initZoom();
-
-
-              
-/*
-          var svg = d3.select("body")
-          .append("svg")
-          .attr("width", "100%")
-          .attr("height", "100%")
-          .call(d3.zoom().on("zoom", function () {
-              svg.attr("transform", d3.event.transform)
-          }))
-          .append("g")
-
- alert("sdfsdfs");
-*/
-
-          /*
-   .attr("y", height - 10)//magic number here
-   .attr("x", function(){ return x(lineEnd)})
-   .attr('text-anchor', 'middle')
-   .attr("class", "myLabel")//easy to style with CSS
-   .text("I'm a label");*/
-   /*
-          let node = $("#path125");
-          node.append("text")
-            .attr("x", function(d) { return x(d) - 3; })
-            .attr("y", barHeight / 2)
-            .attr("dy", ".35em")
-            .text(function(d) { return d; });
-            */
-/*
-          node.append("text")
-            .attr("x", function(d) { return x(d) - 3; })
-            .attr("y", barHeight / 2)
-            .attr("dy", ".35em")
-            .text(function(d) { return d; });
-            */
-            /*
-          let label = node.append("svg:text");
-          label.text = "hello gdfsgdfsgdfsgdfgsfgdfgdfssgsdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-*/
-          d3.select("g").attr("transform", "scale(" + $("#svgEmbed").width()/4000 + ")");
-          //$("svg").height($("#svgEmbed").width()*2);
-          //$("svg").height($("#svgEmbed").height()*1);
-          //$("svg").width($("#svgEmbed").width()*1);
-
-
-          /*let label = node.append("svg:text")
-            .text(function (d) { return d.name; })
-            .style("text-anchor", "middle")
-            .style("fill", "#555")
-            .style("font-family", "Arial")
-            .style("font-size", 12);*/
-
-          //path125
-          /*
-          let node = $("svg");
-          let label = node.append("svg:text")
-            .text(function (d) { return d.name; })
-            .style("text-anchor", "middle")
-            .style("fill", "#555")
-            .style("font-family", "Arial")
-            .style("font-size", 12);*/
-
-
-
-        });
-        
-        
-        //file:///C:/projects/git_main/rs/front/img/grf_195.svg
-/*
-        let xz = d3.select("#svgEmbed");
-        d3.select("#svgEmbed").append("img")
-          .attr("src","http://upload.wikimedia.org/wikipedia/commons/b/b0/NewTux.svg")
-          .attr("width", 100)
-          .attr("height", 100)
-        alert('hello');
-  */      
+			  d3.select("g").attr("transform", "scale(" + $("#svgEmbed").width()/4000 + ")");
+          });
       }
-
+		
     </script>
-
-
-  
+	  
   </body>
 </html>
