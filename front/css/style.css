@@ -1,0 +1,35 @@
+  .title {
+    margin: 0;
+    padding: 0;
+    margin: auto;
+    max-width: 50%;
+  }
+  .containerSVG {
+    margin: auto;
+  }
+  .button {
+    width: 350px;
+    height: 30px;
+    margin: 30px auto 30px auto;
+    padding: 0;
+    appearance: none;
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
+    border-radius: 2px;
+}
+.button:hover {
+    opacity: 0.6;
+    transition: opacity 0.1s linear;
+    cursor: pointer;
+}
+.main {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

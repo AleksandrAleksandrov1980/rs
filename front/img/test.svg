@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="200"
+   height="200"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="test.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <defs
+     id="defs6">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient879">
+      <stop
+         style="stop-color:#00ff37;stop-opacity:1;"
+         offset="0.13826367"
+         id="stop875" />
+      <stop
+         style="stop-color:#e32626;stop-opacity:0;"
+         offset="0.96784562"
+         id="stop877" />
+    </linearGradient>
+    <rect
+       x="36.404014"
+       y="11.385618"
+       width="72.808029"
+       height="30.861017"
+       id="rect408" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient879"
+       id="linearGradient881"
+       x1="16.778805"
+       y1="15.205792"
+       x2="24.568964"
+       y2="15.205792"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="18.88"
+     inkscape:cx="29.608051"
+     inkscape:cy="16.101695"
+     inkscape:window-width="1920"
+     inkscape:window-height="1177"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+
+<button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="CheckFtp()" > 
+                  BUTTON
+                </button>
+
+  <foreignObject
+     x="40"
+     y="40"
+     width="100"
+     height="100">
+    <xhtml:div />
+    <a
+       href="http://rastrwin.ru"> HELLO WROLD </a>
+                       <button type="button" class="btn btn-info btn-round" data-toggle="modal" onclick="CheckFtp()" > 
+                  BUTTON
+                </button>
+    <xhtml:div >testtesttesttesttesttesttesttest </xhtml:div>
+  </foreignObject>
+  <text
+     id="text9"
+     x="-23.806215"
+     y="28.163311"
+     transform="scale(1.1147239,0.89708313)"
+     style="font-size:10.2908px;stroke-width:0.857564">ЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ</text>
+  <rect
+     style="fill:url(#linearGradient881);stroke-width:0.54202;fill-opacity:1"
+     id="rect110"
+     width="7.7901592"
+     height="4.344512"
+     x="16.778805"
+     y="13.033536" />
+  <text
+     xml:space="preserve"
+     id="text406"
+     style="white-space:pre;shape-inside:url(#rect408);fill:none;fill-opacity:0"><tspan
+       x="36.404297"
+       y="22.332729"
+       id="tspan877">dfdyrtyrtt</tspan></text>
+  <text
+     xml:space="preserve"
+     style="white-space:pre;inline-size:38.3113;fill:#333333;fill-opacity:0"
+     x="55.879414"
+     y="26.216883"
+     id="text568"><tspan
+       x="55.879414"
+       y="26.216883"
+       id="tspan881"><tspan
+         dx="0 5.1210938 4.21875 7.4765625 4.21875 7.4765625 7.4765625"
+         id="tspan879">rfgfdgf</tspan></tspan></text>
+  <text
+     xml:space="preserve"
+     style="fill:#333333;fill-opacity:0"
+     x="13.014291"
+     y="25.392279"
+     id="text792"><tspan
+       sodipodi:role="line"
+       id="tspan790"
+       x="13.014291"
+       y="25.392279">dfdsfsdf</tspan></text>
+  <text
+     xml:space="preserve"
+     style="fill:#333333;fill-opacity:0"
+     x="53.782063"
+     y="34.905907"
+     id="text796"
+     inkscape:highlight-color="#aaaaaa"><tspan
+       sodipodi:role="line"
+       id="tspan794"
+       x="53.782063"
+       y="34.905907">ghghg</tspan></text>
+</svg>
