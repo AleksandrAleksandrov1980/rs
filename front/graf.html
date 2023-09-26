@@ -158,7 +158,9 @@ sokjs-->
 
       let zoom = d3.zoom()
 	      //.scaleExtent([0.25, 10]) // из-за этого зум съезжает хз как
+		  .scaleExtent([0.1, 10])
 	      .on('zoom', handleZoom);
+		 //d3.select('svg').transition().call(zoom.translateTo, 0, 0 );
 
       function initZoom() {
 	      d3.select('svg')
@@ -192,21 +194,22 @@ sokjs-->
       }
 	  
 	  function center() {
-		d3.select('svg')
-			.transition()
-			.call(zoom.translateTo, 0.5 * width, 0.5 * height);
+		  d3.select('svg').transition().call(zoom.translateTo, 0.5 * $("#svgEmbed").width(), 0.5 * $("#svgEmbed").height());
+		  //d3.select('svg').transition().call(zoom.translateTo, 0.5 * window.innerWidth, 0.5 * window.innerHeight);
+		  //d3.select('svg').transition().call(zoom.translateTo, 100, 100);
+		  //d3.select("g").attr("transform", "scale(" + $("#svgEmbed").width()/4000 + ")");
      }
 
      function changeText() {
-		 //d3.selectAll("svg text").text( Math.floor(Math.random() * 100000000));
-		 d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
+		 d3.selectAll("svg text").text( Math.floor(Math.random() * 100000000));
+		 //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
       }
 
       function tst_d3(){
           //d3.xml("http://upload.wikimedia.org/wikipedia/commons/b/b0/NewTux.svg").mimeType("image/svg+xml").get(function(error, xml) {
           //d3.xml("http://alexandrov-7k/front/img/NewTux.svg").mimeType("image/svg+xml").get(function(error, xml) {
-		  d3.xml("http://alexandrov-7k/front/img/cx195_priv_ink.svg", function(error,xml) { // norm
-		  //d3.xml("http://alexandrov-7k/front/img/sz_2300_.svg").mimeType("image/svg+xml").get(function(error, xml) { // norm
+		  //d3.xml("http://alexandrov-7k/front/img/cx195_priv_ink.svg", function(error,xml) { // norm
+		  d3.xml("http://alexandrov-7k/front/img/sz_2300_.svg").mimeType("image/svg+xml").get(function(error, xml) { // norm
 	          if (error) 
 				  throw error;
 	          const sssvg = d3.select("#svgEmbed").node().appendChild(xml.documentElement); // add SVG to document
