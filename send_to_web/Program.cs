@@ -14,8 +14,7 @@ class _hlp{
 }
 
 //dotnet publish "C:\projects\git_main\rs\frw\frw.csproj" -c Release -o C:\projects\git_main\rs\frw\publish -r win-x64 --self-contained -p:PublishTrimmed=true
-class Program
-{
+class Program{
     static void Main(string[] args) {
         try{
             string str_path_exe_dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -82,5 +81,5 @@ class Program
             Log.Error($"exception: {ex}");
         }
         Console.WriteLine("end.");
-    }
-}
+    }//static void Main(...) 
+}//class Program{
