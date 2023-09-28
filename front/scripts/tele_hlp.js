@@ -16,16 +16,18 @@ class CStompTele
     try{
       if (message.body){
         this.log('got msg with body : ' + message.body);
-        this._nCounterMsgs++;
-        //this.AddLog( "< " + this._nCounterMsgs.toString()+ " : " + message.body );
-        let obj_msg = JSON.parse(message.body);
-        obj_msg.num = this._nCounterMsgs;
+        let obj_msg = JSON.parse(message.body);   
+        //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
+        //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
+        for(let hlp of obj_msg){ 
+          let s = d3.select("#"+hlp.str_id);
+          s.text(hlp.str_val+ Math.floor(Math.random() * 100));
+        }
       } else {
           this.log('got empty message'); 
       }
     }catch(err){
-      this.log('catched exception!: ' + err);
-      this.AddLog( "< " + this._nCounterMsgs.toString()+ "  error parse! : " + message.body );
+      this.log('callback_subscribe() exception: ' + err);
     }
   };
 
@@ -56,12 +58,10 @@ class CStompTele
       this.subscription_events = this.client.subscribe( this.name_exchng, this.callback_subscribe.bind(this) );
     };
     this.client.onConnect = this.client.onConnect.bind(this);
-
     this.client.onDisconnect = (frame) => {
       this.log('onDisconnect : ' + frame.body);
     }
     this.client.onDisconnect = this.client.onDisconnect.bind(this);
-
     this.client.onStompError = function (frame) {
       // Will be invoked in case of error encountered at Broker
       // Bad login/passcode typically will cause an error
@@ -70,24 +70,19 @@ class CStompTele
       this.log('onStompError: ' + frame.headers['message']);
       this.log('onStompError Additional details: ' + frame.body);
     };
-
     this.client.onWebSocketClose = function (evt)  {
       this.log( 'onWebSocketClose: ' + evt );
     };
     this.client.onWebSocketClose = this.client.onWebSocketClose.bind(this)
-
     this.client.onUnhandledMessage = function (message) {
       this.log( 'onUnhandledMessage: message = ' + message );
     };
-
     this.client.onUnhandledReceipt = function (frame)  {
       this.log('onUnhandledReceipt: ' + frame.body);
     };
-
     this.client.onUnhandledFrame  = function (frame)  {
       this.log('onUnhandledFrame: ' + frame.body);
     };
-
     this.client.activate();
   };
 

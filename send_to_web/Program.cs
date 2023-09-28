@@ -48,15 +48,24 @@ class Program{
             Log.Information($"Rastr.load:{str_path_to_after_oc_file}");
             rastr.Load( RG_KOD.RG_REPL, str_path_to_after_oc_file, "" );
             ASTRALib.table table_node = rastr.Tables.Item("node");
-            System.Array arr = (System.Array)table_node.WriteSafeArray("ny,vras","");
+            System.Array arr = (System.Array)table_node.WriteSafeArray("ny,vras,pn,qn,pg,qg","");
             int nNumRows = arr.GetUpperBound(0) + 1;
             int nNumCols = arr.GetUpperBound(1) + 1;
             List<_hlp> lstHlps = new List<_hlp>();
+            Random rnd = new Random();
             for(int nRowNum = 0 ; nRowNum < nNumRows; nRowNum++){ 
-                _hlp hlp = new _hlp();
-                hlp.str_id  = $"node_vras_{arr.GetValue(nRowNum,0)}";
-                hlp.str_val = $"{Math.Round((double)arr.GetValue(nRowNum,1),1)}";
-                lstHlps.Add( hlp );
+                _hlp hlp_vras = new _hlp();
+                hlp_vras.str_id  = $"node_{arr.GetValue(nRowNum,0)}_vras";
+                hlp_vras.str_val = $"{Math.Round((double)arr.GetValue(nRowNum,1)+rnd.NextDouble()*10,1)}";
+                lstHlps.Add( hlp_vras );
+                _hlp hlp_sn = new _hlp();
+                hlp_sn.str_id  = $"node_{arr.GetValue(nRowNum,0)}_sn";
+                hlp_sn.str_val = $"{Math.Round((double)arr.GetValue(nRowNum,2)+rnd.NextDouble()*10,1)}+j{Math.Round((double)arr.GetValue(nRowNum,3)+rnd.NextDouble()*10,1)}";
+                lstHlps.Add( hlp_sn );
+                _hlp hlp_sg = new _hlp();
+                hlp_sg.str_id  = $"node_{arr.GetValue(nRowNum,0)}_sg";
+                hlp_sg.str_val = $"{Math.Round((double)arr.GetValue(nRowNum,3)+rnd.NextDouble()*10,1)}+j{Math.Round((double)arr.GetValue(nRowNum,4)+rnd.NextDouble()*10,1)}";
+                lstHlps.Add( hlp_sg );
             }
             string str_json_hlps = JsonSerializer.Serialize(lstHlps);
             ConnectionFactory factory = new ConnectionFactory();
