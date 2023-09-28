@@ -72,7 +72,7 @@ class Program{
                     exchange.ExchangeDeclare( exchange: str_q_exch, type: ExchangeType.Fanout, durable: false, autoDelete:false );
                     Log.Information($"EXCHANGE_ declared-> [{str_q_exch}]");
                     byte[] body = Encoding.UTF8.GetBytes(str_json_hlps);
-                    exchange.BasicPublish( exchange: str_q_exch, routingKey: "", basicProperties: null, body: body );
+                    exchange.BasicPublish( exchange: "", routingKey: str_q_exch, basicProperties: null, body: body );
                     Log.Information($"send to: {str_q_exch} : count : {lstHlps.Count}");
                 }
             }
