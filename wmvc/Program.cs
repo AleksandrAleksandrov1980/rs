@@ -13,6 +13,15 @@ builder.Services.AddDbContext<RastrwinContext>(options =>options.UseNpgsql(build
 builder.Services.AddEndpointsApiExplorer(); // webapi
 builder.Services.AddSwaggerGen();           // webapi
 
+//builder.Services.AddControllers
+
+/*
+     services.AddControllers(options =>
+    {
+        options.ModelBinderProviders.Insert(0, new AuthorEntityBinderProvider());
+    });
+ */
+
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if(!app.Environment.IsDevelopment())
