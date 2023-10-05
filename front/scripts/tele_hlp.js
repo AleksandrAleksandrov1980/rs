@@ -20,8 +20,16 @@ class CStompTele
         //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
         //d3.select("#node_1690_vras").text( Math.floor(Math.random() * 10000000)); // WORKED!!!
         for(let hlp of obj_msg){ 
-          let s = d3.select("#"+hlp.str_id);
-          s.text(hlp.str_val+ Math.floor(Math.random() * 100));
+          let fig = d3.select("#"+hlp.str_id);
+          //s.text(hlp.str_val+ Math.floor(Math.random() * 100));
+          if(hlp.str_id.endsWith("_sta")==false){
+            fig.text(hlp.str_val + Math.floor(Math.random() * 100));  
+          }else{
+            if(hlp.str_val=="0")
+              fig.attr("stroke-dasharray", null); 
+            else
+              fig.attr("stroke-dasharray", "5,3"); 
+          }
         }
       } else {
           this.log('got empty message'); 
