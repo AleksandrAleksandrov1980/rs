@@ -47,12 +47,12 @@ class Program{
             string str_path_to_after_oc_file = args[0];
             Log.Information($"Rastr.load:{str_path_to_after_oc_file}");
             rastr.Load( RG_KOD.RG_REPL, str_path_to_after_oc_file, "" );
-            ASTRALib.table table_node = rastr.Tables.Item("node");
-            System.Array arr = (System.Array)table_node.WriteSafeArray("ny,vras,pn,qn,pg,qg","");
-            int nNumRows = arr.GetUpperBound(0) + 1;
-            int nNumCols = arr.GetUpperBound(1) + 1;
             List<_hlp> lstHlps = new List<_hlp>();
             Random rnd = new Random();
+            ASTRALib.table table_node = rastr.Tables.Item("node");
+            System.Array arr = (System.Array)table_node.WriteSafeArray("ny,vras,pn,qn,pg,qg,sta","");
+            int nNumRows = arr.GetUpperBound(0) + 1;
+            int nNumCols = arr.GetUpperBound(1) + 1;
             for(int nRowNum = 0 ; nRowNum < nNumRows; nRowNum++){ 
                 _hlp hlp_vras = new _hlp();
                 hlp_vras.str_id  = $"node_{arr.GetValue(nRowNum,0)}_vras";
@@ -66,6 +66,40 @@ class Program{
                 hlp_sg.str_id  = $"node_{arr.GetValue(nRowNum,0)}_sg";
                 hlp_sg.str_val = $"{Math.Round((double)arr.GetValue(nRowNum,3)+rnd.NextDouble()*10,1)}+j{Math.Round((double)arr.GetValue(nRowNum,4)+rnd.NextDouble()*10,1)}";
                 lstHlps.Add( hlp_sg );
+                _hlp hlp_sta = new _hlp();
+                hlp_sta.str_id  = $"node_{arr.GetValue(nRowNum,0)}_sta";
+                //hlp_sta.str_val = $"{(double)arr.GetValue(nRowNum,5)-1}";
+                if(rnd.Next()%2 == 0)
+                    hlp_sta.str_val = "0";
+                else
+                    hlp_sta.str_val = "1";
+                lstHlps.Add( hlp_sta );
+            }
+            ASTRALib.table table_vetv = rastr.Tables.Item("vetv");
+            System.Array arr_vetv = (System.Array)table_vetv.WriteSafeArray("ip,iq,np,sta,slb,sle","");
+            int nNumRows_vetv = arr_vetv.GetUpperBound(0) + 1;
+            int nNumCols_vetv = arr_vetv.GetUpperBound(1) + 1;
+            for(int nRowNum = 0 ; nRowNum < nNumRows_vetv; nRowNum++){ 
+                int ip = (int)arr_vetv.GetValue(nRowNum,0);
+                int iq = (int)arr_vetv.GetValue(nRowNum,1);
+                int np = (int)arr_vetv.GetValue(nRowNum,2);
+                string str_id = $"vetv_{arr_vetv.GetValue(nRowNum,0)}_{arr_vetv.GetValue(nRowNum,1)}_{arr_vetv.GetValue(nRowNum,2)}";
+                _hlp hlp_sta = new _hlp();
+                hlp_sta.str_id  = str_id+"_sta";
+                if(rnd.Next()%2 == 0)
+                    hlp_sta.str_val = "0";
+                else
+                    hlp_sta.str_val = "1";
+               // hlp_sta.str_val = $"{arr_vetv.GetValue(nRowNum,3)}";
+                lstHlps.Add( hlp_sta );
+                _hlp hlp_slb = new _hlp();
+                hlp_slb.str_id  = str_id+"_slb";
+                hlp_slb.str_val = $"{(string)arr_vetv.GetValue(nRowNum,4)}";
+                lstHlps.Add( hlp_slb );
+                _hlp hlp_sle = new _hlp();
+                hlp_sle.str_id  = str_id+"_sle";
+                hlp_sle.str_val = $"{(string)arr_vetv.GetValue(nRowNum,5)}";
+                lstHlps.Add( hlp_sle );
             }
             string str_json_hlps = JsonSerializer.Serialize(lstHlps);
             ConnectionFactory factory = new ConnectionFactory();
