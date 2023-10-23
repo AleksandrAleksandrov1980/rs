@@ -1,6 +1,7 @@
 {
-    "path_tst_dir" : "D:/Vms/SHARA/crosses/!TESTS/SMZU/",
-    "xml_file_res" : "res<DATE>.xml",
+    "path_tmpl_poisk_os" : "C:/projects/rastr/RastrDocuments/SHABLON/poisk.os",
+    "path_tst_dir"       : "D:/Vms/SHARA/crosses/!TESTS/SMZU/",
+    "xml_file_res"       : "res<DATE>.xml",
     "tsts":
     [
         "/IA/2022_02_14_tstst/10_00_51/mdp_debug_1___11111.os",

@@ -47,11 +47,11 @@ def rastr_set_val( rastr, namet, namec, val ):
     #newVal                       = second paramter,pVal, the new device name as a VARIANT
     col._oleobj_.Invoke( 4, 0, pythoncom.INVOKE_PROPERTYPUT, 0, nRow, val )
 #---------------------------------------------------------------------------------------------------------
-def tst_mdp_file( rastr, path_file_mdp : str, path_dir_out : str, path_file_log :str, logg ):
+def tst_mdp_file( rastr, path_file_mdp : str, path_file_tmpl : str, path_dir_out : str, path_file_log :str, logg ):
     try:
-        logg.info(f"read_file_mdp:{path_file_mdp}")
+        logg.info(f"read_file_mdp:{path_file_mdp} path_file_tmpl{path_file_tmpl}")
         logg.info(f"\n <B> <a href=\"{os.path.dirname(path_file_mdp)}\" >  { os.path.dirname(path_file_mdp) } </a> </B>");
-        rastr.Load( Get_RG_REPL(), path_file_mdp, '' )
+        rastr.Load( Get_RG_REPL(), path_file_mdp, path_file_tmpl )
         rastr_set_val(rastr, "ut_vir_common", "kod", 22 )
         logg.info(f"dir_out: {path_dir_out} ")
         logg.info(f"set_path_log:{path_file_log}")
@@ -173,6 +173,7 @@ def tsts_main():
         print("NotFind astra.dll")
         return
     cnf = read_conf()
+    path_tmpl_poisk_os = cnf['path_tmpl_poisk_os']
     path_tst_dir = cnf['path_tst_dir']
     print( f"path_tst_dir= {path_tst_dir}" )
     path_tst_dir_ress = path_tst_dir + "/!res/"+dt_string+"/"
@@ -188,6 +189,7 @@ def tsts_main():
     logger.info("<h2>")
     logger.info(f"************************************ {dt_string} ****************************************************")
     logger.info("</h2>")
+    logger.info(f"TEMPLATE_POISK_OS: {path_tmpl_poisk_os} ")
     tsts = cnf['tsts']
     i = 0
     for tst in tsts:
@@ -206,7 +208,7 @@ def tsts_main():
         os.makedirs(path_tst_dir_res)
         path_file_log     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".log"
         results           = None
-        results           = tst_mdp_file( rastr, path_file_tst, path_tst_dir_out, path_file_log, logger )
+        results           = tst_mdp_file( rastr, path_file_tst, path_tmpl_poisk_os, path_tst_dir_out, path_file_log, logger )
         time_elapsed      = time.time() - tm_start
         time_elapsed_proc = time.process_time() - tm_start_proc
         logger.info("----------------------------------------------------------------------------------------------------")
