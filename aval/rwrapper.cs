@@ -2,28 +2,36 @@ using System.Runtime.InteropServices;
 namespace aval;
 public class CRwrapper
 {
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so")]
+#if OS_WIN // must be added in .csproj !
+    public const string str_path_dll_ = "C:\\projects\\rastr\\RastrWin\\astra\\build\\Debug\\astra_shrd.dll";
+#else
+    public const string str_path_dll_ = "/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so";
+#endif
+    [DllImport(str_path_dll_)]
     private static extern int test(); 
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so")]
+    [DllImport(str_path_dll_)]
     private static extern long RastrCreate();
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long Load( long idRastr, string pch_fpath, string  pch_tpath );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long Save( long idRastr, string pch_fpath, string pch_tpath );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long Rgm( long idRastr, string pch_parameters );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long GetTableNumRows( long idRastr, string pch_table, ref long n_rows_out );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long SetValInt( long idRastr, string pch_table, string pch_col, long n_row, long n_val );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long GetValInt( long idRastr, string pch_table, string pch_col, long n_row, ref long n_val_out );
-    [DllImport("/home/ustas/projects/git_r/rastr/RastrWin/astra/build/libastra_shrd.so", CharSet = CharSet.Ansi)]
+    [DllImport(str_path_dll_, CharSet = CharSet.Ansi)]
     private static extern long GetValDbl( long idRastr, string pch_table, string pch_col, long n_row, ref double d_val_out );
 
     public long call_test()
     {
         long nRes =0 ;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        { }
         
         nRes = (int)test();
 

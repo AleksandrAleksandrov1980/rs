@@ -32,6 +32,10 @@
   <ItemGroup>
     <ProjectReference Include="..\RastrSrvShare\RastrSrvShare.csproj" />
   </ItemGroup>
+	
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <DefineConstants>OS_WIN</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">

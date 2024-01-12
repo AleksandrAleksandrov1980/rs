@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "aval": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
