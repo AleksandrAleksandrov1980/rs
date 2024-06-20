@@ -32,13 +32,14 @@ def enum_loaded_dlls(name_loking_for) -> bool :
         #print(dll.path)
     return False
 #---------------------------------------------------------------------------------------------------------
-def rastr_set_val( rastr, namet, namec, val ):
+def rastr_set_val( rastr, logg, namet, namec, val ):
     tables   = rastr.tables
     table    = tables(namet)
     cols     = table.cols
     col      = cols(namec)
     newVal   = c32.VARIANT(pythoncom.VT_VARIANT,val)
     nRow     = 0 # 
+    logg.info(f"{namet}.{namec}: {val}")
     #4                            = 0x00000004 in decimal: this is the Id of the property
     #0                            = the LCID, the Locale Id ... I always set it to 0
     #pythoncom.INVOKE_PROPERTYPUT = the type of call.
@@ -47,15 +48,20 @@ def rastr_set_val( rastr, namet, namec, val ):
     #newVal                       = second paramter,pVal, the new device name as a VARIANT
     col._oleobj_.Invoke( 4, 0, pythoncom.INVOKE_PROPERTYPUT, 0, nRow, val )
 #---------------------------------------------------------------------------------------------------------
-def tst_mdp_file( rastr, path_file_mdp : str, path_file_tmpl : str, path_dir_out : str, path_file_log :str, logg ):
+def tst_mdp_file( rastr, path_file_mdp : str, path_dir_out : str, path_file_log :str, logg ):
     try:
-        logg.info(f"read_file_mdp:{path_file_mdp} path_file_tmpl{path_file_tmpl}")
+        logg.info(f"read_file_mdp:{path_file_mdp}")
         logg.info(f"\n <B> <a href=\"{os.path.dirname(path_file_mdp)}\" >  { os.path.dirname(path_file_mdp) } </a> </B>");
-        rastr.Load( Get_RG_REPL(), path_file_mdp, path_file_tmpl )
-        rastr_set_val(rastr, "ut_vir_common", "kod", 22 )
+        rastr.Load( Get_RG_REPL(), path_file_mdp, 'C:/Program Files (x86)/RastrWin3/RastrWin3/SHABLON/poisk.os' ) #Загружаем по шаблону poisk.os, чтобы новые поля добавлялись в расчет
+
+        rastr_set_val(rastr, logg, "com_regim", "neb_p", 0.01 ) #
+        rastr_set_val(rastr, logg, "com_regim", "start", 1    ) # 0-yes 1-no    ,0,1,0,1
+        rastr_set_val(rastr, logg, "com_regim", "flot",  0    ) # 0-no  1-yes   ,1,1,0,0 
+
+        rastr_set_val(rastr, logg, "ut_vir_common", "kod", 22 )
         logg.info(f"dir_out: {path_dir_out} ")
         logg.info(f"set_path_log:{path_file_log}")
-        rastr_set_val(rastr, "ut_vir_common", "log_path2file", path_file_log )
+        rastr_set_val(rastr, logg, "ut_vir_common", "log_path2file", path_file_log )
         path_file_save_1 =  path_dir_out + "/" + Path(path_file_log).stem + "____11111__.os"
         rastr.Save( path_file_save_1, '' )
         logg.info(f"call Emergencies")
@@ -85,11 +91,12 @@ def read_conf():
     p = psutil.Process( os.getpid() )
     p.cmdline()
     name_current_script = get_name__current_script()
-    for cmdline in p.cmdline():
-        if(cmdline.endswith(name_current_script)):
-            dir_current_script = os.path.dirname(cmdline)
+    #for cmdline in p.cmdline():
+    #    if(cmdline.endswith(name_current_script)):
+    #        dir_current_script = os.path.dirname(cmdline)
      #!!!!! win-service !!! path to json!!!
     print(f"current scriptname: {os.path.basename(__file__)}")
+    print(f"directory of current script: {dir_current_script}")
     #with open("D:/rs/py_db_wrt/config.json") as json_data_file: # for WIN-SERVICE !!!
     #path_json = os.getcwd() + "/"+"config.json";
     path_json = dir_current_script + "/"+"config.json"
@@ -173,7 +180,6 @@ def tsts_main():
         print("NotFind astra.dll")
         return
     cnf = read_conf()
-    path_tmpl_poisk_os = cnf['path_tmpl_poisk_os']
     path_tst_dir = cnf['path_tst_dir']
     print( f"path_tst_dir= {path_tst_dir}" )
     path_tst_dir_ress = path_tst_dir + "/!res/"+dt_string+"/"
@@ -189,7 +195,6 @@ def tsts_main():
     logger.info("<h2>")
     logger.info(f"************************************ {dt_string} ****************************************************")
     logger.info("</h2>")
-    logger.info(f"TEMPLATE_POISK_OS: {path_tmpl_poisk_os} ")
     tsts = cnf['tsts']
     i = 0
     for tst in tsts:
@@ -208,7 +213,7 @@ def tsts_main():
         os.makedirs(path_tst_dir_res)
         path_file_log     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".log"
         results           = None
-        results           = tst_mdp_file( rastr, path_file_tst, path_tmpl_poisk_os, path_tst_dir_out, path_file_log, logger )
+        results           = tst_mdp_file( rastr, path_file_tst, path_tst_dir_out, path_file_log, logger )
         time_elapsed      = time.time() - tm_start
         time_elapsed_proc = time.process_time() - tm_start_proc
         logger.info("----------------------------------------------------------------------------------------------------")
@@ -226,6 +231,11 @@ def tsts_main():
     time_elapsed_proc_all = time.process_time() - tm_start_proc_all
     logger.info( f"TOTAL: execution time: { time.strftime( '%H:%M:%S', time.gmtime(time_elapsed_all) )}   CPU execution time:  {time_elapsed_proc_all}  " )
     logger.info("***********************************************************************************************************")
+    path_tst_dir = ""
+    last_results_file = open("lastresults.txt", "w", encoding="utf-8") # !!!! + , encoding="utf-8"
+    last_results_file.write(dt_string)
+    last_results_file.close()
+    return
 #---------------------------------------------------------------------------------------------------------
 tsts_main()
 
