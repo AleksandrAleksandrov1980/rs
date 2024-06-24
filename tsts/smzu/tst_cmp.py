@@ -3,24 +3,30 @@ import os
 import logging
 import json
 from logging import StreamHandler, Formatter
+from time import gmtime, strftime, localtime
 
 print(sys.argv)
-path_etalon_fjson = r'C:\mdp-test\TESTS/SMZU\!res\res_20_06_2024__15_36_36.726\_calc_.json'
-path_new_fjson    = r'C:/mdp-test/TESTS/SMZU/!res/res_20_06_2024__15_36_36.726/_calc_.json'
-#path_etalon_fjson = sys.argv[0]
-#path_new_fjson    = sys.argv[1]
+
+#path_etalon_fjson = 'C:\\mdp-test\\TESTS\\SMZU\\!res\\res_24_06_2024__09_40_39.737_new_ref\\_calc_.json'
+#path_etalon_fjson = r'C:\mdp-test\TESTS/SMZU\!res\res_24_06_2024__09_40_39.737_new_ref\_calc_.json'
+#path_new_fjson    = r'C:/mdp-test/TESTS/SMZU/!res/res_24_06_2024__10_18_25.201/_calc_.json'
+
+#path_etalon_fjson = r'C:\mdp-test\TESTS/SMZU\!res\res_20_06_2024__15_36_36.726\_calc_.json'
+#path_new_fjson    = r'C:/mdp-test/TESTS/SMZU/!res/res_20_06_2024__15_36_36.726/_calc_.json'
+path_etalon_fjson = sys.argv[1]
+path_new_fjson    = sys.argv[2]
 
 path_new_dir = os.path.dirname(path_new_fjson)
-logging.basicConfig(filename=path_new_dir+"/_cmp_.html", encoding = "utf-8", filemode='w', format='[%(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
+logging.basicConfig(filename=path_new_dir+"/_cmp_.txt", encoding = "utf-8", filemode='w', format='[%(asctime)s: %(name)s %(levelname)s ] %(message)s', datefmt='%Y-%m-%d %H:%M:%S' )
 logging.basicConfig(level=logging.NOTSET)
-
- 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = StreamHandler(stream=sys.stdout)
 handler.setFormatter(Formatter(fmt='[%(asctime)s: %(levelname)s] %(message)s'))
 logger.addHandler(handler)
-logger.info("start!")
+logger.info("<------------------------- START! ------------------------->")
+logger.info(f'path_to_etalon: {path_etalon_fjson}')
+logger.info(f'path_to_new   : {path_new_fjson}')
 #-shared_fun--------------------------------------------------------------------------------------------------------
 def find_field_indx(results, namef ):
     found = False
@@ -65,6 +71,7 @@ def cmp_results(arr_cmp, arr_dict_etalon, arr_dict_new):
                     diff['name']       = cmp['name']
                     diff['val_etalon'] = dict_etalon[cmp['name']]
                     diff['val_new']    = dict_new   [cmp['name']]
+                    diff['error_cmp']  = ""
                     arr_diffs.append(diff)
         if(find == False) :
             diff = {}
@@ -77,45 +84,38 @@ def cmp_results(arr_cmp, arr_dict_etalon, arr_dict_new):
 #---------------------------------------------------------------------------------------------------------
 def print_results(arr_cmp, arr_diffs):
     logger = logging.getLogger(__name__)
-    logger.info('<---------------- diffs -------------------------->')
-    for diff in arr_diffs: logger.info(diff)
+    #logger.info('<---------------- diffs -------------------------->')
     logger.info('<----------------  SECHS SUMMARY  -------------------------->')
     for cmp in arr_cmp:
         for diff in arr_diffs:
+            if(len(diff['error_cmp'])>0):
+                continue
             if(cmp['name']==diff['name']):
                 if( (diff['nvir']==0) and
                     (diff['npor']==0) 
                     ):
-                    val_etalon = diff['val_etalon']
-                    val_new    = diff['val_new']
+                    val_etalon    = diff['val_etalon']
+                    val_new       = diff['val_new']
+                    val_diff_proc = 0.
                     if(val_etalon!=0):
                         val_diff_proc = 100*(val_etalon-val_new)/val_etalon
-                    str_log = f'{diff['ns']:10} : {diff['name']:13} : {val_etalon:8.1f}->{val_new:8.1f} : {val_diff_proc:5.2f}%'
-                    if(val_diff_proc< cmp['max_diff_proc']):
+                    str_log = f'{diff['ns']:10} : {cmp['caption']:>10} : {val_etalon:8.1f}->{val_new:8.1f} = {val_etalon-val_new:4.1f} : {val_diff_proc:7.2f} %'
+                    if(abs(val_diff_proc) < cmp['max_diff_proc']):
                         logger.info(str_log)    
                     else:
                         logger.error(str_log)
-    logger.info('<----------------  ALL SUMMARY  -------------------------->')
+    logger.info('<----------------  COMPARE ERRORS  -------------------------->')
     for diff in arr_diffs:
-        val_etalon = diff['val_etalon']
-        val_new    = diff['val_new']
-        if(val_etalon == 0 and val_new == 0): 
-            continue
-        if(val_etalon!=0):
-            val_diff_proc = 100*(val_etalon-val_new)/val_etalon
-        str_log = f'{diff['ns']:10}:s {diff['nvir']:5}:v {diff['npor']:5}:p {diff['name']:13} : {val_etalon:8.1f}->{val_new:8.1f} : {val_diff_proc:5.2f} %'
-        if(val_diff_proc< cmp['max_diff_proc']):
-            logger.info(str_log)    
-        else:
-            logger.error(str_log)
-
+        if(len(diff['error_cmp'])>0):
+            logger.error(f'{diff['ns']:10}:s {diff['nvir']:5}:v {diff['npor']:5}:p error: {diff['error_cmp']}')  
+    logger.info('<------------------------------------------------------------>')
 #---------------------------------------------------------------------------------------------------------
 arr_cmp = [ 
-        {'name': 'itog_mdp',       'max_diff_proc': 1 },
-        {'name': 'itog_mdp_pa',    'max_diff_proc': 1 },
-        {'name': 'padp_real',      'max_diff_proc': 1 },
-        {'name': 'itog_mdp_ap',    'max_diff_proc': 0.1 },
-        {'name': 'itog_mdp_pa_ap', 'max_diff_proc': 0.1 }
+        { 'name': 'itog_mdp',       'max_diff_proc': 1   , "caption" : "МДП"        },
+        { 'name': 'itog_mdp_pa',    'max_diff_proc': 1   , "caption" : "МДП+ПА"     },
+        { 'name': 'padp_real',      'max_diff_proc': 1   , "caption" : "АДП"        },
+        { 'name': 'itog_mdp_ap',    'max_diff_proc': 0.1 , "caption" : "АП->МДП"    },
+        { 'name': 'itog_mdp_pa_ap', 'max_diff_proc': 0.1 , "caption" : "АП->МДП+ПА" }
 ]
 with open(path_etalon_fjson,encoding="utf-8") as file_etalon: 
     j_ress_etalon = json.load(file_etalon)
@@ -128,11 +128,13 @@ for j_res_etalon in j_ress_etalon:
         new_tst = j_res_new['tst']
         if etalon_tst == new_tst :
             find = True
+            logger.info(f'<------------------------------------------------------------------------------------------------>')
             logger.info(f'<---------------- tst[{etalon_tst}] -------------------------->')
+            logger.info(f'<------------------------------------------------------------------------------------------------>')
             arr_dict_etalon = parse_results_to_arr_dict( j_res_etalon['results'] )
             arr_dict_new    = parse_results_to_arr_dict( j_res_new   ['results'] )
             arr_difss       = cmp_results( arr_cmp, arr_dict_etalon, arr_dict_new )
             print_results(arr_cmp, arr_difss)
     if find == False:
-        logger.error("not found new results of test: {etalon_tst}")
+        logger.error("not found new results of test: {etalon_tst} !!!")
 #---------------------------------------------------------------------------------------------------------

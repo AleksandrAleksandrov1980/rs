@@ -195,6 +195,7 @@ def tsts_main():
     logger.info("<h2>")
     logger.info(f"************************************ {dt_string} ****************************************************")
     logger.info("</h2>")
+    path_json_ress = path_tst_dir_ress+"/_calc_.json"
     tsts = cnf['tsts']
     i = 0
     for tst in tsts:
@@ -225,6 +226,16 @@ def tsts_main():
             logger.error("GET NO RESULTS!!")
         else:
             results_trace( results, logger ) #parse out array
+            j_ress = []
+            if os.path.isfile(path_json_ress):
+                with open(path_json_ress,encoding="utf-8") as j_file: 
+                    j_ress = json.load(j_file)
+            j_ress.append( {
+                "tst": tst, 
+                "results": results 
+            })
+            with open(path_json_ress, 'w', encoding='utf-8') as f:
+                json.dump(j_ress, f, ensure_ascii=False, indent=1)
         logger.info("</p>")
     logger.info("************************************** TOTAL **************************************************************")
     time_elapsed_all      = time.time() - tm_start_all
