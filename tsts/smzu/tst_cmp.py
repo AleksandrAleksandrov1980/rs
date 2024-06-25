@@ -98,7 +98,7 @@ def print_results(arr_cmp, arr_diffs):
                     val_new       = diff['val_new']
                     val_diff_proc = 0.
                     if(val_etalon!=0):
-                        val_diff_proc = 100*(val_etalon-val_new)/val_etalon
+                        val_diff_proc = 100*(val_new-val_etalon)/val_etalon
                     str_log = f'{diff['ns']:10} : {cmp['caption']:>10} : {val_etalon:8.1f}->{val_new:8.1f} = {val_etalon-val_new:4.1f} : {val_diff_proc:7.2f} %'
                     if(abs(val_diff_proc) < cmp['max_diff_proc']):
                         logger.info(str_log)    
