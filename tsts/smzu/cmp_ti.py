@@ -3,7 +3,7 @@ import pathlib
 import sys
 from logging import StreamHandler, Formatter
 from csv import reader
-
+import re
 from decimal import Decimal
 
 path_etalon = r"C:\cmp_ti\ia_Срез измерений за 02_01_00 19062024 .csv"
@@ -53,7 +53,14 @@ logger.addHandler(handler)
 logger.info(f"<------------------------- START! log [{path_to_log}] ------------------------->")
 
 def get_key_from_tag(str_tag,indx):
-    return str_tag[indx:indx+cmp_length]
+    match = re.search(r'\(ПС(.*?)\)', str_tag) # get substation name
+    #if match and len(match) > 1:
+    if match and match.lastindex > 0:
+        return str_tag[indx:indx+cmp_length]+f'-:-({match[1]})'
+    else:
+        return str_tag[indx:indx+cmp_length]
+#s = r'Факт Pij ВЛ 110 кВ Комсомолец – Бузулукская II цепь с отпайками (ВЛ 110 кВ Бузулукская-2) (ПС 220 кВ Комсомолец) [Самарское РДУ]'
+#k = get_key_from_tag(s,0)
 def get_val(line):
     if(line[4] == 'Включено'):
         return 0
