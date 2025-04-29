@@ -53,45 +53,69 @@ namespace avdck
             HttpClient? client = null;
             try
             { 
+                //using (var client22 = new DockerClientConfiguration(new Uri("http://msk-n9e-psu4.ntc.ntcees.ru:2375")).CreateClient())
+                //https://stackoverflow.com/questions/60151451/how-to-expose-2375-from-docker-desktop-for-windows
+                //byadmin > netsh interface portproxy add v4tov4 listenport=3375 listenaddress=0.0.0.0 connectaddress=127.0.0.1 connectport=2375
+                //and disable > firewall
+                using (var client22 = new DockerClientConfiguration(new Uri("http://win11u:3375")).CreateClient())
+                {
+                    var parameters = new ContainersListParameters
+                    {
+                        Filters = new Dictionary<string, IDictionary<string, bool>>
+                        {
+                            {
+                                "status",
+                                new Dictionary<string, bool>
+                                {
+                                    { "running", true}
+                                }
+                            }
+                        }
+                    };
+                    Log("befor");
+                    var containers = await client22.Containers.ListContainersAsync(parameters);
+                    Log("after");
+                    foreach (var container in containers)
+                    {                          
+                        Console.WriteLine(container.ID);      
+                        Log(container.ID.ToString());                 
+                    }
+
+                    //https://habr.com/ru/articles/758888/
+                    await client22.Images.CreateImageAsync(
+                        new ImagesCreateParameters
+                        {
+                            FromImage = "postgres",
+                            Tag = "1.24",
+                        }/*,
+
+                        new AuthConfig
+                        {
+                            Email = "test@example.com",
+                            Username = "test",
+                            Password = "pa$$w0rd"
+                        }*/ 
+                        ,null,
+                        new Progress<JSONMessage>());
+
+                    //https://reviewpoint.org/blog/unable-to-run-a-docker
+                    await client22.Containers.CreateContainerAsync(new CreateContainerParameters() {
+                        Image = "postgres:1.24",
+                        HostConfig = new HostConfig() {
+                            
+                        }
+                    });
+
+                    //client22.Images.LoadImageAsync
+
+
+                }
+
                 Log("1");
                 client = new HttpClient();
                 Log("2");
                 client.BaseAddress = new Uri(URL);
                 Log("3");
-
-
-                                    DockerClient docClient = new DockerClientConfiguration(
-                        new Uri("http://msk-n9e-psu4.ntc.ntcees.ru:2375"))
-                        .CreateClient();
-
-                    var sd= docClient.Containers;
-                    //var sds = sd.ListContainersAsync();
-
-                    using (var client22 = new DockerClientConfiguration(new Uri("http://msk-n9e-psu4.ntc.ntcees.ru:2375")).CreateClient())
-                    {
-                        var parameters = new ContainersListParameters
-                        {
-                            Filters = new Dictionary<string, IDictionary<string, bool>>
-                            {
-                                {
-                                    "status",
-                                    new Dictionary<string, bool>
-                                    {
-                                        { "running", true}
-                                    }
-                                }
-
-                            }
-                        };
-                        Log("befor");
-                        var containers = await client22.Containers.ListContainersAsync(parameters);
-                        Log("after");
-                        foreach (var container in containers)
-                        {                          
-                            Console.WriteLine(container.ID);      
-                            Log(container.ID.ToString());                 
-                        }
-                    }
                 // Add an Accept header for JSON format.
                  //client.DefaultRequestHeaders.Accept.Add(         new MediaTypeWithQualityHeaderValue("application/json"));
                 // List data response.
