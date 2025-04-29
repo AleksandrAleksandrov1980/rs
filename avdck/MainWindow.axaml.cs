@@ -53,22 +53,14 @@ namespace avdck
             HttpClient? client = null;
             try
             { 
+                Log("1");
                 client = new HttpClient();
+                Log("2");
                 client.BaseAddress = new Uri(URL);
+                Log("3");
 
-                // Add an Accept header for JSON format.
-              //client.DefaultRequestHeaders.Accept.Add(         new MediaTypeWithQualityHeaderValue("application/json"));
 
-                // List data response.
-                HttpResponseMessage response = client.GetAsync(urlParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
-                if (response.IsSuccessStatusCode)
-                {
-
-                    //DockerClient client1 = new DockerClientConfiguration(
-                    //    new Uri("http://ubuntu-docker.cloudapp.net:4243"))
-                    //    .CreateClient();
-
-                    DockerClient docClient = new DockerClientConfiguration(
+                                    DockerClient docClient = new DockerClientConfiguration(
                         new Uri("http://msk-n9e-psu4.ntc.ntcees.ru:2375"))
                         .CreateClient();
 
@@ -91,26 +83,34 @@ namespace avdck
 
                             }
                         };
-
+                        Log("befor");
                         var containers = await client22.Containers.ListContainersAsync(parameters);
+                        Log("after");
                         foreach (var container in containers)
                         {                          
-                            Console.WriteLine(container.ID);                       
+                            Console.WriteLine(container.ID);      
+                            Log(container.ID.ToString());                 
                         }
                     }
+                // Add an Accept header for JSON format.
+                 //client.DefaultRequestHeaders.Accept.Add(         new MediaTypeWithQualityHeaderValue("application/json"));
+                // List data response.
+                HttpResponseMessage response = client.GetAsync(urlParameters).Result;  // Blocking call! Program will wait here until a response is received or a timeout occurs.
+                Log("4");
+                if (response.IsSuccessStatusCode)
+                {
+                    Log("5");
 
-
-
-
+                    //DockerClient client1 = new DockerClientConfiguration(
+                    //    new Uri("http://ubuntu-docker.cloudapp.net:4243"))
+                    //    .CreateClient();
                     // Parse the response body.
                     var a = response.Content.Headers;
                     var b = response.Headers;
                     var c = response.RequestMessage;
                     var d6 = response.Version.ToString();
                     var e1 = response.TrailingHeaders;
-
                     var es = response.Content.ReadAsStream();
-
                     var dataObjects = response.Content.ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
                     //var dataObjects = response.Content.R ReadAsAsync<IEnumerable<DataObject>>().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
                     foreach (var d in dataObjects)
@@ -123,6 +123,7 @@ namespace avdck
                 else
                 {
                     Console.WriteLine("{0} ({1})", (int)response.StatusCode, response.ReasonPhrase);
+                    Log("connetcton errro");
                 }
                 // Make any other calls using HttpClient here.
             } 
