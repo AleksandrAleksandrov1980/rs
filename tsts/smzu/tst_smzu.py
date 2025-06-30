@@ -54,9 +54,10 @@ def tst_mdp_file( rastr, path_file_mdp : str, path_dir_out : str, path_file_log 
         logg.info(f"\n <B> <a href=\"{os.path.dirname(path_file_mdp)}\" >  { os.path.dirname(path_file_mdp) } </a> </B>");
         rastr.Load( Get_RG_REPL(), path_file_mdp, 'C:/Program Files (x86)/RastrWin3/RastrWin3/SHABLON/poisk.os' ) #Загружаем по шаблону poisk.os, чтобы новые поля добавлялись в расчет
 
-        rastr_set_val(rastr, logg, "com_regim", "neb_p", 0.01 ) #
-        rastr_set_val(rastr, logg, "com_regim", "start", 1    ) # 0-yes 1-no    ,0,1,0,1
-        rastr_set_val(rastr, logg, "com_regim", "flot",  0    ) # 0-no  1-yes   ,1,1,0,0 
+        rastr_set_val(rastr, logg, "com_regim",     "neb_p",     0.01  ) #
+        rastr_set_val(rastr, logg, "com_regim",     "start",      1    ) # 0-yes 1-no    ,0,1,0,1
+        rastr_set_val(rastr, logg, "com_regim",     "flot",       0    ) # 0-no  1-yes   ,1,1,0,0 
+        rastr_set_val(rastr, logg, "ut_vir_common", "ParNumProc", 10   ) # 
 
         rastr_set_val(rastr, logg, "ut_vir_common", "kod", 22 )
         logg.info(f"dir_out: {path_dir_out} ")
@@ -223,7 +224,8 @@ def tsts_main():
         path_file_xml     = os.path.dirname(path_tst_dir_res) + "/" + Path(path_file_tst).stem + ".xml" # simple parse out array!
         logger.info(f"\n <B> <a href=\"{os.path.dirname(path_file_tst)}\" >  { os.path.dirname(path_file_tst) } </a> </B>");
         if results is None:
-            logger.error("GET NO RESULTS!!")
+            logger.error("GET NO RESULTS!! HALT!")
+            break
         else:
             results_trace( results, logger ) #parse out array
             j_ress = []

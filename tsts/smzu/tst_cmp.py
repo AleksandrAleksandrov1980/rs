@@ -5,6 +5,7 @@ import json
 from logging import StreamHandler, Formatter
 from time import gmtime, strftime, localtime
 
+
 print(sys.argv)
 
 #path_etalon_fjson = 'C:\\mdp-test\\TESTS\\SMZU\\!res\\res_24_06_2024__09_40_39.737_new_ref\\_calc_.json'
@@ -114,8 +115,13 @@ arr_cmp = [
         { 'name': 'itog_mdp',       'max_diff_proc': 1   , "caption" : "МДП"        },
         { 'name': 'itog_mdp_pa',    'max_diff_proc': 1   , "caption" : "МДП+ПА"     },
         { 'name': 'padp_real',      'max_diff_proc': 1   , "caption" : "АДП"        },
+        { 'name': 'itog_vdp_pa',    'max_diff_proc': 1   , "caption" : "ВДП"        },
         { 'name': 'itog_mdp_ap',    'max_diff_proc': 0.1 , "caption" : "АП->МДП"    },
-        { 'name': 'itog_mdp_pa_ap', 'max_diff_proc': 0.1 , "caption" : "АП->МДП+ПА" }
+        { 'name': 'itog_mdp_pa_ap', 'max_diff_proc': 0.1 , "caption" : "АП->МДП+ПА" },
+        { 'name': 'kod_mdp',        'max_diff_proc': 0.1 , "caption" : "код МДП"    },
+        { 'name': 'kod_mdp_pa',     'max_diff_proc': 0.1 , "caption" : "код МДП+ПА" },
+        { 'name': 'kod_adp',        'max_diff_proc': 0.1 , "caption" : "код АДП"    },
+        { 'name': 'kod_vdp_pa',     'max_diff_proc': 0.1 , "caption" : "код ВДП"    }
 ]
 with open(path_etalon_fjson,encoding="utf-8") as file_etalon: 
     j_ress_etalon = json.load(file_etalon)
